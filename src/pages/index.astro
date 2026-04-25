@@ -1,16 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Metodologia from '../components/Metodologia.astro';
+import Servicios from '../components/Servicios.jsx';
+import Productos from '../components/Productos.astro';
+import Confianza from '../components/Confianza.astro';
+import Contacto from '../components/Contacto.astro';
+import Footer from '../components/Footer.astro';
 ---
 
-<Layout>
-  <main style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-    <div style="text-align: center;">
-      <h1 style="font-size: 48px; font-weight: 800; letter-spacing: -0.03em;">
-        FENIA
-      </h1>
-      <p style="color: rgba(255,255,255,0.4); margin-top: 8px;">
-        Proyecto configurado correctamente ✓
-      </p>
-    </div>
-  </main>
+<Layout title="FENIA — Neuro-Inteligencia Aumentada">
+  <Nav />
+  <Hero />
+  <Metodologia />
+  <Servicios client:visible />
+  <Productos />
+  <Confianza />
+  <Contacto />
+  <Footer />
 </Layout>
