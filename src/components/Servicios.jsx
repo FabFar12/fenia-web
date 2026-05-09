@@ -51,8 +51,7 @@ export default function Servicios() {
             </div>
             <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",paddingTop:24,borderTop:"1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ display:"flex",gap:8 }}>{a.aud.map((x,i)=><span key={i} style={{ fontSize:11,fontWeight:600,padding:"4px 12px",borderRadius:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.4)" }}>{x}</span>)}</div>
-              <a href="#contacto" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>
-            </div>
+              <a href="https://wa.me/5493513556035?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>            </div>
           </div>
         </div>
       </div>
