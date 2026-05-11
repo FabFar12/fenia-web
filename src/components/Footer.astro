@@ -1,0 +1,73 @@
+---
+// Footer.astro
+---
+
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">F</div>
+          <div><span class="footer-logo-text">FENIA</span><span class="footer-logo-sub">Neuro-Inteligencia Aumentada</span></div>
+        </div>
+        <p class="footer-desc">Formación Estratégica de Neuro-Inteligencia Aumentada. Consultoría, formación y productos digitales para profesionales, emprendedores y empresas.</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Servicios</h4>
+        <a href="#servicios" class="footer-link">Consultoría estratégica</a>
+        <a href="#servicios" class="footer-link">Capacitación</a>
+        <a href="#servicios" class="footer-link">IA aplicada</a>
+        <a href="#productos" class="footer-link">Productos digitales</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Soluciones</h4>
+        <a href="#inicio" class="footer-link">Profesionales</a>
+        <a href="#inicio" class="footer-link">Emprendedores</a>
+        <a href="#inicio" class="footer-link">Empresas</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Contacto</h4>
+        <a href="https://wa.me/5493513559947" target="_blank" rel="noopener" class="footer-link">+54 351 355-9947</a>
+        <div class="footer-social">
+          <a href="#" class="social-icon">IG</a>
+          <a href="#" class="social-icon">IN</a>
+          <a href="#" class="social-icon">YT</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 FENIA · Formación Estratégica de Neuro-Inteligencia Aumentada</span>
+      <div class="footer-legal">
+        <a href="#" class="footer-legal-link">Política de privacidad</a>
+        <a href="#" class="footer-legal-link">Términos</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<style>
+.site-footer{background:#060E1A;border-top:1px solid rgba(255,255,255,0.05)}
+.footer-container{max-width:1200px;margin:0 auto;padding:56px 48px 32px}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand{}
+.footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.footer-logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#00B4D8,#0090B0);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff}
+.footer-logo-text{font-weight:700;font-size:18px;color:#fff;display:block}
+.footer-logo-sub{display:block;font-size:8px;font-weight:500;color:rgba(255,255,255,0.25);letter-spacing:0.06em;text-transform:uppercase;margin-top:-1px}
+.footer-desc{font-size:13px;line-height:1.6;color:rgba(255,255,255,0.3);max-width:260px;margin:0}
+.footer-heading{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 18px 0}
+.footer-link{display:block;font-size:14px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-decoration:none}
+.footer-social{display:flex;gap:10px;margin-top:16px}
+.social-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-decoration:none}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-size:12px;color:rgba(255,255,255,0.2)}
+.footer-legal{display:flex;gap:24px}
+.footer-legal-link{font-size:12px;color:rgba(255,255,255,0.2);text-decoration:none}
+@media(max-width:768px){
+.footer-container{padding:40px 20px 24px}
+.footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+.footer-bottom{flex-direction:column;gap:12px;text-align:center}
+}
+@media(max-width:480px){
+.footer-grid{grid-template-columns:1fr}
+}
+</style>

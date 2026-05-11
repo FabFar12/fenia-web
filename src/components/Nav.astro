@@ -1,23 +1,55 @@
 ---
-// Nav.astro — Navegación principal de FENIA
+// Nav.astro — Navegación responsiva FENIA
 ---
 
-<nav style="display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50;background:rgba(11,26,46,0.95);backdrop-filter:blur(12px);">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#00B4D8,#0090B0);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#fff;box-shadow:0 4px 16px rgba(0,180,216,0.25);font-family:'Plus Jakarta Sans',sans-serif;">
-      F
-    </div>
+<nav class="main-nav">
+  <div class="nav-brand">
+    <div class="nav-logo-icon">F</div>
     <div>
-      <span style="font-weight:700;font-size:20px;color:#fff;letter-spacing:-0.02em;font-family:'Plus Jakarta Sans',sans-serif;">FENIA</span>
-      <span style="display:block;font-size:9px;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:0.06em;text-transform:uppercase;margin-top:-2px;font-family:'Plus Jakarta Sans',sans-serif;">Neuro-Inteligencia Aumentada</span>
+      <span class="nav-logo-text">FENIA</span>
+      <span class="nav-logo-sub">Neuro-Inteligencia Aumentada</span>
     </div>
   </div>
-  <div style="display:flex;gap:32px;align-items:center;">
-    <a href="#inicio" style="font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Inicio</a>
-    <a href="#metodologia" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Metodología</a>
-    <a href="#servicios" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Servicios</a>
-    <a href="#productos" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Productos</a>
-    <a href="#contacto" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Contacto</a>
-    <a href="https://wa.me/5493513556035?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" style="font-size:13.5px;font-weight:600;padding:10px 24px;border-radius:9px;border:none;background:#E8573D;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(232,87,61,0.3);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Solicitar un turno</a>
+
+  <input type="checkbox" id="nav-toggle" class="nav-toggle-input" />
+  <label for="nav-toggle" class="nav-hamburger">
+    <span></span><span></span><span></span>
+  </label>
+
+  <div class="nav-links">
+    <a href="#inicio" class="nav-link nav-link-active">Inicio</a>
+    <a href="#metodologia" class="nav-link">Metodología</a>
+    <a href="#servicios" class="nav-link">Servicios</a>
+    <a href="#productos" class="nav-link">Productos</a>
+    <a href="#contacto" class="nav-link">Contacto</a>
+    <a href="https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" class="nav-cta">Solicitar un turno</a>
   </div>
 </nav>
+
+<style>
+.main-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50;background:rgba(11,26,46,0.95);backdrop-filter:blur(12px)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#00B4D8,#0090B0);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#fff;box-shadow:0 4px 16px rgba(0,180,216,0.25)}
+.nav-logo-text{font-weight:700;font-size:20px;color:#fff;letter-spacing:-0.02em;display:block}
+.nav-logo-sub{display:block;font-size:9px;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:0.06em;text-transform:uppercase;margin-top:-2px}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-link{font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;text-decoration:none}
+.nav-link-active{font-weight:600;color:#fff}
+.nav-cta{font-size:13.5px;font-weight:600;padding:10px 24px;border-radius:9px;background:#E8573D;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(232,87,61,0.3);text-decoration:none}
+.nav-toggle-input{display:none}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.nav-hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s ease}
+
+@media(max-width:768px){
+  .main-nav{padding:14px 20px}
+  .nav-hamburger{display:flex}
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(11,26,46,0.98);backdrop-filter:blur(12px);flex-direction:column;padding:24px 20px;gap:0;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .nav-link,.nav-cta{padding:14px 0;width:100%;font-size:15px}
+  .nav-link{border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-cta{margin-top:12px;text-align:center;padding:14px 24px}
+  .nav-toggle-input:checked ~ .nav-links{display:flex}
+  .nav-toggle-input:checked ~ .nav-hamburger span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+  .nav-toggle-input:checked ~ .nav-hamburger span:nth-child(2){opacity:0}
+  .nav-toggle-input:checked ~ .nav-hamburger span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+}
+</style>

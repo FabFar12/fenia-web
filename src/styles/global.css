@@ -1,20 +1,119 @@
 @import "tailwindcss";
-
 @import '@fontsource/plus-jakarta-sans/400.css';
 @import '@fontsource/plus-jakarta-sans/500.css';
 @import '@fontsource/plus-jakarta-sans/600.css';
 @import '@fontsource/plus-jakarta-sans/700.css';
 @import '@fontsource/plus-jakarta-sans/800.css';
 
-html {
-  scroll-behavior: smooth;
-}
-
+html { scroll-behavior: smooth; }
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #0B1A2E;
-  color: #ffffff;
+  margin: 0; padding: 0;
+  background: #0B1A2E; color: #ffffff;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── RESPONSIVE OVERRIDES ── */
+@media (max-width: 768px) {
+  /* Hero section */
+  #inicio > div:first-child {
+    grid-template-columns: 1fr !important;
+    padding: 40px 20px 40px !important;
+    min-height: auto !important;
+    gap: 20px !important;
+  }
+  #inicio h1 {
+    font-size: 34px !important;
+  }
+  #inicio > div:first-child > div:last-child {
+    display: none !important;
+  }
+  #inicio > div:nth-child(2) > div {
+    padding: 0 20px !important;
+  }
+  #inicio > div:nth-child(2) > div > div {
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    justify-content: center !important;
+  }
+
+  /* Audience cards */
+  #inicio > div:nth-child(3) {
+    padding: 40px 20px !important;
+  }
+  #inicio > div:nth-child(3) h2 {
+    font-size: 24px !important;
+  }
+  #inicio > div:nth-child(3) > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Metodologia */
+  #metodologia > div:last-child {
+    padding: 60px 20px !important;
+  }
+  #metodologia > div:last-child > div:first-child {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    margin-bottom: 48px !important;
+  }
+  #metodologia > div:last-child > div:first-child h2 {
+    font-size: 28px !important;
+  }
+  #metodologia > div:last-child > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  #metodologia > div:last-child > div:nth-child(2) > div:first-child {
+    display: none !important;
+  }
+  /* Integration block */
+  #metodologia > div:last-child > div:last-child {
+    grid-template-columns: 1fr !important;
+    padding: 24px !important;
+    gap: 24px !important;
+  }
+  #metodologia > div:last-child > div:last-child svg {
+    display: none !important;
+  }
+  #metodologia > div:last-child > div:last-child h3 {
+    font-size: 20px !important;
+  }
+
+  /* Servicios */
+  #servicios > div:last-child {
+    padding: 60px 20px !important;
+  }
+  #servicios > div:last-child > div:first-child h2 {
+    font-size: 28px !important;
+  }
+  #servicios > div:last-child > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Productos */
+  #productos > div:last-child {
+    padding: 60px 20px !important;
+  }
+  #productos > div:last-child > div:first-child {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  #productos > div:last-child > div:first-child h2 {
+    font-size: 28px !important;
+  }
+  #productos > div:last-child > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+  }
+  #productos > div:last-child > div:last-child {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 16px !important;
+  }
+
+  /* General mobile spacing */
+  section > div {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
 }

@@ -1,0 +1,66 @@
+---
+// Confianza.astro
+---
+
+<section id="confianza" class="section-confianza">
+  <div class="section-gradient-top"></div>
+  <div class="section-container">
+    <div class="section-header-center">
+      <div class="badge"><div class="badge-dot"></div><span class="badge-text">Confianza y resultados</span></div>
+      <h2 class="section-title">Confianza, criterio y soluciones con <span class="text-cyan">impacto</span></h2>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-number">95%</div><div class="stat-label">Satisfacción en formaciones</div></div>
+      <div class="stat-item"><div class="stat-number">100%</div><div class="stat-label">Enfoque basado en evidencia</div></div>
+      <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">Áreas integradas de expertise</div></div>
+      <div class="stat-item stat-last"><div class="stat-number">3</div><div class="stat-label">Audiencias especializadas</div></div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="ttext">"FENIA nos ayudó a rediseñar completamente nuestro proceso de toma de decisiones. El enfoque neurocientífico generó cambios que se sostienen en el tiempo."</p>
+        <div class="tauthor"><div class="tname">Director de Operaciones</div><div class="torg">Empresa de tecnología · Córdoba</div></div>
+      </div>
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="ttext">"La combinación de estrategia con herramientas de IA fue exactamente lo que necesitábamos. Cada sesión produjo resultados concretos que pudimos implementar inmediatamente."</p>
+        <div class="tauthor"><div class="tname">Fundadora y CEO</div><div class="torg">Startup de servicios · Buenos Aires</div></div>
+      </div>
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="ttext">"El programa de neuro-liderazgo transformó la forma en que gestiono mi práctica. Las herramientas de gestión emocional fueron un antes y después."</p>
+        <div class="tauthor"><div class="tname">Consultora en RRHH</div><div class="torg">Profesional independiente · Rosario</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.section-confianza{background:#132847;position:relative}
+.section-gradient-top{position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,#0B1A2E,transparent);z-index:1;pointer-events:none}
+.section-container{max-width:1200px;margin:0 auto;padding:100px 48px;position:relative;z-index:2}
+.section-header-center{text-align:center;margin-bottom:56px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);margin-bottom:20px}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:#00B4D8}
+.badge-text{font-size:11px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em}
+.section-title{font-size:38px;font-weight:800;line-height:1.15;color:#fff;letter-spacing:-0.03em;margin:0 auto;max-width:550px}
+.text-cyan{color:#00B4D8}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-bottom:48px}
+.stat-item{padding:28px 24px;text-align:center;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.05)}
+.stat-last{border-right:none}
+.stat-number{font-size:28px;font-weight:800;color:#00B4D8}
+.stat-label{font-size:12px;font-weight:500;color:rgba(255,255,255,0.35);margin-top:4px}
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tcard{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:30px 26px;display:flex;flex-direction:column}
+.stars{margin-bottom:18px;font-size:14px;color:#E8573D;letter-spacing:3px}
+.ttext{font-size:14px;line-height:1.7;color:rgba(255,255,255,0.5);margin:0 0 24px 0;flex:1;font-style:italic}
+.tauthor{padding-top:18px;border-top:1px solid rgba(255,255,255,0.06)}
+.tname{font-size:14px;font-weight:700;color:#fff}
+.torg{font-size:12px;color:rgba(255,255,255,0.3);margin-top:3px}
+@media(max-width:768px){
+.section-container{padding:60px 20px}
+.section-title{font-size:26px}
+.stats-bar{grid-template-columns:repeat(2,1fr)}
+.stat-item:nth-child(2){border-right:none}
+.testimonials-grid{grid-template-columns:1fr}
+}
+</style>
