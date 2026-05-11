@@ -10,21 +10,21 @@ export default function IntroLoader() {
     if (!video) return;
 
     video.play().catch(() => {
-      // Autoplay blocked, skip intro
       setFading(true);
-      setTimeout(() => setVisible(false), 600);
+      setTimeout(() => setVisible(false), 800);
     });
 
     video.addEventListener("ended", () => {
-      setFading(true);
-      setTimeout(() => setVisible(false), 600);
+      setTimeout(() => {
+        setFading(true);
+        setTimeout(() => setVisible(false), 800);
+      }, 400);
     });
 
-    // Fallback: skip after 6 seconds max
     const timeout = setTimeout(() => {
       setFading(true);
-      setTimeout(() => setVisible(false), 600);
-    }, 6000);
+      setTimeout(() => setVisible(false), 800);
+    }, 7000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -32,33 +32,13 @@ export default function IntroLoader() {
   if (!visible) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        background: "#0B1A2E",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        opacity: fading ? 0 : 1,
-        transition: "opacity 0.6s ease",
-      }}
-    >
-      <video
-        ref={videoRef}
-        src="/images/intro-fenia.mp4"
-        muted
-        playsInline
-        style={{
-          maxWidth: "320px",
-          width: "80%",
-          height: "auto",
-        }}
-      />
+    <div style={{
+      position:"fixed",top:0,left:0,width:"100vw",height:"100vh",
+      background:"#0B1A2E",display:"flex",alignItems:"center",justifyContent:"center",
+      zIndex:9999,opacity:fading?0:1,transition:"opacity 0.8s ease"
+    }}>
+      <video ref={videoRef} src="/images/intro-fenia.mp4" muted playsInline
+        style={{ maxWidth:"560px",width:"90%",height:"auto" }} />
     </div>
   );
 }
