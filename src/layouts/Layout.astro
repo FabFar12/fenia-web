@@ -77,9 +77,11 @@ const jsonLd = {
   <body>
     <!-- Pack 3: scroll progress bar driven by animations.ts -->
     <div id="scroll-progress" aria-hidden="true"></div>
+    <!-- Pack v2.6: section sticky label, populated by animations.ts -->
+    <div id="section-label" aria-hidden="true"></div>
     <slot />
 
-    <!-- Pack 1 + Pack 3 animation runtime — bundled by Astro, ~3 KB gzipped -->
+    <!-- Pack 1 + Pack 3 + Pack v2 animation runtime — bundled by Astro -->
     <script>
       import '../scripts/animations';
     </script>

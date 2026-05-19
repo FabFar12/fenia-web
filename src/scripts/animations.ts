@@ -88,6 +88,15 @@ function initStatCounters() {
   counters.forEach((el) => io.observe(el));
 }
 
+// v2.6 — Section labels for the floating sticky label chip.
+const SECTION_LABELS: Record<string, string> = {
+  inicio: 'Inicio',
+  metodologia: 'Metodología',
+  servicios: 'Servicios',
+  productos: 'Productos',
+  contacto: 'Contacto',
+};
+
 function initScrollSpy() {
   const navLinks = Array.from(
     document.querySelectorAll<HTMLAnchorElement>('.nav-link[href^="#"]'),
@@ -101,6 +110,8 @@ function initScrollSpy() {
 
   if (sections.length === 0 || !('IntersectionObserver' in window)) return;
 
+  const sectionLabel = document.getElementById('section-label');
+
   const setActive = (id: string) => {
     navLinks.forEach((l) => {
       l.classList.remove('nav-link-active');
@@ -110,6 +121,19 @@ function initScrollSpy() {
     if (matching) {
       matching.classList.add('nav-link-active');
       matching.setAttribute('aria-current', 'location');
+    }
+
+    // v2.6 — Update floating section label. Hide while on Hero (`inicio`).
+    if (sectionLabel) {
+      const label = SECTION_LABELS[id];
+      const idx = sections.findIndex((s) => s.id === id);
+      const numbered = idx >= 0 ? String(idx + 1).padStart(2, '0') : '';
+      if (label && id !== 'inicio') {
+        sectionLabel.textContent = numbered ? `${numbered} — ${label}` : label;
+        sectionLabel.classList.add('is-visible');
+      } else {
+        sectionLabel.classList.remove('is-visible');
+      }
     }
   };
 
@@ -165,12 +189,70 @@ function initCtaGlow() {
   window.addEventListener('mousemove', onMove, { passive: true });
 }
 
+// v2.4 — Magnetic CTAs.
+// Primary buttons translate up to MAX_OFFSET px toward the cursor when it
+// enters their proximity radius. Stripe / Linear use this for tactile feel.
+function initMagneticCtas() {
+  const ctas = document.querySelectorAll<HTMLElement>('.cta-magnetic');
+  if (ctas.length === 0 || REDUCED) return;
+  const RADIUS = 110;
+  const MAX_OFFSET = 7;
+  // Reset transforms tracked per element so we can blend smoothly.
+  const onMove = (e: MouseEvent) => {
+    ctas.forEach((cta) => {
+      const rect = cta.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < RADIUS) {
+        const factor = (1 - dist / RADIUS) * (MAX_OFFSET / RADIUS);
+        cta.style.setProperty('--mx', `${dx * factor}px`);
+        cta.style.setProperty('--my', `${dy * factor}px`);
+      } else {
+        cta.style.setProperty('--mx', '0px');
+        cta.style.setProperty('--my', '0px');
+      }
+    });
+  };
+  window.addEventListener('mousemove', onMove, { passive: true });
+}
+
+// v2.7 — Tilt cards.
+// Cards with `.tilt-card` rotate up to ±MAX_DEG degrees based on cursor
+// position over the card. Returns to neutral on mouseleave.
+function initTiltCards() {
+  const cards = document.querySelectorAll<HTMLElement>('.tilt-card');
+  if (cards.length === 0 || REDUCED) return;
+  const MAX_DEG = 5;
+  cards.forEach((card) => {
+    const onMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const rotY = (x - 0.5) * MAX_DEG * 2;
+      const rotX = -(y - 0.5) * MAX_DEG * 2;
+      card.style.setProperty('--tilt-x', `${rotX}deg`);
+      card.style.setProperty('--tilt-y', `${rotY}deg`);
+    };
+    const onLeave = () => {
+      card.style.setProperty('--tilt-x', '0deg');
+      card.style.setProperty('--tilt-y', '0deg');
+    };
+    card.addEventListener('mousemove', onMove);
+    card.addEventListener('mouseleave', onLeave);
+  });
+}
+
 function initAll() {
   initScrollReveal();
   initStatCounters();
   initScrollSpy();
   initScrollProgress();
   initCtaGlow();
+  initMagneticCtas();
+  initTiltCards();
 }
 
 if (document.readyState === 'loading') {

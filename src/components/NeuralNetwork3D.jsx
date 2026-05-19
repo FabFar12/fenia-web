@@ -1,41 +1,29 @@
 /**
- * NeuralNetwork3D — Pack 4 MVP.
+ * NeuralNetwork3D — Pack 4 v1.2 + Pack v2 polish.
  *
- * WebGL-rendered version of the FENIA neural network. Replaces the static
- * inline SVG that decorated the Hero. Driven by three.js via @react-three/fiber.
+ * WebGL-rendered version of the FENIA neural network. Loaded as an Astro
+ * island with `client:visible` so the WebGL context spins up only when the
+ * Hero is on-screen.
  *
  * Visual contract:
- *  - ~12 spherical nodes positioned with Z depth.
- *  - Connecting lines between selected node pairs.
- *  - Each node pulses subtly (scale wobble with phase offset).
- *  - The whole group eases toward the cursor for a parallax effect.
- *  - Reduced-motion: scene renders static (no useFrame updates).
+ *  - ~12 spherical nodes positioned with Z depth, each with inner core +
+ *    outer halo. Cores pulse with phase-offset sine waves.
+ *  - 16 connecting lines between selected pairs, drawn with a per-vertex
+ *    cyan→deep-cyan gradient (v2.3).
+ *  - Group eases toward the window-wide pointer (parallax).
+ *  - **v2.2 — Idle camera drift**: when no pointer movement for 5 s, the
+ *    group slowly orbits on Y axis. Wakes back to parallax on cursor move.
+ *  - **v2.1 — Bloom post-processing**: cores use `toneMapped={false}` with
+ *    saturated cyan so EffectComposer's Bloom catches them and produces a
+ *    soft halo bleeding into the surrounding navy. Documented in ADR-011.
+ *  - 3 flow-pulses travel along random lines (v1.1).
  *
- * This is v1 — intentionally minimal. Future iterations could add:
- *  - Particles traveling along lines (light pulses).
- *  - Post-processing bloom.
- *  - Audio-reactive variant.
- *
- * Loaded as an Astro island with `client:visible` so the WebGL context
- * spins up only when the Hero is on-screen.
+ * Reduced-motion: scene renders but no useFrame mutations (static frame).
  */
 
 import { Canvas, useFrame } from '@react-three/fiber';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useRef, useMemo, useEffect } from 'react';
-
-// Track normalized window-wide pointer (-1..1) regardless of which element the cursor hovers.
-function useWindowPointer() {
-  const pointer = useRef({ x: 0, y: 0 });
-  useEffect(() => {
-    const handler = (e) => {
-      pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
-    };
-    window.addEventListener('mousemove', handler, { passive: true });
-    return () => window.removeEventListener('mousemove', handler);
-  }, []);
-  return pointer;
-}
 
 const NODES = [
   { pos: [-2.1, 1.2, 0.2], size: 0.06 },
@@ -60,6 +48,22 @@ const LINES = [
 const REDUCED = typeof window !== 'undefined'
   && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
+// Track normalized window-wide pointer (-1..1) for parallax, plus the last
+// timestamp the pointer moved (for idle drift detection).
+function useWindowPointer() {
+  const pointer = useRef({ x: 0, y: 0, lastMove: 0 });
+  useEffect(() => {
+    const handler = (e) => {
+      pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
+      pointer.current.lastMove = performance.now();
+    };
+    window.addEventListener('mousemove', handler, { passive: true });
+    return () => window.removeEventListener('mousemove', handler);
+  }, []);
+  return pointer;
+}
+
 function Node({ position, size, delay }) {
   const ref = useRef();
   useFrame((state) => {
@@ -70,45 +74,45 @@ function Node({ position, size, delay }) {
   });
   return (
     <group position={position}>
-      {/* Inner solid core */}
+      {/* Inner solid core — bright + toneMapped=false so Bloom catches it */}
       <mesh ref={ref}>
         <sphereGeometry args={[size, 20, 20]} />
-        <meshBasicMaterial color="#00B4D8" transparent opacity={0.85} />
+        <meshBasicMaterial color="#1FE3FF" toneMapped={false} transparent opacity={0.95} />
       </mesh>
-      {/* Outer halo */}
+      {/* Outer subtle halo (rendered after the core so transparency stacks correctly) */}
       <mesh>
         <sphereGeometry args={[size * 2.4, 16, 16]} />
-        <meshBasicMaterial color="#00B4D8" transparent opacity={0.08} />
+        <meshBasicMaterial color="#00B4D8" transparent opacity={0.10} />
       </mesh>
     </group>
   );
 }
 
+// v2.3 — Lines with per-vertex color gradient (cyan → deep cyan).
 function NetworkLines() {
-  const positions = useMemo(() => {
-    const arr = [];
+  const { positions, colors } = useMemo(() => {
+    const pos = [];
+    const col = [];
     LINES.forEach(([a, b]) => {
-      arr.push(...NODES[a].pos, ...NODES[b].pos);
+      pos.push(...NODES[a].pos, ...NODES[b].pos);
+      // Start: brighter cyan; End: deeper teal.
+      col.push(0.12, 0.85, 1.0); // #1FD9FF-ish
+      col.push(0.0, 0.45, 0.65); // #00738B-ish
     });
-    return new Float32Array(arr);
+    return { positions: new Float32Array(pos), colors: new Float32Array(col) };
   }, []);
   return (
     <lineSegments>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          array={positions}
-          count={positions.length / 3}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" array={positions} count={positions.length / 3} itemSize={3} />
+        <bufferAttribute attach="attributes-color" array={colors} count={colors.length / 3} itemSize={3} />
       </bufferGeometry>
-      <lineBasicMaterial color="#00B4D8" transparent opacity={0.18} />
+      <lineBasicMaterial vertexColors transparent opacity={0.45} toneMapped={false} />
     </lineSegments>
   );
 }
 
-// Pack 4 v1.1: small light-pulses traveling along randomly chosen lines.
-// `count` simultaneous pulses, each picks a new line when it finishes traversing.
+// Pack 4 v1.1 — Small light-pulses traveling along randomly chosen lines.
 function FlowPulses({ count = 3 }) {
   const meshes = useRef([]);
   const pulses = useRef(
@@ -128,7 +132,6 @@ function FlowPulses({ count = 3 }) {
       if (!mesh) return;
       const elapsed = t - p.startTime;
       if (elapsed >= p.duration + p.gap) {
-        // Restart at a new random line after a brief pause
         p.lineIdx = Math.floor(Math.random() * LINES.length);
         p.startTime = t;
         p.duration = 1.4 + Math.random() * 0.8;
@@ -150,7 +153,6 @@ function FlowPulses({ count = 3 }) {
         start[2] + (end[2] - start[2]) * progress,
       );
       mesh.visible = true;
-      // Fade in/out at the edges of the travel
       const edge = Math.min(progress, 1 - progress) * 4;
       mesh.material.opacity = Math.min(1, edge);
     });
@@ -161,7 +163,7 @@ function FlowPulses({ count = 3 }) {
       {Array.from({ length: count }).map((_, i) => (
         <mesh key={i} ref={(el) => (meshes.current[i] = el)} visible={false}>
           <sphereGeometry args={[0.05, 12, 12]} />
-          <meshBasicMaterial color="#7DEAFF" transparent opacity={0} />
+          <meshBasicMaterial color="#7DEAFF" toneMapped={false} transparent opacity={0} />
         </mesh>
       ))}
     </>
@@ -171,14 +173,30 @@ function FlowPulses({ count = 3 }) {
 function Scene() {
   const groupRef = useRef();
   const pointer = useWindowPointer();
+
   useFrame(() => {
     if (REDUCED || !groupRef.current) return;
-    // Mouse parallax: smooth easing toward window-wide pointer
-    const targetRotY = pointer.current.x * 0.22;
+    const now = performance.now();
+    const idleMs = now - pointer.current.lastMove;
+    const IDLE_THRESHOLD = 5000;
+
+    // Parallax target from window pointer
+    let targetRotY = pointer.current.x * 0.22;
     const targetRotX = pointer.current.y * 0.16;
+
+    // v2.2 — Idle camera drift: once idle for >5 s, slowly add Y rotation.
+    if (idleMs > IDLE_THRESHOLD) {
+      // Smoothly ramp the drift intensity over the next 1 s of idle.
+      const ramp = Math.min((idleMs - IDLE_THRESHOLD) / 1000, 1);
+      targetRotY += ramp * 0.0006 * (now / 16); // accumulates over time
+      // Wrap so we don't grow unbounded
+      targetRotY = ((targetRotY + Math.PI) % (Math.PI * 2)) - Math.PI;
+    }
+
     groupRef.current.rotation.y += (targetRotY - groupRef.current.rotation.y) * 0.04;
     groupRef.current.rotation.x += (targetRotX - groupRef.current.rotation.x) * 0.04;
   });
+
   return (
     <group ref={groupRef}>
       <NetworkLines />
@@ -200,6 +218,17 @@ export default function NeuralNetwork3D() {
       events={undefined}
     >
       <Scene />
+      {/* v2.1 — Bloom post-processing for premium glow. Reduced-motion users
+          still get the effect rendered statically; perf cost is negligible. */}
+      <EffectComposer enableNormalPass={false}>
+        <Bloom
+          intensity={1.1}
+          luminanceThreshold={0.35}
+          luminanceSmoothing={0.55}
+          mipmapBlur
+          radius={0.7}
+        />
+      </EffectComposer>
     </Canvas>
   );
 }

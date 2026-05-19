@@ -99,3 +99,4 @@ See [`content-model.md`](./content-model.md) for the operational guide.
 | 8 | No `vercel.json` versioned (Vercel access pending) | owner | blocked on [PENDING.md #1](../../PENDING.md) |
 | 9 | ~~"Animated/dynamic visual leap"~~ | dev | **resolved 2026-05-19** — Pack 1+2+3+4 shipped ([ADR-008](../adr/ADR-008-animations-and-3d-neural-network.md)) |
 | 10 | ~~No structured data / 404 page~~ | dev | **resolved 2026-05-19** — Schema.org JSON-LD + branded 404 ([ADR-009](../adr/ADR-009-seo-structured-data.md)) |
+| 11 | ~~Pack v2 premium polish~~ | dev | **resolved 2026-05-19** — Bloom, idle drift, gradient lines, magnetic CTAs, tilt cards, sticky label, custom View Transitions ([ADR-011](../adr/ADR-011-pack-v2-premium-polish.md)) |

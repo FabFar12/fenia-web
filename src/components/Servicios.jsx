@@ -63,7 +63,7 @@ export default function Servicios() {
                   <span key={label} style={{ fontSize:11,fontWeight:600,padding:"4px 12px",borderRadius:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.45)" }}>{label}</span>
                 ))}
               </div>
-              <a className="cta-glow" href={WA_URL} target="_blank" rel="noopener noreferrer" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>
+              <a className="cta-glow cta-magnetic" href={WA_URL} target="_blank" rel="noopener noreferrer" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>
             </div>
           </div>
         </div>

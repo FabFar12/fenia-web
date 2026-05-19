@@ -110,6 +110,85 @@ body {
   box-shadow: 0 0 8px rgba(0, 180, 216, 0.5);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Pack v2 — Premium polish
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* v2.4 — Magnetic CTAs. JS sets --mx / --my (px) on mousemove proximity. */
+.cta-magnetic {
+  --mx: 0px;
+  --my: 0px;
+  transition: transform 240ms cubic-bezier(0.18, 0.9, 0.32, 1.1);
+  transform: translate(var(--mx), var(--my));
+  will-change: transform;
+}
+
+/* v2.6 — Floating section label (sticky chip showing the current section). */
+#section-label {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 90;
+  background: rgba(11, 26, 46, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 180, 216, 0.18);
+  border-radius: 100px;
+  padding: 9px 18px;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 260ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 24px rgba(0, 180, 216, 0.10);
+}
+#section-label.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (max-width: 640px) {
+  #section-label { bottom: 16px; right: 16px; font-size: 11px; padding: 7px 14px; }
+}
+
+/* v2.7 — Tilt cards. JS sets --tilt-x / --tilt-y (deg) on mousemove inside the card. */
+.tilt-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.tilt-card:hover {
+  box-shadow:
+    0 14px 34px rgba(0, 180, 216, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* v2.5 — Custom View Transitions (slide instead of crossfade).
+   Astro ClientRouter uses the View Transitions API; we override the default
+   crossfade with a subtle slide for forward navigation. */
+@keyframes vt-slide-out-left {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-24px); }
+}
+@keyframes vt-slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+::view-transition-old(root) {
+  animation: vt-slide-out-left 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-slide-in-right 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Convergence diagram interactive nodes — Pack 2 */
 .conv-node {
   transition:
@@ -144,6 +223,11 @@ body {
   .conv-node { transition: none; }
   .conv-diagram:hover .conv-node { opacity: 1; }
   .conv-diagram .conv-node:hover { transform: none; filter: none; }
+  /* Pack v2 reduced-motion overrides */
+  .cta-magnetic { transform: none !important; transition: none; }
+  .tilt-card { transform: none !important; transition: none; }
+  .tilt-card:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 
 /* ── RESPONSIVE OVERRIDES ── */
