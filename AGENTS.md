@@ -12,6 +12,11 @@
       <li><strong>Stack choices, framework versions, why Astro/React/Tailwind</strong> 👉 <code>docs/adr/ADR-001-tech-stack.md</code></li>
       <li><strong>Testimonial collection / publication flow</strong> 👉 <code>docs/adr/ADR-005-testimonial-collection.md</code></li>
       <li><strong>Local dev experience / scripts / why <code>npm run dev</code> must stay single-command</strong> 👉 <code>docs/adr/ADR-006-dx-single-command-dev.md</code></li>
+      <li><strong>The video logo (HeroVideo component, history of the intro video)</strong> 👉 <code>docs/adr/ADR-007-intro-video-as-logo-banner.md</code></li>
+      <li><strong>3D neural network, animations runtime, Pack 1/2/3/4 architecture</strong> 👉 <code>docs/adr/ADR-008-animations-and-3d-neural-network.md</code> &amp; <code>src/scripts/animations.ts</code> &amp; <code>src/components/NeuralNetwork3D.jsx</code></li>
+      <li><strong>SEO meta, Schema.org JSON-LD, canonical, sitemap, 404</strong> 👉 <code>docs/adr/ADR-009-seo-structured-data.md</code> &amp; <code>src/layouts/Layout.astro</code></li>
+      <li><strong>Accessibility, WCAG AA, ARIA, prefers-reduced-motion contracts</strong> 👉 <code>docs/adr/ADR-010-accessibility-pass.md</code></li>
+      <li><strong>Pack v2 polish — Bloom, magnetic CTAs, tilt cards, sticky section label, custom View Transitions</strong> 👉 <code>docs/adr/ADR-011-pack-v2-premium-polish.md</code></li>
     </ul>
   </rule>
 

@@ -245,6 +245,21 @@ function initTiltCards() {
   });
 }
 
+// Close the mobile nav menu when the user clicks a nav link (the menu is a
+// pure-CSS checkbox toggle, so without this it stays open after navigation).
+function initMobileNavClose() {
+  const toggle = document.getElementById('nav-toggle');
+  if (!(toggle instanceof HTMLInputElement)) return;
+  const links = document.querySelectorAll<HTMLAnchorElement>(
+    '.nav-link, .nav-cta',
+  );
+  links.forEach((link) => {
+    link.addEventListener('click', () => {
+      toggle.checked = false;
+    });
+  });
+}
+
 function initAll() {
   initScrollReveal();
   initStatCounters();
@@ -253,6 +268,7 @@ function initAll() {
   initCtaGlow();
   initMagneticCtas();
   initTiltCards();
+  initMobileNavClose();
 }
 
 if (document.readyState === 'loading') {

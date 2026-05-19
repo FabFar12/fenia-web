@@ -2,6 +2,8 @@
 
 > This file tracks **what the human owner / collaborators need to provide or decide** so the AI can continue. Keep it short and dated. When an item is resolved, delete it from here and write the resolution into the relevant ADR or context file.
 
+> Last sync: 2026-05-19 (after Pack v2 commit).
+
 ---
 
 ## 🔴 Blockers (needed before specific work can proceed)
@@ -83,7 +85,19 @@ Hoy se usa el de Astro (`public/favicon.svg`). Tu amigo tiene un logo F→FENIA 
 **Owner action:** Exportar el logo F + nodos como favicon set, o pedir al diseñador.
 
 ### 10. Open Graph image — 2026-05-19
-No hay imagen para compartir en WhatsApp / LinkedIn / Twitter cuando se pega el link. Hace falta un `og-image.jpg` 1200×630 px.
+No hay imagen para compartir en WhatsApp / LinkedIn / Twitter cuando se pega el link. Hace falta un `og-image.jpg` 1200×630 px en `public/og-image.jpg`. El Layout ya está listo para enchufarla apenas exista.
 
-### 11. Imagen `logo-fenia.png.png` (doble extensión) — 2026-05-19
-En `public/images/` hay un archivo `logo-fenia.png.png` que **no se usa** en ningún componente (los logos están hardcoded como SVG inline). **A eliminar.** Pendiente confirmar con el dueño que el archivo no se usa en otros lugares (correo, redes, etc.) — si solo está en el repo, se borra.
+---
+
+## ✅ Resueltos (referencia histórica)
+
+Tareas que sí estaban pendientes en algún momento y ya están cerradas. Se quedan acá brevemente para que el dueño pueda rastrear progreso.
+
+- **Imagen `logo-fenia.png.png` (doble extensión, sin uso)** — eliminada en commit `9843430` (Fase 0).
+- **`LogoBanner` slim arriba (video chiquito)** — reemplazado por `HeroVideo` centrado en el body en commit `db163df` ([ADR-007 v2](docs/adr/ADR-007-intro-video-as-logo-banner.md)).
+- **Sección Confianza con testimonios placeholder** — oculta de producción en commit `0d1a70c`. Reactivable con 1-line uncomment apenas haya 1 testimonio real recolectado por el flujo de [ADR-005](docs/adr/ADR-005-testimonial-collection.md).
+- **Variable font + sitemap + robots.txt** — todo en commit `8b54e56` (Fase 2).
+- **WCAG AA contrast pass body text** — commit `e65ca13` ([ADR-010](docs/adr/ADR-010-accessibility-pass.md)).
+- **Pack visual v1 (animaciones + 3D)** — commit `7fb7d80` ([ADR-008](docs/adr/ADR-008-animations-and-3d-neural-network.md)).
+- **Pack visual v2 (Bloom, magnetic CTAs, tilt cards, sticky label, slide transitions)** — commit `364249d` ([ADR-011](docs/adr/ADR-011-pack-v2-premium-polish.md)).
+- **SEO baseline (JSON-LD, OG, canonical, sitemap, 404)** — commits `3eb645a` + `8b54e56` ([ADR-009](docs/adr/ADR-009-seo-structured-data.md)).
