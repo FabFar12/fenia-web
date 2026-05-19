@@ -1,5 +1,6 @@
 ---
 // Metodologia.astro — Sección de enfoque y metodología FENIA
+import { methodologyPillars } from '../data/site';
 ---
 
 <section id="metodologia" style="background:#0B1A2E;position:relative;overflow:hidden;">
@@ -30,50 +31,26 @@
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;">
       <div style="position:absolute;top:52px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,180,216,0.15),rgba(0,180,216,0.15),transparent);z-index:0;"></div>
 
-      <!-- Pillar 01 -->
-      <div style="padding:0 20px;position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:rgba(255,255,255,0.25);font-family:'Plus Jakarta Sans',sans-serif;position:relative;">
-            01<div style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid #0B1A2E;"></div>
+      {methodologyPillars.map((pillar) => {
+        const numBg = pillar.highlight ? 'rgba(0,180,216,0.1)' : 'rgba(255,255,255,0.03)';
+        const numBorder = pillar.highlight ? 'rgba(0,180,216,0.25)' : 'rgba(255,255,255,0.06)';
+        const numColor = pillar.highlight ? '#00B4D8' : 'rgba(255,255,255,0.25)';
+        const dotBg = pillar.highlight ? '#00B4D8' : 'rgba(255,255,255,0.1)';
+        return (
+          <div style="padding:0 20px;position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+              <div style={`width:44px;height:44px;border-radius:12px;background:${numBg};border:1px solid ${numBorder};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:${numColor};font-family:'Plus Jakarta Sans',sans-serif;position:relative;`}>
+                {pillar.num}<div style={`position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:${dotBg};border:2px solid #0B1A2E;`}></div>
+              </div>
+            </div>
+            <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{pillar.title}</h3>
+            <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.38);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">{pillar.body}</p>
+            {pillar.highlight && (
+              <div style="width:32px;height:2px;border-radius:1px;background:#00B4D8;margin-top:20px;opacity:0.6;"></div>
+            )}
           </div>
-        </div>
-        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">Pensamiento estratégico</h3>
-        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.38);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Cada intervención parte de un diagnóstico profundo. No aplicamos fórmulas: diseñamos soluciones a medida desde el análisis sistémico de tu organización.</p>
-      </div>
-
-      <!-- Pillar 02 (accent) -->
-      <div style="padding:0 20px;position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,180,216,0.1);border:1px solid rgba(0,180,216,0.25);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#00B4D8;font-family:'Plus Jakarta Sans',sans-serif;position:relative;">
-            02<div style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:#00B4D8;border:2px solid #0B1A2E;"></div>
-          </div>
-        </div>
-        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">Neuro-inteligencia aplicada</h3>
-        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.38);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Integramos principios de neurociencias cognitivas y emocionales. Entendemos cómo funciona el cerebro para tomar mejores decisiones y gestionar el cambio.</p>
-        <div style="width:32px;height:2px;border-radius:1px;background:#00B4D8;margin-top:20px;opacity:0.6;"></div>
-      </div>
-
-      <!-- Pillar 03 -->
-      <div style="padding:0 20px;position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:rgba(255,255,255,0.25);font-family:'Plus Jakarta Sans',sans-serif;position:relative;">
-            03<div style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid #0B1A2E;"></div>
-          </div>
-        </div>
-        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">Inteligencia aumentada</h3>
-        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.38);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Incorporamos herramientas de IA como potenciadores, no reemplazos. La tecnología amplifica tu capacidad analítica, creativa y operativa.</p>
-      </div>
-
-      <!-- Pillar 04 -->
-      <div style="padding:0 20px;position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:rgba(255,255,255,0.25);font-family:'Plus Jakarta Sans',sans-serif;position:relative;">
-            04<div style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid #0B1A2E;"></div>
-          </div>
-        </div>
-        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">Impacto real y escalable</h3>
-        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.38);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Cada solución se diseña para generar resultados medibles y sostenibles. Trabajamos con indicadores concretos y metodologías escalables.</p>
-      </div>
+        );
+      })}
     </div>
 
     <!-- Integration block -->

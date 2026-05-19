@@ -1,7 +1,8 @@
 ---
 // Hero.astro — Sección hero principal de FENIA
-import { whatsapp, heroStats } from '../data/site';
+import { whatsapp, heroStats, audiences } from '../data/site';
 const waUrl = whatsapp.url();
+const accentColor = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573D');
 ---
 
 <section id="inicio" style="background:#0B1A2E;position:relative;overflow:hidden;">
@@ -147,27 +148,14 @@ const waUrl = whatsapp.url();
       <p style="font-size:15px;color:rgba(255,255,255,0.4);max-width:500px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">Elegí el camino que mejor se adapta a tus necesidades</p>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
-      <!-- Profesionales -->
-      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#00B4D8;opacity:0.5;"></div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">Profesionales</h3>
-        <p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0 0 24px 0;font-family:'Plus Jakarta Sans',sans-serif;">Herramientas, formación y acompañamiento para optimizar tu práctica profesional.</p>
-        <a href="#servicios" style="font-size:13px;font-weight:600;color:#00B4D8;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Ver soluciones →</a>
-      </div>
-      <!-- Emprendedores -->
-      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#E8573D;opacity:0.5;"></div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">Emprendedores</h3>
-        <p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0 0 24px 0;font-family:'Plus Jakarta Sans',sans-serif;">Estrategias para ordenar, escalar, decidir mejor y usar tecnología con inteligencia.</p>
-        <a href="#servicios" style="font-size:13px;font-weight:600;color:#E8573D;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Ver soluciones →</a>
-      </div>
-      <!-- Empresas -->
-      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#00B4D8;opacity:0.5;"></div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">Empresas</h3>
-        <p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0 0 24px 0;font-family:'Plus Jakarta Sans',sans-serif;">Intervenciones para cultura, liderazgo, salud organizacional, talento e innovación.</p>
-        <a href="#servicios" style="font-size:13px;font-weight:600;color:#00B4D8;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">Ver soluciones →</a>
-      </div>
+      {audiences.map((aud) => (
+        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;">
+          <div style={`position:absolute;top:0;left:0;right:0;height:2px;background:${accentColor(aud.accent)};opacity:0.5;`}></div>
+          <h3 style="font-size:18px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">{aud.title}</h3>
+          <p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0 0 24px 0;font-family:'Plus Jakarta Sans',sans-serif;">{aud.summary}</p>
+          <a href="#servicios" style={`font-size:13px;font-weight:600;color:${accentColor(aud.accent)};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;`}>Ver soluciones →</a>
+        </div>
+      ))}
     </div>
   </div>
 </section>

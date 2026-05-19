@@ -22,7 +22,7 @@ The home page (`src/pages/index.astro`) is a single route composed of these comp
 
 | # | Component | File | Purpose |
 |---|-----------|------|---------|
-| 1 | `IntroLoader` | [`src/components/IntroLoader.jsx`](../../src/components/IntroLoader.jsx) | Plays an intro video on first visit (currently no skip, no session persistence — both queued for Fase 1 fix) |
+| 1 | `LogoBanner` | [`src/components/LogoBanner.astro`](../../src/components/LogoBanner.astro) | Top header band with the FENIA video logo. Plays once, freezes on final frame, then sits as a static logo. Replaces the legacy blocking IntroLoader — see [ADR-007](../adr/ADR-007-intro-video-as-logo-banner.md) |
 | 2 | `Nav` | [`src/components/Nav.astro`](../../src/components/Nav.astro) | Sticky top nav with anchors + WhatsApp CTA |
 | 3 | `Hero` | [`src/components/Hero.astro`](../../src/components/Hero.astro) | Title + value prop + service cards + audience grid |
 | 4 | `Metodologia` | [`src/components/Metodologia.astro`](../../src/components/Metodologia.astro) | 4-pillar methodology breakdown |
@@ -89,11 +89,12 @@ See [`content-model.md`](./content-model.md) for the operational guide.
 
 | # | Issue | Owner | Status |
 |---|-------|-------|--------|
-| 1 | IntroLoader has no skip button and forces 7s wait | dev | queued — Fase 1 |
+| 1 | ~~IntroLoader has no skip~~ | dev | **resolved 2026-05-19** — replaced by `LogoBanner` ([ADR-007](../adr/ADR-007-intro-video-as-logo-banner.md)) |
 | 2 | All testimonials and products are AI placeholders | owner | unblocking via Tally + curation ([ADR-005](../adr/ADR-005-testimonial-collection.md)) |
 | 3 | 3 CSS dialects coexist; Tailwind installed but unused | dev | phased migration ([ADR-004](../adr/ADR-004-styling-strategy.md)) |
-| 4 | No SEO meta (OG, schema.org, sitemap, robots) | dev | queued — Fase 1 |
-| 5 | Footer social/legal links are `href="#"` (dead) | dev | queued — Fase 1 |
-| 6 | Body text contrast fails WCAG AA in many places | dev | queued — Fase 1 |
+| 4 | ~~No SEO meta (OG, schema.org, sitemap, robots)~~ | dev | **partly resolved 2026-05-19** — OG, Twitter, canonical, sitemap.xml and robots.txt landed. Schema.org `Organization` JSON-LD still pending |
+| 5 | ~~Footer social/legal links are `href="#"` (dead)~~ | dev | **resolved 2026-05-19** — dead links removed; visible ones come from `site.ts` with conditional rendering |
+| 6 | Body text contrast fails WCAG AA in many places | dev | queued |
 | 7 | No analytics, no error tracking, no Web Vitals | dev | queued — Fase 3 |
 | 8 | No `vercel.json` versioned (Vercel access pending) | owner | blocked on [PENDING.md #1](../../PENDING.md) |
+| 9 | "Animated/dynamic visual leap" — scroll-reveal, animated neural net, card hover, scroll spy | dev | proposed (Pack 1/2/3 plan) — awaits owner pick |

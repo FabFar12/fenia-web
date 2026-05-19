@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import LogoBanner from '../components/LogoBanner.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { whatsapp } from '../data/site';
@@ -9,6 +10,7 @@ const waUrl = whatsapp.url('Hola FENIA, quiero dejar un testimonio sobre mi expe
 ---
 
 <Layout title="Dejanos tu testimonio — FENIA">
+  <LogoBanner />
   <Nav />
 
   <main style="background:#0B1A2E;min-height:80vh;">

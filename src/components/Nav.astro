@@ -20,8 +20,8 @@ const waUrl = whatsapp.url();
     </div>
   </a>
 
-  <input type="checkbox" id="nav-toggle" class="nav-toggle-input" />
-  <label for="nav-toggle" class="nav-hamburger"><span></span><span></span><span></span></label>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle-input" aria-label="Abrir menú de navegación" />
+  <label for="nav-toggle" class="nav-hamburger" aria-label="Abrir menú de navegación" role="button" tabindex="0"><span></span><span></span><span></span></label>
 
   <div class="nav-links">
     {navLinks.map((link, i) => (
