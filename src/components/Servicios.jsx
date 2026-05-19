@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { whatsapp } from "../data/site";
 
 const P = { cyan:"#00B4D8", coral:"#E8573D" };
+const WA_URL = whatsapp.url();
 
 const svcs = [
   {icon:"◇",title:"Consultoría estratégica",sub:"Diagnóstico, diseño e implementación",desc:"Trabajamos con líderes y equipos para analizar la situación actual, identificar oportunidades y diseñar intervenciones a medida.",bullets:["Diagnóstico organizacional con enfoque neuro-estratégico","Diseño de intervenciones para equipos de alto rendimiento","Acompañamiento en procesos de cambio y transformación","Optimización de toma de decisiones a nivel directivo"],aud:["Empresas","Directivos"]},
@@ -51,7 +53,7 @@ export default function Servicios() {
             </div>
             <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",paddingTop:24,borderTop:"1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ display:"flex",gap:8 }}>{a.aud.map((x,i)=><span key={i} style={{ fontSize:11,fontWeight:600,padding:"4px 12px",borderRadius:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.4)" }}>{x}</span>)}</div>
-              <a href="https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>            </div>
+              <a href={WA_URL} target="_blank" rel="noopener" style={{ fontSize:13,fontWeight:600,padding:"10px 24px",borderRadius:8,border:"none",background:P.coral,color:"#fff",cursor:"pointer",boxShadow:"0 4px 16px rgba(232,87,61,0.25)",textDecoration:"none" }}>Consultar →</a>            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,8 @@
 ---
 // Footer.astro
+import { whatsapp, socials, legal, siteMeta } from '../data/site';
+const currentYear = new Date().getFullYear();
+const yearRange = currentYear > legal.copyrightYearStart ? `${legal.copyrightYearStart}–${currentYear}` : `${currentYear}`;
 ---
 
 <footer class="site-footer">
@@ -27,19 +30,29 @@
       </div>
       <div class="footer-col">
         <h4 class="footer-heading">Contacto</h4>
-        <a href="https://wa.me/5493513559947" target="_blank" rel="noopener" class="footer-link">+54 351 355-9947</a>
+        <a href={`https://wa.me/${whatsapp.phone}`} target="_blank" rel="noopener" class="footer-link">{whatsapp.displayPhone}</a>
         <div class="footer-social">
-          <a href="#" class="social-icon">IG</a>
-          <a href="#" class="social-icon">IN</a>
-          <a href="#" class="social-icon">YT</a>
+          {socials.instagram.url && (
+            <a href={socials.instagram.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.instagram.label}>IG</a>
+          )}
+          {socials.linkedin.url && (
+            <a href={socials.linkedin.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.linkedin.label}>IN</a>
+          )}
+          {socials.youtube.url && (
+            <a href={socials.youtube.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.youtube.label}>YT</a>
+          )}
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">© 2026 FENIA · Formación Estratégica de Neuro-Inteligencia Aumentada</span>
+      <span class="footer-copy">© {yearRange} {siteMeta.name} · {siteMeta.fullName}</span>
       <div class="footer-legal">
-        <a href="#" class="footer-legal-link">Política de privacidad</a>
-        <a href="#" class="footer-legal-link">Términos</a>
+        {legal.privacyUrl && (
+          <a href={legal.privacyUrl} class="footer-legal-link">Política de privacidad</a>
+        )}
+        {legal.termsUrl && (
+          <a href={legal.termsUrl} class="footer-legal-link">Términos</a>
+        )}
       </div>
     </div>
   </div>

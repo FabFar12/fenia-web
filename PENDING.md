@@ -32,13 +32,20 @@
 **Cómo se agregan:** Crear un archivo nuevo en `src/content/products/{slug}.md` con el frontmatter documentado en [docs/ai-context/content-model.md](./docs/ai-context/content-model.md).
 
 ### 4. Testimonios reales — 2026-05-19
-**Why it matters:** Los 3 testimonios anónimos actuales son placeholder. La decisión confirmada (2026-05-19) es usar **Nivel A — Manual asistido con Tally + curación manual**.
-**Owner action:**
-  - Crear un formulario en Tally (`https://tally.so`) con campos: nombre completo, cargo, empresa/proyecto, LinkedIn (opcional), texto del testimonio, foto (opcional), autorización para publicar.
-  - Compartir el link del formulario para que se publique en una página `/dejanos-tu-testimonio` (a implementar en Fase 2).
-  - Empezar a pedir testimonios por WhatsApp a clientes reales tras cada engagement.
-  - A medida que lleguen testimonios aprobados, el dev los agrega como archivos en `src/content/testimonials/{slug}.md`.
-**Mientras tanto:** La sección "Confianza" en producción sigue mostrando los placeholder; **propuesta pendiente** — discutir si la ocultamos o mostramos "Próximamente — testimonios verificados" (decisión a tomar antes de tocar el componente).
+**Why it matters:** Los 3 testimonios anónimos actuales eran placeholder y se han retirado de producción. La decisión confirmada (2026-05-19) es usar **Nivel A — Manual asistido con Tally + curación manual**.
+**Estado:** La sección Confianza ya **NO se renderiza** en la home (commit en `dev`). La página pública `/dejanos-tu-testimonio` ya existe y enlaza desde la sección Contacto. Sin el form de Tally, esa página muestra un fallback elegante que invita a enviar el testimonio por WhatsApp.
+**Owner action — siguientes pasos:**
+  1. Crear un formulario en Tally (`https://tally.so`) con campos:
+     - Nombre completo (requerido)
+     - Cargo y empresa/proyecto (requerido)
+     - LinkedIn (opcional)
+     - Foto (opcional)
+     - Texto del testimonio (recomendado <280 chars)
+     - Checkbox de consentimiento explícito de publicación (requerido)
+  2. Copiar el link del formulario embebido (URL tipo `https://tally.so/embed/...` o `https://tally.so/r/...`).
+  3. Configurar en Vercel la variable de entorno **`PUBLIC_TALLY_TESTIMONIAL_FORM_URL`** con ese link. Cuando exista, la página `/dejanos-tu-testimonio` automáticamente embebe el formulario.
+  4. Empezar a pedir testimonios por WhatsApp a clientes reales tras cada engagement.
+  5. Cuando llegue un testimonio aprobado y con consentimiento explícito → el dev lo agrega como `.md` en `src/content/testimonials/`. Una vez haya al menos 1, restaurar el render de `<Confianza />` en `src/pages/index.astro` (línea comentada).
 
 ### 5. KPIs reales del Hero y de la sección Confianza — 2026-05-19
 **Why it matters:** "6 áreas de expertise", "12+ productos digitales", "100% enfoque aplicado", "95% satisfacción en formaciones", "100% enfoque basado en evidencia" son cifras sin fuente documentable.

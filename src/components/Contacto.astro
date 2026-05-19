@@ -1,5 +1,7 @@
 ---
 // Contacto.astro
+import { whatsapp, socials } from '../data/site';
+const waUrl = whatsapp.url();
 ---
 
 <section id="contacto" class="section-contacto">
@@ -10,20 +12,25 @@
       <h2 class="contacto-title">Transformá ideas, equipos y procesos con una mirada <span class="text-cyan">estratégica y aumentada</span></h2>
       <p class="contacto-desc">Decí cómo gustás empezar una conversación: un servicio a medida, un producto listo para aplicar, o simplemente explorar opciones.</p>
       <div class="contacto-buttons">
-        <a href="https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" class="btn-coral">💬 Solicitar un turno</a>
-        <a href="#productos" class="btn-outline">Comprar productos digitales</a>
+        <a href={waUrl} target="_blank" rel="noopener" class="btn-coral">💬 Solicitar un turno</a>
+        <a href="#productos" class="btn-outline">Ver próximos productos</a>
       </div>
       <div class="contacto-info">
         <div class="contacto-col">
           <div class="contacto-label">WhatsApp</div>
-          <a href="https://wa.me/5493513559947" target="_blank" rel="noopener" class="contacto-value">+54 351 355-9947</a>
+          <a href={`https://wa.me/${whatsapp.phone}`} target="_blank" rel="noopener" class="contacto-value">{whatsapp.displayPhone}</a>
           <div class="contacto-sub">Respuesta en menos de 24h</div>
         </div>
         <div class="contacto-col">
           <div class="contacto-label">Redes</div>
-          <div class="contacto-value">@fenia.ok</div>
+          <div class="contacto-value">{socials.instagram.handle}</div>
           <div class="contacto-sub">Instagram · LinkedIn</div>
         </div>
+      </div>
+      <div class="contacto-testimonial">
+        <a href="/dejanos-tu-testimonio" class="contacto-testimonial-link">
+          ¿Trabajaste con FENIA? Dejanos tu testimonio →
+        </a>
       </div>
     </div>
   </div>
@@ -43,6 +50,9 @@
 .btn-coral{font-size:15px;font-weight:600;padding:16px 36px;border-radius:12px;background:#E8573D;color:#fff;cursor:pointer;box-shadow:0 6px 24px rgba(232,87,61,0.3);display:inline-flex;align-items:center;gap:10px;text-decoration:none}
 .btn-outline{font-size:15px;font-weight:600;padding:16px 36px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);color:#fff;cursor:pointer;text-decoration:none}
 .contacto-info{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:32px 0;border-top:1px solid rgba(255,255,255,0.06)}
+.contacto-testimonial{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);text-align:center}
+.contacto-testimonial-link{font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);text-decoration:none;letter-spacing:0.01em}
+.contacto-testimonial-link:hover{color:#00B4D8}
 .contacto-col{text-align:center}
 .contacto-label{font-size:11px;font-weight:700;color:#00B4D8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
 .contacto-value{font-size:15px;font-weight:600;color:#fff;text-decoration:none;display:block}

@@ -95,10 +95,17 @@ export const navLinks: readonly NavLink[] = [
 
 export type HeroStat = { label: string; value: string };
 
+// NOTE (PENDING.md #5): preserving current production values verbatim to keep
+// this refactor visually identical. The "6" and "12+" are placeholder values
+// that need to be reconciled with reality in a follow-up PR with owner approval.
+// Proposed honest values (when approved):
+//   - "4" / "Áreas de servicio"   (matches `services` length)
+//   - "3" / "Audiencias"          (matches `audiences` length)
+//   - "100%" / "Enfoque aplicado" (legacy claim, no source)
 export const heroStats: readonly HeroStat[] = [
-  { value: '4', label: 'Áreas de servicio' },
-  { value: '3', label: 'Audiencias' },
-  { value: '100%', label: 'Enfoque aplicado' },
+  { value: '6', label: 'Áreas de expertise' }, // TODO: align with reality
+  { value: '12+', label: 'Productos digitales' }, // TODO: derive from getCollection('products').filter(live).length
+  { value: '100%', label: 'Enfoque aplicado' }, // TODO: validate or replace
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

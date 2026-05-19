@@ -1,5 +1,7 @@
 ---
 // Nav.astro
+import { whatsapp, navLinks } from '../data/site';
+const waUrl = whatsapp.url();
 ---
 
 <nav class="main-nav">
@@ -22,12 +24,10 @@
   <label for="nav-toggle" class="nav-hamburger"><span></span><span></span><span></span></label>
 
   <div class="nav-links">
-    <a href="#inicio" class="nav-link nav-link-active">Inicio</a>
-    <a href="#metodologia" class="nav-link">Metodología</a>
-    <a href="#servicios" class="nav-link">Servicios</a>
-    <a href="#productos" class="nav-link">Productos</a>
-    <a href="#contacto" class="nav-link">Contacto</a>
-    <a href="https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20consultar%20sobre%20sus%20servicios" target="_blank" rel="noopener" class="nav-cta">Solicitar un turno</a>
+    {navLinks.map((link, i) => (
+      <a href={link.href} class={`nav-link${i === 0 ? ' nav-link-active' : ''}`}>{link.label}</a>
+    ))}
+    <a href={waUrl} target="_blank" rel="noopener" class="nav-cta">Solicitar un turno</a>
   </div>
 </nav>
 
