@@ -1,8 +1,9 @@
 ---
 // Footer.astro
-import { whatsapp, socials, legal, siteMeta } from '../data/site';
+import { whatsapp, socials, legal, siteMeta, sectionHref } from '../data/site';
 const currentYear = new Date().getFullYear();
 const yearRange = currentYear > legal.copyrightYearStart ? `${legal.copyrightYearStart}–${currentYear}` : `${currentYear}`;
+const pathname = Astro.url.pathname;
 ---
 
 <footer class="site-footer">
@@ -16,16 +17,16 @@ const yearRange = currentYear > legal.copyrightYearStart ? `${legal.copyrightYea
       </div>
       <div class="footer-col">
         <h4 class="footer-heading">Servicios</h4>
-        <a href="#servicios" class="footer-link">Consultoría estratégica</a>
-        <a href="#servicios" class="footer-link">Capacitación</a>
-        <a href="#servicios" class="footer-link">IA aplicada</a>
-        <a href="#productos" class="footer-link">Productos digitales</a>
+        <a href={sectionHref('#servicios', pathname)} class="footer-link">Consultoría estratégica</a>
+        <a href={sectionHref('#servicios', pathname)} class="footer-link">Capacitación</a>
+        <a href={sectionHref('#servicios', pathname)} class="footer-link">IA aplicada</a>
+        <a href={sectionHref('#productos', pathname)} class="footer-link">Productos digitales</a>
       </div>
       <div class="footer-col">
         <h4 class="footer-heading">Soluciones</h4>
-        <a href="#inicio" class="footer-link">Profesionales</a>
-        <a href="#inicio" class="footer-link">Emprendedores</a>
-        <a href="#inicio" class="footer-link">Empresas</a>
+        <a href={sectionHref('#inicio', pathname)} class="footer-link">Profesionales</a>
+        <a href={sectionHref('#inicio', pathname)} class="footer-link">Emprendedores</a>
+        <a href={sectionHref('#inicio', pathname)} class="footer-link">Empresas</a>
       </div>
       <div class="footer-col">
         <h4 class="footer-heading">Contacto</h4>

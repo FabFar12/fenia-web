@@ -87,6 +87,22 @@ export const navLinks: readonly NavLink[] = [
   { label: 'Contacto', href: '#contacto', kind: 'anchor' },
 ];
 
+/**
+ * Build an href for an in-page section anchor that works from ANY page.
+ *
+ * The home page sections (`#inicio`, `#servicios`, …) only exist on `/`.
+ * From a sub-page (`/dejanos-tu-testimonio`, `/404`) a bare `#servicios`
+ * would resolve to `/dejanos-tu-testimonio#servicios` and go nowhere.
+ *
+ * - On the home page → returns the bare `#anchor` (pure same-page scroll;
+ *   keeps the Nav scroll-spy selector `[href^="#"]` matching).
+ * - On any other page → prefixes `/` so the browser navigates home first,
+ *   then scrolls to the section.
+ */
+export function sectionHref(anchor: string, pathname: string): string {
+  return pathname === '/' ? anchor : `/${anchor}`;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero stats
 // TODO (PENDING.md #5): align values with reality or derive from real data.

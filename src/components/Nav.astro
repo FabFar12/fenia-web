@@ -1,11 +1,13 @@
 ---
 // Nav.astro
-import { whatsapp, navLinks } from '../data/site';
+import { whatsapp, navLinks, sectionHref } from '../data/site';
 const waUrl = whatsapp.url();
+const pathname = Astro.url.pathname;
+const isHome = pathname === '/';
 ---
 
 <nav class="main-nav">
-  <a href="#inicio" class="nav-brand">
+  <a href={isHome ? '#inicio' : '/'} class="nav-brand">
     <div class="nav-f-mark">
       <span class="nav-f-letter">F</span>
       <div class="nav-f-nodes">
@@ -25,7 +27,7 @@ const waUrl = whatsapp.url();
 
   <div class="nav-links">
     {navLinks.map((link, i) => (
-      <a href={link.href} class={`nav-link${i === 0 ? ' nav-link-active' : ''}`}>{link.label}</a>
+      <a href={sectionHref(link.href, pathname)} class={`nav-link${i === 0 ? ' nav-link-active' : ''}`}>{link.label}</a>
     ))}
     <a href={waUrl} target="_blank" rel="noopener" class="nav-cta cta-magnetic">Solicitar un turno</a>
   </div>

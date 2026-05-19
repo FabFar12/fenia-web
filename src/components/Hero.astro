@@ -38,8 +38,9 @@ const heroServiceCards = services.map((s, i) => ({
       <ellipse cx="400" cy="350" rx="200" ry="150" fill="url(#go)"/>
     </svg>
 
-    <!-- Pack 4: animated 3D neural network. Loaded as island when Hero is in viewport. -->
-    <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;" aria-hidden="true">
+    <!-- Pack 4: animated 3D neural network. Loaded as island when Hero is in
+         viewport. `.hero-3d-layer` gives it scroll-parallax — see ADR-017. -->
+    <div class="hero-3d-layer" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;" aria-hidden="true">
       <NeuralNetwork3D client:visible />
     </div>
 
