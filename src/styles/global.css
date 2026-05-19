@@ -311,6 +311,254 @@ body {
   color: rgba(255, 255, 255, 0.95);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Servicios section (ADR-013) — semantic classes + mobile-responsive layout
+   ───────────────────────────────────────────────────────────────────────── */
+.servicios-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.servicios-tabs {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+.servicios-tab {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 20px 18px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 240ms;
+  position: relative;
+  font-family: inherit;
+  color: inherit;
+}
+.servicios-tab.is-active {
+  background: rgba(0, 180, 216, 0.08);
+}
+.servicios-tab-rule {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 2px;
+  background: #00B4D8;
+}
+.servicios-tab-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+  transition: background 240ms, border-color 240ms, color 240ms;
+}
+.servicios-tab.is-active .servicios-tab-icon {
+  background: rgba(0, 180, 216, 0.12);
+  border-color: rgba(0, 180, 216, 0.28);
+  color: #00B4D8;
+}
+.servicios-tab-text { min-width: 0; }
+.servicios-tab-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+}
+.servicios-tab.is-active .servicios-tab-title { color: #fff; }
+.servicios-tab-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 2px;
+}
+
+.servicios-detail {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 44px 48px;
+}
+.servicios-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.servicios-detail-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 180, 216, 0.1);
+  border: 1px solid rgba(0, 180, 216, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #00B4D8;
+  flex-shrink: 0;
+}
+.servicios-detail-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.servicios-detail-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 28px 0;
+}
+.servicios-detail-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+}
+.servicios-detail-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.servicios-detail-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+.servicios-detail-cta {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: #E8573D;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(232, 87, 61, 0.25);
+  text-decoration: none;
+}
+
+/* Bullets — auto-cycle highlight (ADR-013).
+   Same pattern as convergence differentiators and methodology pillars. */
+.svc-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.svc-bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: default;
+}
+.svc-bullet-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.20);
+  margin-top: 7px;
+  flex-shrink: 0;
+  transition: background 280ms, box-shadow 280ms, transform 280ms;
+}
+.svc-bullet-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 280ms;
+}
+.svc-bullet.is-active .svc-bullet-dot,
+.svc-bullet:hover .svc-bullet-dot {
+  background: #00B4D8;
+  transform: scale(1.4);
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.55);
+}
+.svc-bullet.is-active .svc-bullet-text,
+.svc-bullet:hover .svc-bullet-text {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Mobile responsive — fix the broken Servicios layout on small screens.
+   Below 768 px the 280-px tab column + 1fr detail simply doesn't fit a
+   typical 360–414 px mobile viewport and the detail panel was clipping.
+   Switch to a single column, render tabs as a horizontal scrollable row,
+   reduce padding. */
+@media (max-width: 768px) {
+  .servicios-container {
+    padding: 60px 20px !important;
+  }
+  .servicios-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .servicios-tabs {
+    flex-direction: row !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px !important;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .servicios-tab {
+    flex-shrink: 0;
+    width: auto;
+    min-width: 200px;
+    max-width: 240px;
+    padding: 14px 14px !important;
+    scroll-snap-align: start;
+  }
+  .servicios-tab-rule {
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: 4px;
+    width: auto;
+    height: 2px;
+  }
+  .servicios-detail {
+    padding: 32px 22px !important;
+  }
+  .servicios-detail-title {
+    font-size: 19px !important;
+  }
+  .servicios-detail-foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .servicios-detail-cta {
+    text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .servicios-tab {
+    min-width: 180px;
+  }
+}
+
 /* v2.5 — Custom View Transitions (slide instead of crossfade).
    Astro ClientRouter uses the View Transitions API; we override the default
    crossfade with a subtle slide for forward navigation. */
@@ -329,12 +577,13 @@ body {
   animation: vt-slide-in-right 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Convergence diagram interactive nodes — Pack 2 */
+/* Convergence diagram interactive nodes — Pack 2 + ADR-013 animations */
 .conv-node {
   transition:
     transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 240ms,
     filter 240ms;
+  transform-box: fill-box;
   transform-origin: center;
   cursor: pointer;
 }
@@ -345,6 +594,81 @@ body {
   opacity: 1 !important;
   transform: scale(1.4);
   filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ADR-013 — Convergence diagram is now alive.
+   Each peripheral node drifts inside a wrapping <g>; the center halo and
+   core both pulse; the 4 connecting lines breathe opacity. The drift on
+   <g> stacks below the hover scale on the inner <circle>, so the hover
+   interaction (added in Pack 2) still works. */
+.conv-drift {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* Pause drift when any node is hovered so users can target steady */
+}
+.conv-diagram:has(.conv-node:hover) .conv-drift {
+  animation-play-state: paused;
+}
+.conv-drift-1 { animation: conv-drift-1 7.2s ease-in-out infinite; }
+.conv-drift-2 { animation: conv-drift-2 8.5s ease-in-out infinite -1.7s; }
+.conv-drift-3 { animation: conv-drift-3 9.1s ease-in-out infinite -3.1s; }
+.conv-drift-4 { animation: conv-drift-4 6.4s ease-in-out infinite -2.4s; }
+
+@keyframes conv-drift-1 {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(2.5px, -2px); }
+  50%      { transform: translate(1px, -3.5px); }
+  75%      { transform: translate(-2px, -1px); }
+}
+@keyframes conv-drift-2 {
+  0%, 100% { transform: translate(0, 0); }
+  33%      { transform: translate(-2.8px, 1.8px); }
+  66%      { transform: translate(-1.4px, -2.6px); }
+}
+@keyframes conv-drift-3 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, -3px); }
+}
+@keyframes conv-drift-4 {
+  0%, 100% { transform: translate(0, 0); }
+  40%      { transform: translate(2.7px, -1.5px); }
+  70%      { transform: translate(-1.2px, 2px); }
+}
+
+.conv-center-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: conv-halo-pulse 3.2s ease-in-out infinite;
+}
+.conv-center-core {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: conv-core-pulse 2.6s ease-in-out infinite;
+}
+@keyframes conv-halo-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.45); opacity: 0.45; }
+}
+@keyframes conv-core-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%      { transform: scale(1.18); opacity: 1;    }
+}
+
+.conv-line { animation: conv-line-pulse 4s ease-in-out infinite; }
+.conv-line-1 { animation-delay: 0s;    }
+.conv-line-2 { animation-delay: -0.7s; }
+.conv-line-3 { animation-delay: -1.4s; }
+.conv-line-4 { animation-delay: -2.1s; }
+@keyframes conv-line-pulse {
+  0%, 100% { opacity: 0.22; }
+  50%      { opacity: 0.42; }
+}
+.conv-line-coral {
+  animation: conv-line-pulse-coral 4s ease-in-out infinite -1s;
+}
+@keyframes conv-line-pulse-coral {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.34; }
 }
 
 /* Reduced motion — short-circuit everything */
@@ -372,6 +696,10 @@ body {
   .hero-svc-float { animation: none; }
   .meth-pillar, .meth-pillar-num, .meth-pillar-dot, .meth-pillar-rule { transition: none; }
   .conv-diff-dot, .conv-diff-text { transition: none; }
+  /* ADR-013 reduced-motion overrides */
+  .conv-drift, .conv-center-halo, .conv-center-core,
+  .conv-line, .conv-line-coral { animation: none !important; }
+  .svc-bullet-dot, .svc-bullet-text { transition: none; }
 }
 
 /* ── RESPONSIVE OVERRIDES ── */
