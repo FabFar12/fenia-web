@@ -1,7 +1,7 @@
-# ADR-007 — Intro video repurposed as top logo banner (replaces blocking IntroLoader)
+# ADR-007 — Intro video as page hero element (supersedes IntroLoader; supersedes own top-banner v1)
 
 ## Status
-Accepted (2026-05-19). Supersedes the prior implementation of `src/components/IntroLoader.jsx`.
+Accepted (2026-05-19), **amended same-day** to move the video from a slim top banner to a centered hero feature in the body of the home page. The thin top-band version (`LogoBanner.astro`) was deleted; the current implementation lives in `src/components/HeroVideo.astro`. The amendment is reflected in the *Decision* section below.
 
 ## Context
 
@@ -21,20 +21,25 @@ Problems with that pattern:
 
 ## Decision
 
-**Recycle the video as a permanent header-banner element (`src/components/LogoBanner.astro`) above the main `Nav`.**
+### v1 (deprecated, 2026-05-19)
+
+The video was first placed as a slim top "logo banner" (`src/components/LogoBanner.astro`) above the `Nav`. Banner height ~80 px desktop / ~70 px mobile, video ~56 px / ~42 px. While this technically replaced the blocking intro, the video read as small and decorative — it didn't feel like a brand showcase.
+
+### v2 (current, 2026-05-19)
+
+**Reposition the video as a centered hero feature inside the body of the home page**, in a dedicated section between the `Nav` and the existing `Hero` (`src/components/HeroVideo.astro`). The slim top banner was deleted.
 
 Behavior:
 
-- Banner is `~80 px` tall on desktop, `~70 px` on mobile.
-- Centered video element (`max-height: 56 px` desktop / `42 px` mobile, `max-width: 240 px` / `180 px`).
-- Plays once on first paint: `autoplay`, `muted`, `playsinline`, **no `loop`**.
-- When the video ends, the browser holds the last frame on screen — the static "FENIA logo" final frame becomes the visible logo.
-- Subtle radial cyan halo behind + two thin "horizon" lines fading out left/right for sophistication ([Linear/Stripe-style visual idiom](https://linear.app)).
-- Banner is **not sticky** — it scrolls away naturally. The existing `Nav` remains the sticky chrome.
-- `prefers-reduced-motion: reduce` is honored: video is hidden and a typographic "FENIA" wordmark appears as fallback.
-- Banner appears at the top of every page (currently `/` and `/dejanos-tu-testimonio`).
+- Section ~72/88 px vertical padding desktop, ~44/60 px mobile.
+- Centered video (`height: 220 px` desktop / `180 px` tablet / `140 px` mobile, `max-width` adaptive).
+- Plays once on first paint: `autoplay`, `muted`, `playsinline`, **no `loop`**. Browser holds the last frame as a static "FENIA logo" once playback ends.
+- Ambient radial cyan halo behind + matching dot-grid texture + two thin "horizon" rules flanking the video (idiom shared with the legacy banner, scaled up).
+- Section is **not sticky** — it scrolls away naturally. The `Nav` remains the sticky chrome.
+- `prefers-reduced-motion: reduce` is honored: video is hidden and a typographic "FENIA" wordmark replaces it at 64 px.
+- **Only mounted on the home page (`/`)** — `404.astro` and `dejanos-tu-testimonio.astro` are secondary pages, the `Nav` brand wordmark is enough identity there.
 
-The old `src/components/IntroLoader.jsx` is **deleted**. The React island it occupied is freed (one less hydration on first load).
+The old `src/components/IntroLoader.jsx` was deleted in v1. The slim `src/components/LogoBanner.astro` is deleted in v2. The React island freed in v1 stays freed in v2.
 
 ## Consequences
 
@@ -51,6 +56,7 @@ The old `src/components/IntroLoader.jsx` is **deleted**. The React island it occ
 
 ## Reference paths
 
-- Component: [`src/components/LogoBanner.astro`](../../src/components/LogoBanner.astro)
+- Component (v2): [`src/components/HeroVideo.astro`](../../src/components/HeroVideo.astro)
 - Asset: [`public/images/intro-fenia.mp4`](../../public/images/intro-fenia.mp4)
-- Mounted by: [`src/pages/index.astro`](../../src/pages/index.astro), [`src/pages/dejanos-tu-testimonio.astro`](../../src/pages/dejanos-tu-testimonio.astro)
+- Mounted by: [`src/pages/index.astro`](../../src/pages/index.astro) (only — secondary pages just show `Nav`).
+- Deleted in v2: `src/components/LogoBanner.astro` (was the v1 slim top banner).

@@ -1,0 +1,162 @@
+---
+// HeroVideo.astro — Centerpiece video showcase for the home page.
+//
+// Replaces the previous slim top "LogoBanner" band. Now the FENIA intro
+// video sits below the Nav as the first visual element in the body,
+// taking real space and acting as a brand showcase.
+//
+// Plays once on load, freezes on the final frame, becomes a static logo.
+// Respects `prefers-reduced-motion: reduce` (falls back to typographic
+// FENIA wordmark with no video).
+//
+// See ADR-007 (superseded section).
+---
+
+<section class="hero-video" aria-label="FENIA — logo">
+  <div class="hero-video-glow" aria-hidden="true"></div>
+
+  <div class="hero-video-stage">
+    <span class="hero-video-rule hero-video-rule-left" aria-hidden="true"></span>
+
+    <div class="hero-video-frame">
+      <video
+        class="hero-video-asset"
+        src="/images/intro-fenia.mp4"
+        autoplay
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+        tabindex="-1"
+      ></video>
+    </div>
+
+    <span class="hero-video-rule hero-video-rule-right" aria-hidden="true"></span>
+  </div>
+</section>
+
+<style>
+  .hero-video {
+    position: relative;
+    width: 100%;
+    background: #0B1A2E;
+    padding: 72px 24px 88px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    animation: hero-video-enter 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Ambient radial halo behind the video */
+  .hero-video-glow {
+    position: absolute;
+    inset: -10% 10%;
+    z-index: 0;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 180, 216, 0.14) 0%,
+      rgba(0, 180, 216, 0.04) 38%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  /* Subtle decorative ring of small dots */
+  .hero-video::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 0.6px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .hero-video-stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+    max-width: 980px;
+  }
+
+  /* Thin "horizon" lines flanking the video, fading out outwards */
+  .hero-video-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 180, 216, 0.30) 55%,
+      rgba(0, 180, 216, 0.50) 100%
+    );
+  }
+  .hero-video-rule-right {
+    background: linear-gradient(
+      to left,
+      transparent 0%,
+      rgba(0, 180, 216, 0.30) 55%,
+      rgba(0, 180, 216, 0.50) 100%
+    );
+  }
+
+  .hero-video-frame {
+    position: relative;
+    flex-shrink: 0;
+    /* Slight outline that picks up the brand cyan, very subtle */
+    border-radius: 18px;
+    padding: 0;
+  }
+
+  .hero-video-asset {
+    display: block;
+    height: 220px;
+    width: auto;
+    max-width: min(100%, 520px);
+    background: transparent;
+    /* Premium drop-shadow so the video reads as elevated over the page */
+    filter: drop-shadow(0 12px 36px rgba(0, 180, 216, 0.28))
+            drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+  }
+
+  @keyframes hero-video-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Tablet */
+  @media (max-width: 1024px) {
+    .hero-video { padding: 56px 20px 72px; }
+    .hero-video-stage { gap: 28px; }
+    .hero-video-asset { height: 180px; }
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .hero-video { padding: 44px 16px 60px; }
+    .hero-video-stage { gap: 16px; max-width: 100%; }
+    .hero-video-asset { height: 140px; max-width: 80vw; }
+    .hero-video-rule { display: none; }
+  }
+
+  /* Reduced motion: replace the video with a typographic wordmark */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video { animation: none; }
+    .hero-video-asset { display: none; }
+    .hero-video-frame::before {
+      content: "FENIA";
+      font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 64px;
+      letter-spacing: -0.04em;
+      color: #fff;
+      line-height: 1;
+      display: inline-block;
+    }
+  }
+</style>

@@ -22,8 +22,8 @@ The home page (`src/pages/index.astro`) is a single route composed of these comp
 
 | # | Component | File | Purpose |
 |---|-----------|------|---------|
-| 1 | `LogoBanner` | [`src/components/LogoBanner.astro`](../../src/components/LogoBanner.astro) | Top header band with the FENIA video logo. Plays once, freezes on final frame, then sits as a static logo. Replaces the legacy blocking IntroLoader — see [ADR-007](../adr/ADR-007-intro-video-as-logo-banner.md) |
-| 2 | `Nav` | [`src/components/Nav.astro`](../../src/components/Nav.astro) | Sticky top nav with anchors + WhatsApp CTA |
+| 1 | `Nav` | [`src/components/Nav.astro`](../../src/components/Nav.astro) | Sticky top nav with anchors + WhatsApp CTA |
+| 2 | `HeroVideo` | [`src/components/HeroVideo.astro`](../../src/components/HeroVideo.astro) | Centered video centerpiece below the Nav. Plays once, freezes on final frame, becomes a static logo with ambient cyan halo. Home-page only. See [ADR-007 v2](../adr/ADR-007-intro-video-as-logo-banner.md) |
 | 3 | `Hero` | [`src/components/Hero.astro`](../../src/components/Hero.astro) | Title + value prop + service cards + audience grid |
 | 4 | `Metodologia` | [`src/components/Metodologia.astro`](../../src/components/Metodologia.astro) | 4-pillar methodology breakdown |
 | 5 | `Servicios` | [`src/components/Servicios.jsx`](../../src/components/Servicios.jsx) | Interactive tab view of the 4 service lines (React island) |
