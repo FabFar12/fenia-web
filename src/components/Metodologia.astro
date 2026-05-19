@@ -52,30 +52,42 @@ import { methodologyPillars } from '../data/site';
         <h3 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">No es consultoría tradicional.<br/>No es solo tecnología.</h3>
         <p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.7);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Es un modelo integrador donde neurociencia, estrategia e IA convergen para producir resultados que ninguna disciplina aislada podría lograr.</p>
       </div>
-      <!-- Convergence diagram — animated nodes (ADR-013).
-           Each peripheral node drifts via its own keyframes inside a wrapping
-           <g> so the existing hover scale on .conv-node still works on top
-           of the drift translate. Center pulses. Lines breathe opacity. -->
-      <svg class="conv-diagram" width="140" height="140" viewBox="0 0 140 140" aria-label="Diagrama de convergencia: neurociencia, IA, estrategia y gestión emocional">
-        <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-        <circle cx="70" cy="70" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <!-- Atom-style convergence diagram (ADR-014).
+           Each electron lives inside a <g class="orbit-N"> whose CSS rotation
+           sweeps it around the nucleus (70, 70). Halo + core stacked per
+           electron for a soft glow. Nucleus pulses. Labels stay static. -->
+      <svg class="conv-diagram conv-atom" width="160" height="160" viewBox="0 0 140 140" aria-label="Diagrama atómico: 4 disciplinas orbitando el núcleo de FENIA">
+        <!-- Faint orbital guides -->
+        <circle class="atom-ring" cx="70" cy="70" r="50" fill="none" stroke="rgba(0,180,216,0.10)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <circle class="atom-ring" cx="70" cy="70" r="32" fill="none" stroke="rgba(0,180,216,0.08)" stroke-width="0.5" stroke-dasharray="2 4"/>
 
-        <line class="conv-line conv-line-1" x1="35" y1="35" x2="70" y2="70" stroke="#00B4D8" stroke-width="1" opacity="0.22"/>
-        <line class="conv-line conv-line-2" x1="105" y1="35" x2="70" y2="70" stroke="#00B4D8" stroke-width="1" opacity="0.22"/>
-        <line class="conv-line conv-line-3" x1="70" y1="120" x2="70" y2="70" stroke="#00B4D8" stroke-width="1" opacity="0.22"/>
-        <line class="conv-line conv-line-4 conv-line-coral" x1="20" y1="90" x2="70" y2="70" stroke="#E8573D" stroke-width="1" opacity="0.18"/>
+        <!-- Electrons. Each <g> rotates around (70,70); its child <circle> sits
+             at (70 + R, 70) so the rotation traces a circle of radius R. -->
+        <g class="orbit orbit-1">
+          <circle class="electron-halo" cx="92" cy="70" r="9" fill="#00B4D8"/>
+          <circle class="electron-core" cx="92" cy="70" r="4" fill="#00B4D8"><title>Neurociencias</title></circle>
+        </g>
+        <g class="orbit orbit-2">
+          <circle class="electron-halo" cx="106" cy="70" r="10" fill="#00B4D8"/>
+          <circle class="electron-core" cx="106" cy="70" r="4" fill="#00B4D8"><title>IA aplicada</title></circle>
+        </g>
+        <g class="orbit orbit-3">
+          <circle class="electron-halo" cx="120" cy="70" r="10" fill="#00B4D8"/>
+          <circle class="electron-core" cx="120" cy="70" r="4" fill="#00B4D8"><title>Estrategia</title></circle>
+        </g>
+        <g class="orbit orbit-4">
+          <circle class="electron-halo electron-halo-coral" cx="128" cy="70" r="9" fill="#E8573D"/>
+          <circle class="electron-core electron-core-coral" cx="128" cy="70" r="3.5" fill="#E8573D"><title>Gestión emocional</title></circle>
+        </g>
 
-        <g class="conv-drift conv-drift-1"><circle class="conv-node" cx="35" cy="35" r="5" fill="#00B4D8" opacity="0.6"><title>Neurociencias</title></circle></g>
-        <g class="conv-drift conv-drift-2"><circle class="conv-node" cx="105" cy="35" r="5" fill="#00B4D8" opacity="0.55"><title>IA aplicada</title></circle></g>
-        <g class="conv-drift conv-drift-3"><circle class="conv-node" cx="70" cy="120" r="5" fill="#00B4D8" opacity="0.5"><title>Estrategia</title></circle></g>
-        <g class="conv-drift conv-drift-4"><circle class="conv-node" cx="20" cy="90" r="4" fill="#E8573D" opacity="0.55"><title>Gestión emocional</title></circle></g>
+        <!-- Nucleus -->
+        <circle class="atom-nucleus-halo" cx="70" cy="70" r="14" fill="rgba(0,180,216,0.15)"/>
+        <circle class="atom-nucleus-core" cx="70" cy="70" r="6.5" fill="#1FE3FF"/>
 
-        <circle class="conv-center-halo" cx="70" cy="70" r="12" fill="rgba(0,180,216,0.12)"/>
-        <circle class="conv-center-core" cx="70" cy="70" r="6" fill="#00B4D8" opacity="0.85"/>
-
-        <text x="22" y="28" font-size="8" fill="rgba(255,255,255,0.5)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Neuro</text>
-        <text x="92" y="28" font-size="8" fill="rgba(255,255,255,0.5)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">IA</text>
-        <text x="54" y="136" font-size="8" fill="rgba(255,255,255,0.5)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Estrategia</text>
+        <!-- Static labels at conceptual corners -->
+        <text x="22" y="28" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Neuro</text>
+        <text x="92" y="28" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">IA</text>
+        <text x="54" y="136" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Estrategia</text>
       </svg>
       <!-- Differentiators (auto-cycle highlight; see ADR-012) -->
       <div class="conv-differentiators" style="display:flex;flex-direction:column;gap:16px;">

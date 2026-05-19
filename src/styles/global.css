@@ -577,98 +577,90 @@ body {
   animation: vt-slide-in-right 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Convergence diagram interactive nodes — Pack 2 + ADR-013 animations */
-.conv-node {
-  transition:
-    transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 240ms,
-    filter 240ms;
-  transform-box: fill-box;
-  transform-origin: center;
-  cursor: pointer;
+/* ─────────────────────────────────────────────────────────────────────────
+   Atom-style convergence diagram (ADR-014, supersedes ADR-013 §1).
+   - 4 <g class="orbit-N"> wrappers rotate around (70, 70) in user units of
+     the SVG viewBox via `transform-box: view-box`.
+   - Each electron <circle> inside the <g> sits at (70+R, 70); the rotation
+     sweeps it around the center.
+   - Mixed normal/reverse direction so the atom doesn't feel mechanical.
+   - Negative animation-delays distribute starting angles around the clock.
+   - :has(.electron-core:hover) pauses all orbits so users can target.
+   ───────────────────────────────────────────────────────────────────────── */
+.atom-ring {
+  /* faint dashed orbit guides */
+  animation: atom-ring-glow 5s ease-in-out infinite;
 }
-.conv-diagram:hover .conv-node {
-  opacity: 0.4;
-}
-.conv-diagram .conv-node:hover {
-  opacity: 1 !important;
-  transform: scale(1.4);
-  filter: drop-shadow(0 0 6px currentColor);
+@keyframes atom-ring-glow {
+  0%, 100% { stroke-opacity: 0.7; }
+  50%      { stroke-opacity: 1; }
 }
 
-/* ADR-013 — Convergence diagram is now alive.
-   Each peripheral node drifts inside a wrapping <g>; the center halo and
-   core both pulse; the 4 connecting lines breathe opacity. The drift on
-   <g> stacks below the hover scale on the inner <circle>, so the hover
-   interaction (added in Pack 2) still works. */
-.conv-drift {
-  transform-box: fill-box;
-  transform-origin: center;
-  /* Pause drift when any node is hovered so users can target steady */
+.orbit {
+  transform-box: view-box;
+  transform-origin: 70px 70px;
+  /* keep the inner <circle>s hit-test-able for hover */
+  pointer-events: visiblePainted;
 }
-.conv-diagram:has(.conv-node:hover) .conv-drift {
+.orbit-1 { animation: atom-spin 6.5s linear infinite 0s;     }
+.orbit-2 { animation: atom-spin 9.5s linear infinite -2.6s reverse; }
+.orbit-3 { animation: atom-spin 11.5s linear infinite -6s;   }
+.orbit-4 { animation: atom-spin 8s   linear infinite -2s reverse; }
+
+@keyframes atom-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pause every orbit when the user reaches for an electron */
+.conv-diagram:has(.electron-core:hover) .orbit {
   animation-play-state: paused;
 }
-.conv-drift-1 { animation: conv-drift-1 7.2s ease-in-out infinite; }
-.conv-drift-2 { animation: conv-drift-2 8.5s ease-in-out infinite -1.7s; }
-.conv-drift-3 { animation: conv-drift-3 9.1s ease-in-out infinite -3.1s; }
-.conv-drift-4 { animation: conv-drift-4 6.4s ease-in-out infinite -2.4s; }
 
-@keyframes conv-drift-1 {
-  0%, 100% { transform: translate(0, 0); }
-  25%      { transform: translate(2.5px, -2px); }
-  50%      { transform: translate(1px, -3.5px); }
-  75%      { transform: translate(-2px, -1px); }
+.electron-halo {
+  opacity: 0.18;
+  filter: blur(1px);
+  transition: opacity 240ms, r 240ms;
 }
-@keyframes conv-drift-2 {
-  0%, 100% { transform: translate(0, 0); }
-  33%      { transform: translate(-2.8px, 1.8px); }
-  66%      { transform: translate(-1.4px, -2.6px); }
-}
-@keyframes conv-drift-3 {
-  0%, 100% { transform: translate(0, 0); }
-  50%      { transform: translate(0, -3px); }
-}
-@keyframes conv-drift-4 {
-  0%, 100% { transform: translate(0, 0); }
-  40%      { transform: translate(2.7px, -1.5px); }
-  70%      { transform: translate(-1.2px, 2px); }
-}
+.electron-halo-coral { opacity: 0.22; }
 
-.conv-center-halo {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: conv-halo-pulse 3.2s ease-in-out infinite;
+.electron-core {
+  opacity: 0.95;
+  transition: opacity 240ms, r 240ms, filter 240ms;
+  cursor: pointer;
+  filter: drop-shadow(0 0 3px rgba(0, 180, 216, 0.6));
 }
-.conv-center-core {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: conv-core-pulse 2.6s ease-in-out infinite;
+.electron-core-coral {
+  filter: drop-shadow(0 0 3px rgba(232, 87, 61, 0.6));
 }
-@keyframes conv-halo-pulse {
-  0%, 100% { transform: scale(1);    opacity: 1;   }
-  50%      { transform: scale(1.45); opacity: 0.45; }
+.electron-core:hover {
+  r: 6;
+  filter: drop-shadow(0 0 8px currentColor);
 }
-@keyframes conv-core-pulse {
-  0%, 100% { transform: scale(1);    opacity: 0.85; }
-  50%      { transform: scale(1.18); opacity: 1;    }
+.electron-core-coral:hover {
+  filter: drop-shadow(0 0 8px #E8573D);
 }
+.electron-core:hover + title,
+.orbit:hover .electron-halo { opacity: 0.35; }
 
-.conv-line { animation: conv-line-pulse 4s ease-in-out infinite; }
-.conv-line-1 { animation-delay: 0s;    }
-.conv-line-2 { animation-delay: -0.7s; }
-.conv-line-3 { animation-delay: -1.4s; }
-.conv-line-4 { animation-delay: -2.1s; }
-@keyframes conv-line-pulse {
-  0%, 100% { opacity: 0.22; }
-  50%      { opacity: 0.42; }
+/* Nucleus — same idiom as before but with brighter core for Bloom-like glow */
+.atom-nucleus-halo {
+  transform-box: view-box;
+  transform-origin: 70px 70px;
+  animation: atom-nucleus-halo 3.2s ease-in-out infinite;
 }
-.conv-line-coral {
-  animation: conv-line-pulse-coral 4s ease-in-out infinite -1s;
+.atom-nucleus-core {
+  transform-box: view-box;
+  transform-origin: 70px 70px;
+  animation: atom-nucleus-core 2.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.7));
 }
-@keyframes conv-line-pulse-coral {
-  0%, 100% { opacity: 0.18; }
-  50%      { opacity: 0.34; }
+@keyframes atom-nucleus-halo {
+  0%, 100% { transform: scale(1);   opacity: 1;    }
+  50%      { transform: scale(1.5); opacity: 0.35; }
+}
+@keyframes atom-nucleus-core {
+  0%, 100% { transform: scale(1);    opacity: 0.95; }
+  50%      { transform: scale(1.22); opacity: 0.7;  }
 }
 
 /* Reduced motion — short-circuit everything */
@@ -696,9 +688,9 @@ body {
   .hero-svc-float { animation: none; }
   .meth-pillar, .meth-pillar-num, .meth-pillar-dot, .meth-pillar-rule { transition: none; }
   .conv-diff-dot, .conv-diff-text { transition: none; }
-  /* ADR-013 reduced-motion overrides */
-  .conv-drift, .conv-center-halo, .conv-center-core,
-  .conv-line, .conv-line-coral { animation: none !important; }
+  /* ADR-013 / ADR-014 reduced-motion overrides */
+  .orbit, .atom-ring, .atom-nucleus-halo, .atom-nucleus-core
+    { animation: none !important; }
   .svc-bullet-dot, .svc-bullet-text { transition: none; }
 }
 
