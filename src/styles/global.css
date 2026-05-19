@@ -81,15 +81,17 @@ body {
   );
 }
 
-/* ADR-017 (rev. — stronger) — Scroll parallax on the Hero 3D layer.
-   The neural network translates down AND scales down as you scroll, so it
-   visibly recedes into depth — "looking through a window". Implemented as
-   a CSS scroll-driven animation: it runs entirely on the compositor, no
-   JS scroll handler (keeps the scroll perf gains from ADR-012).
-   Browsers without `animation-timeline` just render it static — graceful. */
+/* ADR-017 (rev.2) — Scroll parallax on the Hero 3D layer.
+   IMPORTANT: translate only — NO scale(). Scaling a live-rendering WebGL
+   <canvas> forces the compositor to resample its bitmap on every scroll
+   tick → visible jank. A pure translateY is a cheap compositor-only move
+   (no resample, no repaint) so it stays smooth at any distance. We make
+   it noticeable by using a large translate instead of a scale.
+   Runs as a CSS scroll-driven animation: no JS scroll handler. Browsers
+   without `animation-timeline` render it static — graceful. */
 @keyframes hero-3d-parallax {
-  from { transform: translateY(0)     scale(1);    }
-  to   { transform: translateY(150px) scale(0.84); }
+  from { transform: translateY(0);     }
+  to   { transform: translateY(170px); }
 }
 .hero-3d-layer {
   animation: hero-3d-parallax linear both;
