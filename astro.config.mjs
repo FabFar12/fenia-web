@@ -10,5 +10,11 @@ export default defineConfig({
   integrations: [react(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // The 3D neural network island bundles three.js (~220 KB gzipped).
+      // Raise the warning threshold so we don't get noisy build output.
+      // See docs/adr/ADR-008-animations-and-3d-neural-network.md
+      chunkSizeWarningLimit: 1024,
+    },
   },
 });

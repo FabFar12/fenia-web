@@ -193,7 +193,10 @@ export type Service = {
   subtitle: string;
   body: string;
   bullets: readonly string[];
+  /** Canonical audiences (typed). Used for filtering/analytics. */
   audiences: readonly AudienceKey[];
+  /** Optional display-only labels. Can include non-canonical categories (e.g. "Directivos"). Falls back to titlecased audiences if absent. */
+  audienceLabels?: readonly string[];
 };
 
 export const services: readonly Service[] = [
@@ -210,6 +213,7 @@ export const services: readonly Service[] = [
       'Optimización de toma de decisiones a nivel directivo',
     ],
     audiences: ['empresas'],
+    audienceLabels: ['Empresas', 'Directivos'],
   },
   {
     slug: 'capacitacion',
@@ -224,6 +228,7 @@ export const services: readonly Service[] = [
       'Workshops intensivos y desarrollo continuo',
     ],
     audiences: ['profesionales', 'empresas', 'emprendedores'],
+    audienceLabels: ['Profesionales', 'Empresas', 'Emprendedores'],
   },
   {
     slug: 'ia-aplicada',
@@ -238,6 +243,7 @@ export const services: readonly Service[] = [
       'Estrategia de adopción gradual y medible',
     ],
     audiences: ['empresas', 'emprendedores', 'profesionales'],
+    audienceLabels: ['Empresas', 'Emprendedores', 'Profesionales'],
   },
   {
     slug: 'productos',
@@ -252,6 +258,7 @@ export const services: readonly Service[] = [
       'Módulos de bienestar organizacional',
     ],
     audiences: ['profesionales', 'emprendedores'],
+    audienceLabels: ['Profesionales', 'Emprendedores'],
   },
 ];
 

@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LogoBanner from '../components/LogoBanner.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { whatsapp } from '../data/site';
+
+const waUrl = whatsapp.url('Hola FENIA, vi que un link estaba roto y me gustaría consultar');
+---
+
+<Layout
+  title="Página no encontrada — FENIA"
+  description="La página que buscás no existe. Volvé al inicio o escribinos por WhatsApp."
+>
+  <LogoBanner />
+  <Nav />
+
+  <main style="background:#0B1A2E;min-height:75vh;display:flex;align-items:center;justify-content:center;">
+    <section style="max-width:560px;padding:80px 32px;text-align:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;">
+
+      <div class="reveal" style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);margin-bottom:28px;">
+        <div style="width:5px;height:5px;border-radius:50%;background:#E8573D;"></div>
+        <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.1em;">Error 404</span>
+      </div>
+
+      <h1 class="reveal" style="font-size:48px;font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin:0 0 16px 0;">
+        Esta página <span class="gradient-anim">no existe</span>
+      </h1>
+
+      <p class="reveal" style="font-size:16px;line-height:1.7;color:rgba(255,255,255,0.6);margin:0 0 40px 0;">
+        Es posible que el enlace esté desactualizado o que escribiste mal la dirección.
+        Podés volver al inicio o contarnos qué buscabas y te ayudamos.
+      </p>
+
+      <div class="reveal" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <a href="/" style="font-size:14.5px;font-weight:600;padding:14px 30px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);color:#fff;text-decoration:none;">
+          ← Volver al inicio
+        </a>
+        <a class="cta-glow" href={waUrl} target="_blank" rel="noopener noreferrer" style="font-size:14.5px;font-weight:600;padding:14px 30px;border-radius:10px;border:none;background:#E8573D;color:#fff;box-shadow:0 4px 20px rgba(232,87,61,0.3);text-decoration:none;">
+          💬 Escribinos por WhatsApp
+        </a>
+      </div>
+
+    </section>
+  </main>
+
+  <Footer />
+</Layout>

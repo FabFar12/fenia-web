@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
-import { siteMeta } from '../data/site';
+import { siteMeta, whatsapp, socials } from '../data/site';
 
 interface Props {
   title?: string;
@@ -13,6 +13,34 @@ const {
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, siteMeta.prodUrl).toString();
+
+// Schema.org structured data — Organization + ProfessionalService.
+// Improves how FENIA appears in Google's Knowledge Panel and rich results.
+// See docs/adr/ADR-009-seo-structured-data.md
+const sameAsLinks = [socials.instagram.url, socials.linkedin.url, socials.youtube.url].filter(
+  (u): u is string => typeof u === 'string' && u.length > 0,
+);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${siteMeta.prodUrl}/#organization`,
+  name: siteMeta.name,
+  alternateName: siteMeta.fullName,
+  description: siteMeta.description,
+  url: siteMeta.prodUrl,
+  telephone: `+${whatsapp.phone}`,
+  inLanguage: siteMeta.locale,
+  areaServed: { '@type': 'Country', name: 'Argentina' },
+  knowsAbout: [
+    'Neurociencias aplicadas',
+    'Pensamiento estratégico',
+    'Inteligencia artificial aplicada',
+    'Gestión emocional',
+    'Liderazgo',
+    'Bienestar organizacional',
+  ],
+  ...(sameAsLinks.length > 0 ? { sameAs: sameAsLinks } : {}),
+};
 ---
 
 <!doctype html>
@@ -39,6 +67,9 @@ const canonicalUrl = new URL(Astro.url.pathname, siteMeta.prodUrl).toString();
     <meta name="twitter:description" content={description} />
 
     <title>{title}</title>
+
+    <!-- Schema.org structured data. See ADR-009. -->
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
 
     <!-- Astro View Transitions — smooth cross-page transitions. See ADR-008. -->
     <ClientRouter />

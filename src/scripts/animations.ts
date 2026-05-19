@@ -102,9 +102,15 @@ function initScrollSpy() {
   if (sections.length === 0 || !('IntersectionObserver' in window)) return;
 
   const setActive = (id: string) => {
-    navLinks.forEach((l) => l.classList.remove('nav-link-active'));
+    navLinks.forEach((l) => {
+      l.classList.remove('nav-link-active');
+      l.removeAttribute('aria-current');
+    });
     const matching = document.querySelector(`.nav-link[href="#${id}"]`);
-    matching?.classList.add('nav-link-active');
+    if (matching) {
+      matching.classList.add('nav-link-active');
+      matching.setAttribute('aria-current', 'location');
+    }
   };
 
   const spy = new IntersectionObserver(
