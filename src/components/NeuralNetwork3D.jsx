@@ -23,7 +23,7 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 
 const NODES = [
   { pos: [-2.1, 1.2, 0.2], size: 0.06 },
@@ -209,26 +209,47 @@ function Scene() {
 }
 
 export default function NeuralNetwork3D() {
+  // ADR-012 — Pause `useFrame` (and therefore the GPU + Bloom pipeline) once
+  // the Hero is scrolled out of the viewport. Switching `frameloop` to
+  // 'never' suspends the render loop entirely; switching back to 'always'
+  // resumes it. Resolves the scroll-lag bug reported on 2026-05-19 — when
+  // the 3D scene was always running it competed with the main thread on
+  // every scroll tick.
+  const wrapperRef = useRef(null);
+  const [inView, setInView] = useState(true);
+
+  useEffect(() => {
+    if (!wrapperRef.current || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0, rootMargin: '20% 0px 20% 0px' },
+    );
+    io.observe(wrapperRef.current);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <Canvas
-      camera={{ position: [0, 0, 5.4], fov: 50 }}
-      dpr={[1, 2]}
-      style={{ width: '100%', height: '100%', display: 'block', background: 'transparent', pointerEvents: 'none' }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      events={undefined}
-    >
-      <Scene />
-      {/* v2.1 — Bloom post-processing for premium glow. Reduced-motion users
-          still get the effect rendered statically; perf cost is negligible. */}
-      <EffectComposer enableNormalPass={false}>
-        <Bloom
-          intensity={1.1}
-          luminanceThreshold={0.35}
-          luminanceSmoothing={0.55}
-          mipmapBlur
-          radius={0.7}
-        />
-      </EffectComposer>
-    </Canvas>
+    <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
+      <Canvas
+        camera={{ position: [0, 0, 5.4], fov: 50 }}
+        dpr={[1, 2]}
+        frameloop={inView ? 'always' : 'never'}
+        style={{ width: '100%', height: '100%', display: 'block', background: 'transparent', pointerEvents: 'none' }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        events={undefined}
+      >
+        <Scene />
+        {/* v2.1 — Bloom post-processing for premium glow. */}
+        <EffectComposer enableNormalPass={false}>
+          <Bloom
+            intensity={1.1}
+            luminanceThreshold={0.35}
+            luminanceSmoothing={0.55}
+            mipmapBlur
+            radius={0.7}
+          />
+        </EffectComposer>
+      </Canvas>
+    </div>
   );
 }

@@ -1,9 +1,25 @@
 ---
 // Hero.astro — Sección hero principal de FENIA
-import { whatsapp, heroStats, audiences } from '../data/site';
+import { whatsapp, heroStats, audiences, services } from '../data/site';
 import NeuralNetwork3D from './NeuralNetwork3D.jsx';
 const waUrl = whatsapp.url();
 const accentColor = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573D');
+
+// Right-column floating cards: one per service line.
+// Positions hand-tuned to recreate the scattered visual rhythm of the original 4 cards.
+const cardPositions = [
+  { top: 0,   left: 20,  highlight: false },
+  { top: 60,  left: 260, highlight: false },
+  { top: 190, left: 40,  highlight: true  },
+  { top: 250, left: 280, highlight: false },
+];
+const heroServiceCards = services.map((s, i) => ({
+  slug: s.slug,
+  icon: s.icon,
+  title: s.title,
+  subtitle: s.subtitle,
+  pos: cardPositions[i] ?? cardPositions[0],
+}));
 ---
 
 <section id="inicio" style="background:#0B1A2E;position:relative;overflow:hidden;">
@@ -62,60 +78,36 @@ const accentColor = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573
       </div>
     </div>
 
-    <!-- Right: Service cards -->
+    <!-- Right: Service cards (float-animated + tilt on hover + click → corresponding Servicios tab) -->
     <div style="position:relative;z-index:2;height:420px;">
-      <!-- Card 1: Consultoría -->
-      <div class="service-card" style="position:absolute;top:0;left:20px;background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 22px;width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.4);margin-bottom:14px;">◇</div>
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 0 6px 0;">Consultoría estratégica</h3>
-        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.4);margin:0;">Diagnóstico, diseño e implementación de soluciones organizacionales</p>
-      </div>
-      <!-- Card 2: Capacitación -->
-      <div class="service-card" style="position:absolute;top:60px;left:260px;background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 22px;width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.4);margin-bottom:14px;">△</div>
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 0 6px 0;">Capacitación</h3>
-        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.4);margin:0;">Liderazgo, gestión emocional y pensamiento estratégico</p>
-      </div>
-      <!-- Card 3: IA aplicada (accent) -->
-      <div class="service-card" style="position:absolute;top:190px;left:40px;background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(0,180,216,0.2);border-radius:16px;padding:24px 22px;width:220px;box-shadow:0 8px 32px rgba(0,180,216,0.08);">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,180,216,0.1);border:1px solid rgba(0,180,216,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;color:#00B4D8;margin-bottom:14px;">○</div>
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 0 6px 0;">IA aplicada</h3>
-        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.4);margin:0;">Integración de herramientas de inteligencia artificial en procesos reales</p>
-      </div>
-      <!-- Card 4: Productos -->
-      <div class="service-card" style="position:absolute;top:250px;left:280px;background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 22px;width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.4);margin-bottom:14px;">□</div>
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 0 6px 0;">Productos digitales</h3>
-        <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.4);margin:0;">Recursos descargables listos para aplicar en tu práctica</p>
-      </div>
+      {heroServiceCards.map((card, i) => (
+        <a
+          class="hero-svc-float"
+          data-service-slug={card.slug}
+          href="#servicios"
+          style={`position:absolute;top:${card.pos.top}px;left:${card.pos.left}px;text-decoration:none;display:block;animation-delay:${i * 0.6}s;`}
+          aria-label={`Ir al servicio: ${card.title}`}
+        >
+          <div
+            class="hero-svc-card tilt-card"
+            style={`background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid ${card.pos.highlight ? 'rgba(0,180,216,0.2)' : 'rgba(255,255,255,0.06)'};border-radius:16px;padding:24px 22px;width:220px;box-shadow:${card.pos.highlight ? '0 8px 32px rgba(0,180,216,0.08)' : '0 4px 20px rgba(0,0,0,0.15)'};`}
+          >
+            <div
+              class="hero-svc-icon"
+              aria-hidden="true"
+              style={`width:36px;height:36px;border-radius:10px;background:${card.pos.highlight ? 'rgba(0,180,216,0.1)' : 'rgba(255,255,255,0.04)'};border:1px solid ${card.pos.highlight ? 'rgba(0,180,216,0.25)' : 'rgba(255,255,255,0.08)'};display:flex;align-items:center;justify-content:center;font-size:16px;color:${card.pos.highlight ? '#00B4D8' : 'rgba(255,255,255,0.45)'};margin-bottom:14px;`}
+            >{card.icon}</div>
+            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 0 6px 0;">{card.title}</h3>
+            <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.55);margin:0;">{card.subtitle}</p>
+          </div>
+        </a>
+      ))}
       <!-- Dashed connection lines between cards -->
-      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;" aria-hidden="true">
         <line x1="140" y1="95" x2="270" y2="80" stroke="#00B4D8" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="4 4"/>
         <line x1="160" y1="200" x2="160" y2="210" stroke="#00B4D8" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="4 4"/>
         <line x1="380" y1="175" x2="400" y2="260" stroke="#00B4D8" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="4 4"/>
       </svg>
-    </div>
-  </div>
-
-  <!-- Pillars bar -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 48px;">
-    <div style="border-top:1px solid rgba(255,255,255,0.06);padding:28px 0;display:flex;justify-content:space-between;align-items:center;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:14px;color:rgba(255,255,255,0.15);">⬡</span>
-        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.3);font-family:'Plus Jakarta Sans',sans-serif;">Pensamiento estratégico</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:14px;color:#00B4D8;">◈</span>
-        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);font-family:'Plus Jakarta Sans',sans-serif;">Neuro-inteligencia aplicada</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:14px;color:rgba(255,255,255,0.15);">⬢</span>
-        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.3);font-family:'Plus Jakarta Sans',sans-serif;">Gestión emocional</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:14px;color:rgba(255,255,255,0.15);">◉</span>
-        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.3);font-family:'Plus Jakarta Sans',sans-serif;">Impacto real y escalable</span>
-      </div>
     </div>
   </div>
 
@@ -139,3 +131,18 @@ const accentColor = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573
     </div>
   </div>
 </section>
+
+<script>
+  // Click on a Hero floating service card → dispatch a custom event that
+  // Servicios.jsx listens to in order to select the matching tab. The href
+  // anchor (`#servicios`) handles the smooth scroll to the section; this
+  // event picks the right tab on arrival.
+  document.querySelectorAll('.hero-svc-float[data-service-slug]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const slug = (el as HTMLElement).dataset.serviceSlug;
+      if (slug) {
+        window.dispatchEvent(new CustomEvent('fenia:select-service', { detail: { slug } }));
+      }
+    });
+  });
+</script>

@@ -96,17 +96,22 @@ body {
   50%      { background-position: 100% 50%; }
 }
 
-/* Scroll progress bar (fixed at viewport top) */
+/* Scroll progress bar (fixed at viewport top).
+   v1.1 — Uses `transform: scaleX(...)` instead of `width: ...%` so updates
+   stay on the compositor layer and don't trigger layout reflows during
+   scroll. Resolves the perceived scroll lag reported on 2026-05-19. */
 #scroll-progress {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   height: 2px;
-  width: 0%;
   background: linear-gradient(90deg, #00B4D8 0%, #00D4AA 100%);
   z-index: 200;
   pointer-events: none;
-  transition: width 60ms linear;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
   box-shadow: 0 0 8px rgba(0, 180, 216, 0.5);
 }
 
@@ -171,6 +176,141 @@ body {
     0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Hero floating service cards (ADR-012):
+   - subtle bob-up animation, staggered via animation-delay set inline
+   - tilt-card class on the inner element handles the rotateX/Y on hover
+   - clicking the anchor fires `fenia:select-service` (see Hero.astro <script>) */
+.hero-svc-float {
+  animation: hero-svc-bob 5s ease-in-out infinite;
+  display: block;
+}
+.hero-svc-card {
+  transition: border-color 240ms, box-shadow 240ms;
+}
+.hero-svc-float:hover .hero-svc-card {
+  border-color: rgba(0, 180, 216, 0.35) !important;
+  box-shadow: 0 12px 36px rgba(0, 180, 216, 0.16), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+.hero-svc-float:hover .hero-svc-icon {
+  color: #00B4D8 !important;
+  background: rgba(0, 180, 216, 0.12) !important;
+  border-color: rgba(0, 180, 216, 0.3) !important;
+}
+@keyframes hero-svc-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* Methodology pillars (ADR-012) — hover + auto-cycle interactivity.
+   Default: all subdued. JS adds `.is-active` to one pillar at a time on a
+   timer; hover overrides (CSS specificity) to show the hovered pillar. */
+.meth-pillar {
+  transition: opacity 280ms, transform 280ms;
+}
+.meth-pillars:hover .meth-pillar:not(:hover) {
+  opacity: 0.45;
+}
+.meth-pillar-num {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+  transition: background 280ms, border-color 280ms, color 280ms,
+              box-shadow 280ms, transform 280ms;
+}
+.meth-pillar-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid #0B1A2E;
+  transition: background 280ms;
+}
+.meth-pillar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px 0;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+}
+.meth-pillar-body {
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+}
+.meth-pillar-rule {
+  width: 32px;
+  height: 2px;
+  border-radius: 1px;
+  background: #00B4D8;
+  margin-top: 20px;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: opacity 320ms, transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.meth-pillar.is-active .meth-pillar-num,
+.meth-pillar:hover .meth-pillar-num {
+  background: rgba(0, 180, 216, 0.12);
+  border-color: rgba(0, 180, 216, 0.32);
+  color: #00B4D8;
+  box-shadow: 0 6px 24px rgba(0, 180, 216, 0.12);
+  transform: scale(1.04);
+}
+.meth-pillar.is-active .meth-pillar-dot,
+.meth-pillar:hover .meth-pillar-dot {
+  background: #00B4D8;
+}
+.meth-pillar.is-active .meth-pillar-rule,
+.meth-pillar:hover .meth-pillar-rule {
+  opacity: 0.7;
+  transform: scaleX(1);
+}
+
+/* Convergence differentiators (ADR-012) — auto-cycle highlight */
+.conv-diff {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.conv-diff-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  transition: background 320ms, box-shadow 320ms, transform 320ms;
+}
+.conv-diff-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+  transition: color 320ms;
+}
+.conv-diff.is-active .conv-diff-dot {
+  background: #00B4D8;
+  transform: scale(1.4);
+  box-shadow: 0 0 12px rgba(0, 180, 216, 0.55);
+}
+.conv-diff.is-active .conv-diff-text {
+  color: rgba(255, 255, 255, 0.95);
+}
+
 /* v2.5 — Custom View Transitions (slide instead of crossfade).
    Astro ClientRouter uses the View Transitions API; we override the default
    crossfade with a subtle slide for forward navigation. */
@@ -228,6 +368,10 @@ body {
   .tilt-card { transform: none !important; transition: none; }
   .tilt-card:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  /* ADR-012 reduced-motion overrides */
+  .hero-svc-float { animation: none; }
+  .meth-pillar, .meth-pillar-num, .meth-pillar-dot, .meth-pillar-rule { transition: none; }
+  .conv-diff-dot, .conv-diff-text { transition: none; }
 }
 
 /* ── RESPONSIVE OVERRIDES ── */

@@ -149,6 +149,8 @@ function initScrollSpy() {
   sections.forEach((s) => spy.observe(s));
 }
 
+// Uses transform: scaleX(fraction) instead of width: %% to avoid layout
+// reflows during scroll. Resolves the scroll-lag bug reported 2026-05-19.
 function initScrollProgress() {
   const bar = document.getElementById('scroll-progress');
   if (!bar) return;
@@ -156,8 +158,8 @@ function initScrollProgress() {
   const update = () => {
     const scrolled = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = max > 0 ? Math.min((scrolled / max) * 100, 100) : 0;
-    bar.style.width = `${pct}%`;
+    const frac = max > 0 ? Math.min(scrolled / max, 1) : 0;
+    bar.style.transform = `scaleX(${frac})`;
     ticking = false;
   };
   const onScroll = () => {
@@ -170,44 +172,47 @@ function initScrollProgress() {
   update();
 }
 
-function initCtaGlow() {
-  const ctas = document.querySelectorAll<HTMLElement>('.cta-glow');
-  if (ctas.length === 0 || REDUCED) return;
-  const radius = 260;
-  const onMove = (e: MouseEvent) => {
-    ctas.forEach((cta) => {
+// Shared mousemove handler for both `.cta-glow` (proximity halo intensity)
+// and `.cta-magnetic` (proximity translate). Single rAF-throttled pump
+// avoids running heavy DOM reads twice per mousemove frame and keeps the
+// main thread free during scroll — see ADR-012 perf section.
+function initCtaInteractions() {
+  const glowCtas = document.querySelectorAll<HTMLElement>('.cta-glow');
+  const magneticCtas = document.querySelectorAll<HTMLElement>('.cta-magnetic');
+  if (glowCtas.length === 0 && magneticCtas.length === 0) return;
+  if (REDUCED) return;
+
+  const GLOW_RADIUS = 260;
+  const MAG_RADIUS = 110;
+  const MAG_MAX = 7;
+
+  let pendingX = 0;
+  let pendingY = 0;
+  let queued = false;
+
+  const apply = () => {
+    queued = false;
+    // .cta-glow — intensity custom prop
+    glowCtas.forEach((cta) => {
       const rect = cta.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
+      const dx = pendingX - cx;
+      const dy = pendingY - cy;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const intensity = Math.max(0, 1 - dist / radius);
+      const intensity = Math.max(0, 1 - dist / GLOW_RADIUS);
       cta.style.setProperty('--glow', String(intensity));
     });
-  };
-  window.addEventListener('mousemove', onMove, { passive: true });
-}
-
-// v2.4 — Magnetic CTAs.
-// Primary buttons translate up to MAX_OFFSET px toward the cursor when it
-// enters their proximity radius. Stripe / Linear use this for tactile feel.
-function initMagneticCtas() {
-  const ctas = document.querySelectorAll<HTMLElement>('.cta-magnetic');
-  if (ctas.length === 0 || REDUCED) return;
-  const RADIUS = 110;
-  const MAX_OFFSET = 7;
-  // Reset transforms tracked per element so we can blend smoothly.
-  const onMove = (e: MouseEvent) => {
-    ctas.forEach((cta) => {
+    // .cta-magnetic — translate custom props
+    magneticCtas.forEach((cta) => {
       const rect = cta.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
+      const dx = pendingX - cx;
+      const dy = pendingY - cy;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < RADIUS) {
-        const factor = (1 - dist / RADIUS) * (MAX_OFFSET / RADIUS);
+      if (dist < MAG_RADIUS) {
+        const factor = (1 - dist / MAG_RADIUS) * (MAG_MAX / MAG_RADIUS);
         cta.style.setProperty('--mx', `${dx * factor}px`);
         cta.style.setProperty('--my', `${dy * factor}px`);
       } else {
@@ -216,7 +221,80 @@ function initMagneticCtas() {
       }
     });
   };
+
+  const onMove = (e: MouseEvent) => {
+    pendingX = e.clientX;
+    pendingY = e.clientY;
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(apply);
+    }
+  };
   window.addEventListener('mousemove', onMove, { passive: true });
+}
+
+// ADR-012 — Auto-cycle highlight for a list of items.
+// One item at a time gets `.is-active`; cycle pauses while pointer is over
+// the container so users have time to read. Visible only when the container
+// is in viewport (saves CPU + avoids running while user is off-section).
+function initAutoCycle(
+  containerSelector: string,
+  itemSelector: string,
+  intervalMs: number,
+) {
+  const container = document.querySelector<HTMLElement>(containerSelector);
+  if (!container) return;
+  const items = Array.from(container.querySelectorAll<HTMLElement>(itemSelector));
+  if (items.length === 0) return;
+
+  const setActive = (idx: number) => {
+    items.forEach((el, i) => el.classList.toggle('is-active', i === idx));
+  };
+
+  if (REDUCED) {
+    setActive(0);
+    return;
+  }
+
+  let active = 0;
+  let paused = false;
+  let inView = false;
+  let timerId: number | null = null;
+
+  const tick = () => {
+    if (paused || !inView) return;
+    active = (active + 1) % items.length;
+    setActive(active);
+  };
+  const start = () => {
+    if (timerId !== null) return;
+    timerId = window.setInterval(tick, intervalMs);
+  };
+  const stop = () => {
+    if (timerId === null) return;
+    window.clearInterval(timerId);
+    timerId = null;
+  };
+
+  container.addEventListener('mouseenter', () => { paused = true; });
+  container.addEventListener('mouseleave', () => { paused = false; });
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) start();
+        else stop();
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(container);
+  } else {
+    inView = true;
+    start();
+  }
+
+  setActive(active);
 }
 
 // v2.7 — Tilt cards.
@@ -265,10 +343,14 @@ function initAll() {
   initStatCounters();
   initScrollSpy();
   initScrollProgress();
-  initCtaGlow();
-  initMagneticCtas();
+  // Single shared mousemove pump for glow + magnetic (replaces the two
+  // separate handlers that fought over the main thread during scroll).
+  initCtaInteractions();
   initTiltCards();
   initMobileNavClose();
+  // ADR-012 — Auto-cycle highlights
+  initAutoCycle('.meth-pillars', '.meth-pillar', 4200);
+  initAutoCycle('.conv-differentiators', '.conv-diff', 3200);
 }
 
 if (document.readyState === 'loading') {

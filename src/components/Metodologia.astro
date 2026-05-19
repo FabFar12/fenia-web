@@ -27,30 +27,23 @@ import { methodologyPillars } from '../data/site';
       </p>
     </div>
 
-    <!-- Pillars -->
-    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;">
+    <!-- Pillars (auto-cycle highlight + hover override; see ADR-012) -->
+    <div class="meth-pillars reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;">
       <div style="position:absolute;top:52px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,180,216,0.15),rgba(0,180,216,0.15),transparent);z-index:0;"></div>
 
-      {methodologyPillars.map((pillar) => {
-        const numBg = pillar.highlight ? 'rgba(0,180,216,0.1)' : 'rgba(255,255,255,0.03)';
-        const numBorder = pillar.highlight ? 'rgba(0,180,216,0.25)' : 'rgba(255,255,255,0.06)';
-        const numColor = pillar.highlight ? '#00B4D8' : 'rgba(255,255,255,0.25)';
-        const dotBg = pillar.highlight ? '#00B4D8' : 'rgba(255,255,255,0.1)';
-        return (
-          <div class="reveal" style="padding:0 20px;position:relative;z-index:1;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-              <div style={`width:44px;height:44px;border-radius:12px;background:${numBg};border:1px solid ${numBorder};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:${numColor};font-family:'Plus Jakarta Sans',sans-serif;position:relative;`}>
-                {pillar.num}<div style={`position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:${dotBg};border:2px solid #0B1A2E;`}></div>
-              </div>
+      {methodologyPillars.map((pillar, i) => (
+        <div class="meth-pillar reveal" data-pillar-index={i} style="padding:0 20px;position:relative;z-index:1;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+            <div class="meth-pillar-num">
+              {pillar.num}
+              <div class="meth-pillar-dot"></div>
             </div>
-            <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{pillar.title}</h3>
-            <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">{pillar.body}</p>
-            {pillar.highlight && (
-              <div style="width:32px;height:2px;border-radius:1px;background:#00B4D8;margin-top:20px;opacity:0.6;"></div>
-            )}
           </div>
-        );
-      })}
+          <h3 class="meth-pillar-title">{pillar.title}</h3>
+          <p class="meth-pillar-body">{pillar.body}</p>
+          <div class="meth-pillar-rule"></div>
+        </div>
+      ))}
     </div>
 
     <!-- Integration block -->
@@ -72,12 +65,12 @@ import { methodologyPillars } from '../data/site';
         <text x="92" y="28" font-size="8" fill="rgba(255,255,255,0.3)" font-family="'Plus Jakarta Sans',sans-serif" font-weight="600">IA</text>
         <text x="54" y="136" font-size="8" fill="rgba(255,255,255,0.3)" font-family="'Plus Jakarta Sans',sans-serif" font-weight="600">Estrategia</text>
       </svg>
-      <!-- Differentiators -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div style="display:flex;align-items:center;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:#00B4D8;flex-shrink:0;"></div><span style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);font-family:'Plus Jakarta Sans',sans-serif;">Diagnóstico antes de solución</span></div>
-        <div style="display:flex;align-items:center;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25);flex-shrink:0;"></div><span style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);font-family:'Plus Jakarta Sans',sans-serif;">Evidencia neurocientífica real</span></div>
-        <div style="display:flex;align-items:center;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25);flex-shrink:0;"></div><span style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);font-family:'Plus Jakarta Sans',sans-serif;">IA como potenciador, no reemplazo</span></div>
-        <div style="display:flex;align-items:center;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25);flex-shrink:0;"></div><span style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);font-family:'Plus Jakarta Sans',sans-serif;">Métricas de impacto concretas</span></div>
+      <!-- Differentiators (auto-cycle highlight; see ADR-012) -->
+      <div class="conv-differentiators" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Diagnóstico antes de solución</span></div>
+        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Evidencia neurocientífica real</span></div>
+        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">IA como potenciador, no reemplazo</span></div>
+        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Métricas de impacto concretas</span></div>
       </div>
     </div>
   </div>

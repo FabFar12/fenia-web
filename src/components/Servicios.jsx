@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { whatsapp, services } from "../data/site";
 
 const P = { cyan: "#00B4D8", coral: "#E8573D" };
@@ -9,6 +9,20 @@ export default function Servicios() {
   const [active, setActive] = useState(0);
   const a = services[active];
   const audienceLabels = a.audienceLabels ?? a.audiences.map(titleCase);
+
+  // Listen for the cross-component event fired by Hero floating service cards.
+  // When a user clicks one of those cards, this component selects the matching
+  // tab so the corresponding service shows up after the smooth scroll.
+  useEffect(() => {
+    const handler = (e) => {
+      const slug = e?.detail?.slug;
+      if (!slug) return;
+      const idx = services.findIndex((s) => s.slug === slug);
+      if (idx >= 0) setActive(idx);
+    };
+    window.addEventListener("fenia:select-service", handler);
+    return () => window.removeEventListener("fenia:select-service", handler);
+  }, []);
 
   return (
     <section id="servicios" style={{ background:"#0F2138",position:"relative",overflow:"hidden",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
