@@ -744,23 +744,17 @@ body {
   #inicio > div:first-child > div:last-child {
     display: none !important;
   }
-  #inicio > div:nth-child(2) > div {
-    padding: 0 20px !important;
-  }
-  #inicio > div:nth-child(2) > div > div {
-    flex-wrap: wrap !important;
-    gap: 16px !important;
-    justify-content: center !important;
-  }
 
-  /* Audience cards */
-  #inicio > div:nth-child(3) {
-    padding: 40px 20px !important;
+  /* Audience cards — class-based (the old #inicio > div:nth-child(3)
+     selectors broke when the pillars bar was removed and the audience
+     block shifted position; see ADR-016). */
+  .hero-audience {
+    padding: 40px 20px 56px !important;
   }
-  #inicio > div:nth-child(3) h2 {
+  .hero-audience h2 {
     font-size: 24px !important;
   }
-  #inicio > div:nth-child(3) > div:last-child {
+  .hero-audience-grid {
     grid-template-columns: 1fr !important;
   }
 

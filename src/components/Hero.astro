@@ -112,14 +112,14 @@ const heroServiceCards = services.map((s, i) => ({
   </div>
 
   <!-- Audience cards -->
-  <div style="max-width:1200px;margin:0 auto;padding:48px 48px 80px;">
+  <div class="hero-audience" style="max-width:1200px;margin:0 auto;padding:48px 48px 80px;">
     <div style="text-align:center;margin-bottom:40px;">
       <h2 style="font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">
         Una nueva forma de integrar estrategia, <span style="color:#00B4D8;">tecnología</span> y desarrollo humano
       </h2>
       <p style="font-size:15px;color:rgba(255,255,255,0.65);max-width:500px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">Elegí el camino que mejor se adapta a tus necesidades</p>
     </div>
-    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div class="hero-audience-grid reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       {audiences.map((aud) => (
         <div class="reveal hover-lift" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;">
           <div style={`position:absolute;top:0;left:0;right:0;height:2px;background:${accentColor(aud.accent)};opacity:0.5;`}></div>
