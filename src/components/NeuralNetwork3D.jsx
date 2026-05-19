@@ -107,6 +107,67 @@ function NetworkLines() {
   );
 }
 
+// Pack 4 v1.1: small light-pulses traveling along randomly chosen lines.
+// `count` simultaneous pulses, each picks a new line when it finishes traversing.
+function FlowPulses({ count = 3 }) {
+  const meshes = useRef([]);
+  const pulses = useRef(
+    Array.from({ length: count }, () => ({
+      lineIdx: Math.floor(Math.random() * LINES.length),
+      startTime: Math.random() * 3,
+      duration: 1.4 + Math.random() * 0.8,
+      gap: 0.5 + Math.random() * 1.5,
+    })),
+  );
+
+  useFrame((state) => {
+    if (REDUCED) return;
+    const t = state.clock.elapsedTime;
+    pulses.current.forEach((p, i) => {
+      const mesh = meshes.current[i];
+      if (!mesh) return;
+      const elapsed = t - p.startTime;
+      if (elapsed >= p.duration + p.gap) {
+        // Restart at a new random line after a brief pause
+        p.lineIdx = Math.floor(Math.random() * LINES.length);
+        p.startTime = t;
+        p.duration = 1.4 + Math.random() * 0.8;
+        p.gap = 0.5 + Math.random() * 1.5;
+        mesh.visible = false;
+        return;
+      }
+      if (elapsed < 0 || elapsed > p.duration) {
+        mesh.visible = false;
+        return;
+      }
+      const progress = elapsed / p.duration;
+      const [a, b] = LINES[p.lineIdx];
+      const start = NODES[a].pos;
+      const end = NODES[b].pos;
+      mesh.position.set(
+        start[0] + (end[0] - start[0]) * progress,
+        start[1] + (end[1] - start[1]) * progress,
+        start[2] + (end[2] - start[2]) * progress,
+      );
+      mesh.visible = true;
+      // Fade in/out at the edges of the travel
+      const edge = Math.min(progress, 1 - progress) * 4;
+      mesh.material.opacity = Math.min(1, edge);
+    });
+  });
+
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <mesh key={i} ref={(el) => (meshes.current[i] = el)} visible={false}>
+          <sphereGeometry args={[0.05, 12, 12]} />
+          <meshBasicMaterial color="#7DEAFF" transparent opacity={0} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
 function Scene() {
   const groupRef = useRef();
   const pointer = useWindowPointer();
@@ -124,6 +185,7 @@ function Scene() {
       {NODES.map((n, i) => (
         <Node key={i} position={n.pos} size={n.size} delay={i * 0.7} />
       ))}
+      <FlowPulses count={3} />
     </group>
   );
 }

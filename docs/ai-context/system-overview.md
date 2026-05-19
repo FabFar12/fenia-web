@@ -94,7 +94,8 @@ See [`content-model.md`](./content-model.md) for the operational guide.
 | 3 | 3 CSS dialects coexist; Tailwind installed but unused | dev | phased migration ([ADR-004](../adr/ADR-004-styling-strategy.md)) |
 | 4 | ~~No SEO meta (OG, schema.org, sitemap, robots)~~ | dev | **partly resolved 2026-05-19** — OG, Twitter, canonical, sitemap.xml and robots.txt landed. Schema.org `Organization` JSON-LD still pending |
 | 5 | ~~Footer social/legal links are `href="#"` (dead)~~ | dev | **resolved 2026-05-19** — dead links removed; visible ones come from `site.ts` with conditional rendering |
-| 6 | Body text contrast fails WCAG AA in many places | dev | queued |
+| 6 | ~~Body text contrast fails WCAG AA in many places~~ | dev | **resolved 2026-05-19** — [ADR-010](../adr/ADR-010-accessibility-pass.md) |
 | 7 | No analytics, no error tracking, no Web Vitals | dev | queued — Fase 3 |
 | 8 | No `vercel.json` versioned (Vercel access pending) | owner | blocked on [PENDING.md #1](../../PENDING.md) |
-| 9 | "Animated/dynamic visual leap" — scroll-reveal, animated neural net, card hover, scroll spy | dev | proposed (Pack 1/2/3 plan) — awaits owner pick |
+| 9 | ~~"Animated/dynamic visual leap"~~ | dev | **resolved 2026-05-19** — Pack 1+2+3+4 shipped ([ADR-008](../adr/ADR-008-animations-and-3d-neural-network.md)) |
+| 10 | ~~No structured data / 404 page~~ | dev | **resolved 2026-05-19** — Schema.org JSON-LD + branded 404 ([ADR-009](../adr/ADR-009-seo-structured-data.md)) |
