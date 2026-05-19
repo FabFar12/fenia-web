@@ -578,17 +578,15 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Atom-style convergence diagram (ADR-014, supersedes ADR-013 §1).
-   - 4 <g class="orbit-N"> wrappers rotate around (70, 70) in user units of
-     the SVG viewBox via `transform-box: view-box`.
-   - Each electron <circle> inside the <g> sits at (70+R, 70); the rotation
-     sweeps it around the center.
-   - Mixed normal/reverse direction so the atom doesn't feel mechanical.
-   - Negative animation-delays distribute starting angles around the clock.
-   - :has(.electron-core:hover) pauses all orbits so users can target.
+   Atom-style convergence diagram with orbiting labels (ADR-015,
+   supersedes ADR-014 layout — center moved to 80,80, viewBox 160).
+   - 4 <g class="orbit-N"> rotate around (80, 80).
+   - Each has a nested <g class="orbit-counter-N"> counter-rotating at the
+     same speed → labels translate with the electron but stay upright.
+   - .orbit.is-active (set by JS, linked to the matching differentiator)
+     pauses that orbit, enlarges + glows the electron, reveals the label.
    ───────────────────────────────────────────────────────────────────────── */
 .atom-ring {
-  /* faint dashed orbit guides */
   animation: atom-ring-glow 5s ease-in-out infinite;
 }
 @keyframes atom-ring-glow {
@@ -598,21 +596,36 @@ body {
 
 .orbit {
   transform-box: view-box;
-  transform-origin: 70px 70px;
-  /* keep the inner <circle>s hit-test-able for hover */
+  transform-origin: 80px 80px;
   pointer-events: visiblePainted;
 }
-.orbit-1 { animation: atom-spin 6.5s linear infinite 0s;     }
-.orbit-2 { animation: atom-spin 9.5s linear infinite -2.6s reverse; }
-.orbit-3 { animation: atom-spin 11.5s linear infinite -6s;   }
-.orbit-4 { animation: atom-spin 8s   linear infinite -2s reverse; }
+.orbit-1 { animation: atom-spin 9s   linear infinite 0s;          }
+.orbit-2 { animation: atom-spin 12s  linear infinite -3s reverse; }
+.orbit-3 { animation: atom-spin 15s  linear infinite -7s;         }
+.orbit-4 { animation: atom-spin 11s  linear infinite -2.5s reverse; }
 
 @keyframes atom-spin {
   to { transform: rotate(360deg); }
 }
 
-/* Pause every orbit when the user reaches for an electron */
-.conv-diagram:has(.electron-core:hover) .orbit {
+/* Counter-rotation: same period, opposite direction, pivoted exactly on
+   each electron's initial center so the label stays upright while it
+   translates around the orbit. */
+.orbit-counter { transform-box: view-box; }
+.orbit-counter-1 { transform-origin: 110px 80px; animation: atom-spin 9s  linear infinite 0s reverse; }
+.orbit-counter-2 { transform-origin: 122px 80px; animation: atom-spin 12s linear infinite -3s;        }
+.orbit-counter-3 { transform-origin: 134px 80px; animation: atom-spin 15s linear infinite -7s reverse; }
+.orbit-counter-4 { transform-origin: 144px 80px; animation: atom-spin 11s linear infinite -2.5s;       }
+
+/* When an orbit is the active one (JS-linked to its differentiator) OR a
+   user hovers an electron, freeze that orbit + its counter so the label
+   reads steady. */
+.orbit.is-active,
+.orbit.is-active .orbit-counter {
+  animation-play-state: paused;
+}
+.conv-diagram:has(.electron-core:hover) .orbit,
+.conv-diagram:has(.electron-core:hover) .orbit-counter {
   animation-play-state: paused;
 }
 
@@ -632,25 +645,45 @@ body {
 .electron-core-coral {
   filter: drop-shadow(0 0 3px rgba(232, 87, 61, 0.6));
 }
-.electron-core:hover {
+.electron-core:hover,
+.orbit.is-active .electron-core {
   r: 6;
-  filter: drop-shadow(0 0 8px currentColor);
+  filter: drop-shadow(0 0 9px currentColor);
 }
-.electron-core-coral:hover {
-  filter: drop-shadow(0 0 8px #E8573D);
+.electron-core-coral:hover,
+.orbit.is-active .electron-core-coral {
+  filter: drop-shadow(0 0 9px #E8573D);
 }
-.electron-core:hover + title,
-.orbit:hover .electron-halo { opacity: 0.35; }
+.orbit.is-active .electron-halo,
+.orbit:hover .electron-halo {
+  opacity: 0.42;
+}
 
-/* Nucleus — same idiom as before but with brighter core for Bloom-like glow */
+/* Orbiting labels — subtle by default, brighten when the orbit is active */
+.electron-label {
+  font-size: 6.5px;
+  font-weight: 700;
+  fill: rgba(255, 255, 255, 0.5);
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  transition: fill 260ms, font-size 260ms;
+}
+.orbit.is-active .electron-label,
+.orbit:hover .electron-label {
+  fill: rgba(255, 255, 255, 0.95);
+  font-size: 7.5px;
+}
+
+/* Nucleus — brighter core for Bloom-like glow */
 .atom-nucleus-halo {
   transform-box: view-box;
-  transform-origin: 70px 70px;
+  transform-origin: 80px 80px;
   animation: atom-nucleus-halo 3.2s ease-in-out infinite;
 }
 .atom-nucleus-core {
   transform-box: view-box;
-  transform-origin: 70px 70px;
+  transform-origin: 80px 80px;
   animation: atom-nucleus-core 2.6s ease-in-out infinite;
   filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.7));
 }
@@ -688,9 +721,11 @@ body {
   .hero-svc-float { animation: none; }
   .meth-pillar, .meth-pillar-num, .meth-pillar-dot, .meth-pillar-rule { transition: none; }
   .conv-diff-dot, .conv-diff-text { transition: none; }
-  /* ADR-013 / ADR-014 reduced-motion overrides */
-  .orbit, .atom-ring, .atom-nucleus-halo, .atom-nucleus-core
+  /* ADR-013 / ADR-014 / ADR-015 reduced-motion overrides */
+  .orbit, .orbit-counter, .atom-ring,
+  .atom-nucleus-halo, .atom-nucleus-core
     { animation: none !important; }
+  .electron-label { transition: none; }
   .svc-bullet-dot, .svc-bullet-text { transition: none; }
 }
 

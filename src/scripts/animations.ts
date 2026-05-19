@@ -297,6 +297,92 @@ function initAutoCycle(
   setActive(active);
 }
 
+// ADR-015 — Convergence link: the 4 differentiators and the 4 atom
+// electrons share ONE active index. Auto-cycles; hovering either a
+// differentiator OR an electron pins the active index to that pair.
+// `.is-active` lands on both `.conv-diff` and the matching `.orbit`.
+function initConvergenceLink(intervalMs: number) {
+  const diffs = Array.from(document.querySelectorAll<HTMLElement>('.conv-diff'));
+  const orbits = Array.from(document.querySelectorAll<SVGElement>('.orbit'));
+  const electrons = Array.from(document.querySelectorAll<SVGElement>('.electron-core'));
+  if (diffs.length === 0 || orbits.length === 0) return;
+
+  const count = Math.min(diffs.length, orbits.length);
+
+  const setActive = (idx: number) => {
+    diffs.forEach((el, i) => el.classList.toggle('is-active', i === idx));
+    orbits.forEach((el, i) => el.classList.toggle('is-active', i === idx));
+  };
+
+  if (REDUCED) {
+    setActive(0);
+    return;
+  }
+
+  let active = 0;
+  let paused = false;
+  let inView = false;
+  let timerId: number | null = null;
+
+  const tick = () => {
+    if (paused || !inView) return;
+    active = (active + 1) % count;
+    setActive(active);
+  };
+  const start = () => {
+    if (timerId !== null) return;
+    timerId = window.setInterval(tick, intervalMs);
+  };
+  const stop = () => {
+    if (timerId === null) return;
+    window.clearInterval(timerId);
+    timerId = null;
+  };
+
+  // Hover a differentiator → pin to its index
+  diffs.forEach((el, i) => {
+    el.addEventListener('mouseenter', () => {
+      paused = true;
+      active = i;
+      setActive(i);
+    });
+    el.addEventListener('mouseleave', () => { paused = false; });
+  });
+
+  // Hover an electron → pin to its index (read from data-orbit-idx)
+  electrons.forEach((el) => {
+    const idxAttr = el.getAttribute('data-orbit-idx');
+    const i = idxAttr ? parseInt(idxAttr, 10) : NaN;
+    if (Number.isNaN(i)) return;
+    el.addEventListener('mouseenter', () => {
+      paused = true;
+      active = i;
+      setActive(i);
+    });
+    el.addEventListener('mouseleave', () => { paused = false; });
+  });
+
+  // Visibility-gate the cycle: observe whichever container exists.
+  const obsTarget = document.querySelector('.conv-differentiators')
+    ?? document.querySelector('.conv-diagram');
+  if (obsTarget && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) start();
+        else stop();
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(obsTarget);
+  } else {
+    inView = true;
+    start();
+  }
+
+  setActive(active);
+}
+
 // v2.7 — Tilt cards.
 // Cards with `.tilt-card` rotate up to ±MAX_DEG degrees based on cursor
 // position over the card. Returns to neutral on mouseleave.
@@ -348,9 +434,10 @@ function initAll() {
   initCtaInteractions();
   initTiltCards();
   initMobileNavClose();
-  // ADR-012 — Auto-cycle highlights
+  // ADR-012 — Auto-cycle highlight (methodology pillars)
   initAutoCycle('.meth-pillars', '.meth-pillar', 4200);
-  initAutoCycle('.conv-differentiators', '.conv-diff', 3200);
+  // ADR-015 — Differentiators ⇄ atom electrons share one active index
+  initConvergenceLink(3200);
 }
 
 if (document.readyState === 'loading') {

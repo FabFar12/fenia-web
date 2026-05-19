@@ -52,49 +52,66 @@ import { methodologyPillars } from '../data/site';
         <h3 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 10px 0;font-family:'Plus Jakarta Sans',sans-serif;">No es consultoría tradicional.<br/>No es solo tecnología.</h3>
         <p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.7);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">Es un modelo integrador donde neurociencia, estrategia e IA convergen para producir resultados que ninguna disciplina aislada podría lograr.</p>
       </div>
-      <!-- Atom-style convergence diagram (ADR-014).
-           Each electron lives inside a <g class="orbit-N"> whose CSS rotation
-           sweeps it around the nucleus (70, 70). Halo + core stacked per
-           electron for a soft glow. Nucleus pulses. Labels stay static. -->
-      <svg class="conv-diagram conv-atom" width="160" height="160" viewBox="0 0 140 140" aria-label="Diagrama atómico: 4 disciplinas orbitando el núcleo de FENIA">
-        <!-- Faint orbital guides -->
-        <circle class="atom-ring" cx="70" cy="70" r="50" fill="none" stroke="rgba(0,180,216,0.10)" stroke-width="0.5" stroke-dasharray="2 4"/>
-        <circle class="atom-ring" cx="70" cy="70" r="32" fill="none" stroke="rgba(0,180,216,0.08)" stroke-width="0.5" stroke-dasharray="2 4"/>
+      <!-- Atom-style convergence diagram with orbiting labels (ADR-015).
+           Each electron lives inside a <g class="orbit-N"> whose CSS
+           rotation sweeps it around the nucleus. A nested <g class="orbit-
+           counter-N"> counter-rotates at the same speed in the opposite
+           direction — net effect: the label TRANSLATES with the electron
+           but stays UPRIGHT in screen space. Each electron is linked 1:1
+           with a differentiator on the right via data-orbit-idx. -->
+      <svg class="conv-diagram conv-atom" width="180" height="180" viewBox="0 0 160 160" aria-label="Diagrama atómico: 4 disciplinas orbitando el núcleo de FENIA">
+        <!-- Faint orbital guides — slight stroke pulse for ambience -->
+        <circle class="atom-ring" cx="80" cy="80" r="58" fill="none" stroke="rgba(0,180,216,0.10)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <circle class="atom-ring" cx="80" cy="80" r="32" fill="none" stroke="rgba(0,180,216,0.08)" stroke-width="0.5" stroke-dasharray="2 4"/>
 
-        <!-- Electrons. Each <g> rotates around (70,70); its child <circle> sits
-             at (70 + R, 70) so the rotation traces a circle of radius R. -->
-        <g class="orbit orbit-1">
-          <circle class="electron-halo" cx="92" cy="70" r="9" fill="#00B4D8"/>
-          <circle class="electron-core" cx="92" cy="70" r="4" fill="#00B4D8"><title>Neurociencias</title></circle>
+        <!-- Orbit 1 (innermost, R=30) — Diagnóstico -->
+        <g class="orbit orbit-1" data-orbit-idx="0">
+          <g class="orbit-counter orbit-counter-1">
+            <circle class="electron-halo" cx="110" cy="80" r="9" fill="#00B4D8"/>
+            <circle class="electron-core" cx="110" cy="80" r="4" fill="#00B4D8" data-orbit-idx="0"><title>Diagnóstico antes de solución</title></circle>
+            <text class="electron-label" x="110" y="66" text-anchor="middle">Diagnóstico</text>
+          </g>
         </g>
-        <g class="orbit orbit-2">
-          <circle class="electron-halo" cx="106" cy="70" r="10" fill="#00B4D8"/>
-          <circle class="electron-core" cx="106" cy="70" r="4" fill="#00B4D8"><title>IA aplicada</title></circle>
+
+        <!-- Orbit 2 (R=42) — Evidencia -->
+        <g class="orbit orbit-2" data-orbit-idx="1">
+          <g class="orbit-counter orbit-counter-2">
+            <circle class="electron-halo" cx="122" cy="80" r="10" fill="#00B4D8"/>
+            <circle class="electron-core" cx="122" cy="80" r="4" fill="#00B4D8" data-orbit-idx="1"><title>Evidencia neurocientífica real</title></circle>
+            <text class="electron-label" x="122" y="66" text-anchor="middle">Evidencia</text>
+          </g>
         </g>
-        <g class="orbit orbit-3">
-          <circle class="electron-halo" cx="120" cy="70" r="10" fill="#00B4D8"/>
-          <circle class="electron-core" cx="120" cy="70" r="4" fill="#00B4D8"><title>Estrategia</title></circle>
+
+        <!-- Orbit 3 (R=54) — IA -->
+        <g class="orbit orbit-3" data-orbit-idx="2">
+          <g class="orbit-counter orbit-counter-3">
+            <circle class="electron-halo" cx="134" cy="80" r="10" fill="#00B4D8"/>
+            <circle class="electron-core" cx="134" cy="80" r="4" fill="#00B4D8" data-orbit-idx="2"><title>IA como potenciador, no reemplazo</title></circle>
+            <text class="electron-label" x="134" y="66" text-anchor="middle">IA aplicada</text>
+          </g>
         </g>
-        <g class="orbit orbit-4">
-          <circle class="electron-halo electron-halo-coral" cx="128" cy="70" r="9" fill="#E8573D"/>
-          <circle class="electron-core electron-core-coral" cx="128" cy="70" r="3.5" fill="#E8573D"><title>Gestión emocional</title></circle>
+
+        <!-- Orbit 4 (outermost, R=64, coral) — Métricas -->
+        <g class="orbit orbit-4" data-orbit-idx="3">
+          <g class="orbit-counter orbit-counter-4">
+            <circle class="electron-halo electron-halo-coral" cx="144" cy="80" r="9" fill="#E8573D"/>
+            <circle class="electron-core electron-core-coral" cx="144" cy="80" r="3.5" fill="#E8573D" data-orbit-idx="3"><title>Métricas de impacto concretas</title></circle>
+            <text class="electron-label" x="144" y="66" text-anchor="middle">Métricas</text>
+          </g>
         </g>
 
         <!-- Nucleus -->
-        <circle class="atom-nucleus-halo" cx="70" cy="70" r="14" fill="rgba(0,180,216,0.15)"/>
-        <circle class="atom-nucleus-core" cx="70" cy="70" r="6.5" fill="#1FE3FF"/>
-
-        <!-- Static labels at conceptual corners -->
-        <text x="22" y="28" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Neuro</text>
-        <text x="92" y="28" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">IA</text>
-        <text x="54" y="136" font-size="8" fill="rgba(255,255,255,0.55)" font-family="'Plus Jakarta Sans Variable','Plus Jakarta Sans',sans-serif" font-weight="600">Estrategia</text>
+        <circle class="atom-nucleus-halo" cx="80" cy="80" r="14" fill="rgba(0,180,216,0.15)"/>
+        <circle class="atom-nucleus-core" cx="80" cy="80" r="6.5" fill="#1FE3FF"/>
       </svg>
-      <!-- Differentiators (auto-cycle highlight; see ADR-012) -->
+      <!-- Differentiators — linked 1:1 with the atom electrons (ADR-015).
+           Auto-cycle + hover override; hovering a diff highlights its
+           matching electron and vice-versa. -->
       <div class="conv-differentiators" style="display:flex;flex-direction:column;gap:16px;">
-        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Diagnóstico antes de solución</span></div>
-        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Evidencia neurocientífica real</span></div>
-        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">IA como potenciador, no reemplazo</span></div>
-        <div class="conv-diff"><div class="conv-diff-dot"></div><span class="conv-diff-text">Métricas de impacto concretas</span></div>
+        <div class="conv-diff" data-diff-idx="0"><div class="conv-diff-dot"></div><span class="conv-diff-text">Diagnóstico antes de solución</span></div>
+        <div class="conv-diff" data-diff-idx="1"><div class="conv-diff-dot"></div><span class="conv-diff-text">Evidencia neurocientífica real</span></div>
+        <div class="conv-diff" data-diff-idx="2"><div class="conv-diff-dot"></div><span class="conv-diff-text">IA como potenciador, no reemplazo</span></div>
+        <div class="conv-diff" data-diff-idx="3"><div class="conv-diff-dot"></div><span class="conv-diff-text">Métricas de impacto concretas</span></div>
       </div>
     </div>
   </div>
