@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import { siteMeta } from '../data/site';
 
 interface Props {
@@ -38,8 +39,18 @@ const canonicalUrl = new URL(Astro.url.pathname, siteMeta.prodUrl).toString();
     <meta name="twitter:description" content={description} />
 
     <title>{title}</title>
+
+    <!-- Astro View Transitions — smooth cross-page transitions. See ADR-008. -->
+    <ClientRouter />
   </head>
   <body>
+    <!-- Pack 3: scroll progress bar driven by animations.ts -->
+    <div id="scroll-progress" aria-hidden="true"></div>
     <slot />
+
+    <!-- Pack 1 + Pack 3 animation runtime — bundled by Astro, ~3 KB gzipped -->
+    <script>
+      import '../scripts/animations';
+    </script>
   </body>
 </html>

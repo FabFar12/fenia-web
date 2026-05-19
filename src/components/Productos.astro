@@ -38,7 +38,7 @@ const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personali
     </div>
 
     <!-- Product cards -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       {products.map((product) => {
         const isComingSoon = product.data.status === 'coming-soon';
         const chipLabel = isComingSoon
@@ -46,7 +46,7 @@ const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personali
           : product.data.type;
         const footerLeft = isComingSoon ? 'En preparación' : 'Consultar';
         return (
-          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+          <div class="reveal hover-lift" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
             <div style={`position:absolute;top:0;left:0;right:0;height:2px;background:${accentText(product.data.accent)};opacity:0.5;`}></div>
             <span style={`display:inline-block;width:fit-content;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;border-radius:5px;background:${accentBg(product.data.accent)};color:${accentText(product.data.accent)};margin-bottom:18px;font-family:'Plus Jakarta Sans',sans-serif;`}>{chipLabel}</span>
             <h3 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.title}</h3>
@@ -63,7 +63,7 @@ const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personali
     <!-- CTA bar -->
     <div style="margin-top:40px;padding:24px 32px;border-radius:14px;background:rgba(0,180,216,0.04);border:1px solid rgba(0,180,216,0.1);display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.6);font-family:'Plus Jakarta Sans',sans-serif;">¿Necesitás un recurso personalizado para tu equipo u organización?</span>
-      <a href={customRequestUrl} target="_blank" rel="noopener" style="font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;border:none;background:#E8573D;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 4px 16px rgba(232,87,61,0.25);text-decoration:none;">Hablemos →</a>
+      <a class="cta-glow" href={customRequestUrl} target="_blank" rel="noopener" style="font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;border:none;background:#E8573D;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 4px 16px rgba(232,87,61,0.25);text-decoration:none;">Hablemos →</a>
     </div>
   </div>
 </section>
