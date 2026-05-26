@@ -1,7 +1,9 @@
 # ADR-007 — Intro video as page hero element (supersedes IntroLoader; supersedes own top-banner v1)
 
 ## Status
-Accepted (2026-05-19), **amended same-day** to move the video from a slim top banner to a centered hero feature in the body of the home page. The thin top-band version (`LogoBanner.astro`) was deleted; the current implementation lives in `src/components/HeroVideo.astro`. The amendment is reflected in the *Decision* section below.
+**Superseded by [ADR-026](./ADR-026-static-logo-on-plate-hero.md) (2026-05-26).** The intro video was replaced with a static `main-logo.png` rendered on a light "plate" because the owner provided a print-style PNG logo whose dark-navy wordmark was illegible against the dark page background. The component file `src/components/HeroVideo.astro` is kept (same visual contract — centered brand element, ambient cyan halo, horizon rules) but now serves an `<img>` instead of a `<video>`. The file `public/images/intro-fenia.mp4` is no longer referenced; it can be removed in a future cleanup PR.
+
+Originally: Accepted (2026-05-19), amended same-day to move the video from a slim top banner to a centered hero feature in the body of the home page. The thin top-band version (`LogoBanner.astro`) was deleted; the implementation lived in `src/components/HeroVideo.astro`.
 
 ## Context
 
