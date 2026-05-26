@@ -63,6 +63,11 @@ jobs:
           path: dist/
           retention-days: 7
           if-no-files-found: error
+          # CRITICAL: v4 strips files starting with `.` from the tarball by
+          # default. We need `.htaccess` (the entire hosting config under
+          # ADR-023) to survive the artifact round-trip into the deploy job.
+          # Without this, .htaccess never reaches Hostinger.
+          include-hidden-files: true
 
   deploy:
     name: Deploy to Hostinger via FTPS
