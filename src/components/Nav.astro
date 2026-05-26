@@ -1,5 +1,11 @@
 ---
 // Nav.astro
+//
+// Sticky top navigation. The brand block on the left is a single image —
+// `main-logo-desc.png` (logo + wordmark + tagline) — rendered on a light
+// plate so the dark-navy parts of the asset (which match the page
+// background) remain legible. Treatment is the brand-consistent mini
+// version of the hero plate (see ADR-026 and src/components/HeroVideo.astro).
 import { whatsapp, navLinks, sectionHref } from '../data/site';
 const waUrl = whatsapp.url();
 const pathname = Astro.url.pathname;
@@ -7,19 +13,20 @@ const isHome = pathname === '/';
 ---
 
 <nav class="main-nav">
-  <a href={isHome ? '#inicio' : '/'} class="nav-brand">
-    <div class="nav-f-mark">
-      <span class="nav-f-letter">F</span>
-      <div class="nav-f-nodes">
-        <div class="nav-node n1"></div>
-        <div class="nav-node n2"></div>
-        <div class="nav-node n3"></div>
-      </div>
-    </div>
-    <div class="nav-brand-text">
-      <span class="nav-name"><span class="nav-name-f">F</span>ENIA</span>
-      <span class="nav-sub">Neuro-Inteligencia Aumentada</span>
-    </div>
+  <a
+    href={isHome ? '#inicio' : '/'}
+    class="nav-brand"
+    aria-label="FENIA — inicio"
+  >
+    <img
+      class="nav-brand-img"
+      src="/images/main-logo-desc.png"
+      alt="FENIA — Neuro-Inteligencia Aumentada"
+      width="380"
+      height="140"
+      loading="eager"
+      decoding="async"
+    />
   </a>
 
   <input type="checkbox" id="nav-toggle" class="nav-toggle-input" aria-label="Abrir menú de navegación" />
@@ -34,19 +41,37 @@ const isHome = pathname === '/';
 </nav>
 
 <style>
-.main-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50;background:rgba(11,26,46,0.95);backdrop-filter:blur(12px)}
-.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-f-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#00B4D8,#0090B0);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 4px 16px rgba(0,180,216,0.25)}
-.nav-f-letter{font-weight:800;font-size:20px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
-.nav-f-nodes{position:absolute;top:-2px;right:-3px}
-.nav-node{width:5px;height:5px;border-radius:50%;background:#fff;position:absolute}
-.n1{top:0;right:0;opacity:0.9}
-.n2{top:8px;right:-2px;width:4px;height:4px;opacity:0.6}
-.n3{top:-1px;right:9px;width:3px;height:3px;opacity:0.4}
-.nav-brand-text{display:flex;flex-direction:column}
-.nav-name{font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;font-family:'Plus Jakarta Sans',sans-serif;line-height:1}
-.nav-name-f{color:#00B4D8}
-.nav-sub{font-size:9px;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:0.06em;text-transform:uppercase;margin-top:1px}
+.main-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50;background:rgba(11,26,46,0.95);backdrop-filter:blur(12px)}
+
+/* The brand link is the plate.
+   Mini version of the hero plate (ADR-026): same gradient + cyan ring +
+   smaller glow, sized to fit comfortably in the 64-72px nav strip. */
+.nav-brand{
+  display:inline-flex;
+  align-items:center;
+  text-decoration:none;
+  background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
+  border-radius:10px;
+  padding:6px 14px;
+  box-shadow:
+    0 0 0 1px rgba(0,180,216,0.22),
+    0 4px 14px -4px rgba(0,180,216,0.35);
+  transition:transform 180ms cubic-bezier(0.16,1,0.3,1),box-shadow 180ms;
+}
+.nav-brand:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(0,180,216,0.34),
+    0 6px 18px -4px rgba(0,180,216,0.50);
+}
+.nav-brand-img{
+  display:block;
+  height:40px;
+  width:auto;
+  max-width:240px;
+  object-fit:contain;
+}
+
 .nav-links{display:flex;gap:32px;align-items:center}
 .nav-link{font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.45);text-decoration:none}
 .nav-link-active{font-weight:600;color:#fff}
@@ -56,7 +81,9 @@ const isHome = pathname === '/';
 .nav-hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s ease}
 
 @media(max-width:768px){
-  .main-nav{padding:14px 20px}
+  .main-nav{padding:10px 20px}
+  .nav-brand{padding:5px 10px;border-radius:8px}
+  .nav-brand-img{height:32px;max-width:180px}
   .nav-hamburger{display:flex}
   .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(11,26,46,0.98);backdrop-filter:blur(12px);flex-direction:column;padding:24px 20px;gap:0;border-bottom:1px solid rgba(255,255,255,0.08)}
   .nav-link,.nav-cta{padding:14px 0;width:100%;font-size:15px}
