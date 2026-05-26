@@ -1,7 +1,7 @@
 ---
 title: "Guía de Neuro-Liderazgo"
 type: "Guía"
-status: "coming-soon"
+status: "draft"
 accent: "cyan"
 summary: "Principios neurocientíficos aplicados al liderazgo cotidiano. Estrategias validadas para regular emociones y decidir con claridad."
 price: null

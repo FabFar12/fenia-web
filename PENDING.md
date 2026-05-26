@@ -91,10 +91,37 @@
 
 ## 🟡 Decisiones de producto pendientes
 
-### 10. ¿Sección Productos debe vender o solo informar? — carried over from 2026-05-19
-Hoy los botones dicen "Comprar ahora →" pero todos linkan a `#contacto`. Hay dos caminos:
-  - **A.** No habrá e-commerce nunca: rebrandear "Productos" como "Recursos" y cambiar CTAs a "Consultar" / "Solicitar acceso".
-  - **B.** Habrá e-commerce: integrar Mercado Pago / Gumroad / Stripe (ver Fase 5 del Plan Maestro).
+### 10. Activación del primer producto real (Guía para evaluar en tiempos de IA) — 2026-05-26
+**Estado:** decisión arquitectónica cerrada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md). El producto está creado como `src/content/products/guia-evaluar-tiempos-ia.md` con `status: "coming-soon"` esperando los datos finales de Fab. Los 3 productos placeholder anteriores pasaron a `status: "draft"` (ocultos del sitio).
+
+**Bloqueantes — Fab debe proveer:**
+1. **Cuenta Mercado Pago Vendedor activa** (o confirmar que usará la existente de la consultoría).
+2. **Crear el producto en Mercado Pago**:
+   - Tipo: producto digital.
+   - Subir el PDF como deliverable.
+   - URL de retorno tras pago exitoso: `https://fenia.com.ar/gracias` (página a crear en sesión 2).
+   - ¿Cuotas sin interés? (recomendado 3 cuotas si precio > AR$ 10.000).
+3. **Pasar al dev el link de cobro**: formato `https://link.mercadopago.com.ar/<id>` o `https://mpago.la/<id>`.
+4. **Confirmar metadatos del producto**:
+   - Título oficial (¿"Guía para evaluar en tiempos de IA" es definitivo?).
+   - Subtítulo / descripción larga (1-2 párrafos para el cuerpo del `.md`).
+   - Precio en pesos argentinos.
+   - Foto/imagen de portada (1200x630 ideal) o confirmar uso de ícono genérico.
+   - Audiencias finales (hoy: las tres).
+
+**Dev actions una vez recibido todo lo anterior:**
+1. Editar `src/content/products/guia-evaluar-tiempos-ia.md`:
+   - `status: "live"`.
+   - `cta.label: "Comprar ahora"`.
+   - `cta.href: <link MP>`.
+   - `price: <número>`.
+   - Reemplazar el cuerpo del `.md` con la descripción real.
+2. Crear `src/pages/gracias.astro` (página de retorno post-pago — mensaje + CTA a WhatsApp si el email no llega).
+3. Push a `dev` → merge a `main` → deploy automático a Hostinger.
+4. Test end-to-end: Fab compra su propio producto con su tarjeta, confirma email + descarga.
+
+### (Cerrado) ¿Sección Productos debe vender o solo informar? — 2026-05-19 → resuelto 2026-05-26
+Decisión tomada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md): **Productos vende**, vía Mercado Pago Link de Pago. Tier-B (checkout embebido + backend PHP) diferido hasta validar con volumen real (≥20 ventas/mes o ≥3 productos live).
 
 ### 11. ¿Quién aparece en la sección "Quién está detrás"? — carried over from 2026-05-19
 Hoy no existe. Una consultoría humana sin caras pierde credibilidad. ¿Tu amigo trabaja solo? ¿Tiene socios? ¿Quiere mostrar bio + foto + LinkedIn?

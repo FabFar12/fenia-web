@@ -1,7 +1,7 @@
 ---
 title: "Toolkit de IA para Emprendedores"
 type: "Toolkit"
-status: "coming-soon"
+status: "draft"
 accent: "coral"
 summary: "Herramientas de IA curadas con tutoriales paso a paso. Flujos de trabajo, prompts estratégicos y criterios de selección."
 price: null

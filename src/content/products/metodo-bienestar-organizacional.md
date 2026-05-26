@@ -1,7 +1,7 @@
 ---
 title: "Método de Bienestar Organizacional"
 type: "Método"
-status: "coming-soon"
+status: "draft"
 accent: "cyan"
 summary: "Marco diagnóstico y plan de acción para evaluar y mejorar la salud organizacional. Incluye instrumentos y métricas."
 price: null
