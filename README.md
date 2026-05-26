@@ -13,7 +13,8 @@
 | Item | Detalle |
 |------|---------|
 | URL producción | https://fenia.com.ar/ |
-| Hosting | Vercel (auto-deploy desde `main`) |
+| Hosting | **Hostinger** (web + DNS + dominio + email — un único proveedor). Deploy auto desde `main` vía GitHub Actions FTPS. Ver [ADR-022](./docs/adr/ADR-022-pivot-to-hostinger-only.md). *Migración en curso desde Vercel — ver [PENDING.md](./PENDING.md).* |
+| Plan Hostinger | ARS 200.000 / 4 años (tier exacto pendiente de confirmar — [PENDING.md #2](./PENDING.md)) |
 | Repositorio | https://github.com/FabFar12/fenia-web |
 | Rama producción | `main` |
 | Rama de trabajo | `dev` |
@@ -93,9 +94,16 @@ fenia-web/
 
 ## Despliegue
 
-Vercel deploya automáticamente al hacer push a `main`. Cualquier rama distinta (incluida `dev`) recibe un **deploy de preview** con URL única que se postea en el PR.
+Cada `git push origin main` dispara [`.github/workflows/ci.yml`](./.github/workflows/ci.yml):
 
-⚠️ **Pendiente** ([`PENDING.md` #1](./PENDING.md)): obtener acceso al dashboard de Vercel para versionar `vercel.json` y las variables de entorno.
+1. **Job `check-and-build`** — `astro check` + `npm run build` (corre también en PRs como quality gate).
+2. **Job `deploy`** — solo en `main`. Sube `dist/` a Hostinger por **FTPS**. Requiere los secretos `HOSTINGER_FTP_*` configurados en *Repo → Settings → Secrets and variables → Actions*.
+
+La configuración de hosting (headers de seguridad, cache, 404, HTTPS) vive versionada en [`public/.htaccess`](./public/.htaccess) — ver [ADR-023](./docs/adr/ADR-023-htaccess-hosting-config.md).
+
+⚠️ **Sin preview deploys por PR** — Hostinger no los soporta nativamente. Para validar visualmente un cambio antes de mergear: `npm run build && npm run preview` localmente, o subir manualmente a un subdominio de prueba. Ver [AGENTS.md § PROPOSE-THEN-EXECUTE](./AGENTS.md).
+
+📌 **Migración en curso (mayo 2026):** el sitio se está moviendo desde Vercel a Hostinger. Ver [ADR-022](./docs/adr/ADR-022-pivot-to-hostinger-only.md), [docs/audit/2026-05-26-hosting-pivot-to-hostinger.md](./docs/audit/2026-05-26-hosting-pivot-to-hostinger.md) y los items abiertos en [PENDING.md](./PENDING.md).
 
 ## Contribuir
 

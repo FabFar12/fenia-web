@@ -8,7 +8,10 @@
       <li><strong>Big picture / what the site is</strong> 👉 <code>docs/ai-context/system-overview.md</code> &amp; <code>README.md</code></li>
       <li><strong>Anything that touches site copy, WhatsApp number, social links, hero stats, products, testimonials</strong> 👉 <code>docs/ai-context/content-model.md</code> &amp; <code>docs/adr/ADR-003-content-layer.md</code> — <strong>NEVER hardcode these in components; they live in <code>src/data/site.ts</code> or <code>src/content/</code></strong></li>
       <li><strong>Styles, colors, typography, responsive, animations</strong> 👉 <code>docs/ai-context/style-guide.md</code> &amp; <code>docs/adr/ADR-004-styling-strategy.md</code></li>
-      <li><strong>Deployment, hosting, env vars, domain, DNS</strong> 👉 <code>docs/ai-context/deployment.md</code> &amp; <code>docs/adr/ADR-002-hosting-vercel.md</code> &amp; <code>PENDING.md</code></li>
+      <li><strong>Deployment, hosting, env vars, domain, DNS</strong> 👉 <code>docs/ai-context/deployment.md</code> &amp; <code>docs/adr/ADR-022-pivot-to-hostinger-only.md</code> (current) &amp; <code>docs/adr/ADR-018-migrate-to-cloudflare-pages.md</code> + <code>ADR-002</code> (both superseded, historical) &amp; <code>PENDING.md</code></li>
+      <li><strong>HTTP headers (CSP, HSTS), redirects, cache policy</strong> 👉 <code>public/.htaccess</code> &amp; <code>docs/adr/ADR-023-htaccess-hosting-config.md</code></li>
+      <li><strong>CI / quality gate / FTPS deploy / branch protection</strong> 👉 <code>.github/workflows/ci.yml</code> &amp; <code>docs/adr/ADR-020-ci-minimal-github-actions.md</code></li>
+      <li><strong>Observability (analytics, error tracking, uptime)</strong> 👉 <code>docs/adr/ADR-024-observability-on-hostinger.md</code> (current) &amp; <code>ADR-021</code> (superseded, historical) &amp; <code>.env.example</code></li>
       <li><strong>Stack choices, framework versions, why Astro/React/Tailwind</strong> 👉 <code>docs/adr/ADR-001-tech-stack.md</code></li>
       <li><strong>Testimonial collection / publication flow</strong> 👉 <code>docs/adr/ADR-005-testimonial-collection.md</code></li>
       <li><strong>Local dev experience / scripts / why <code>npm run dev</code> must stay single-command</strong> 👉 <code>docs/adr/ADR-006-dx-single-command-dev.md</code></li>
@@ -24,8 +27,9 @@
     <strong>BRANCH PROTOCOL — non-negotiable</strong>
     <ul>
       <li>Default working branch: <code>dev</code>. <strong>Never commit directly to <code>main</code>.</strong></li>
-      <li><code>main</code> is the production branch — every push to it auto-deploys to Vercel (<code>fenia.com.ar</code>).</li>
+      <li><code>main</code> is the production branch — every push to it triggers <a href=".github/workflows/ci.yml">CI + FTPS deploy</a> to Hostinger (<code>fenia.com.ar</code>). See <a href="docs/adr/ADR-022-pivot-to-hostinger-only.md">ADR-022</a>.</li>
       <li>Only merge <code>dev → main</code> via PR <em>and</em> explicit human approval. No silent merges.</li>
+      <li>CI (<code>.github/workflows/ci.yml</code>) must be green before merging to <code>main</code>. See <a href="docs/adr/ADR-020-ci-minimal-github-actions.md">ADR-020</a>.</li>
       <li>If you find yourself on <code>main</code>, switch back with <code>git checkout dev</code> before touching any file.</li>
     </ul>
   </rule>
@@ -110,10 +114,13 @@ npm run sync       # astro sync (regenerate content collection types) — option
 
 ## Deployment
 
-- **Production**: Vercel auto-deploys on every push to `main` → `https://fenia.com.ar/`
-- **Preview**: every PR / branch push to GitHub triggers a Vercel preview deploy (URL posted in PR)
-- **DNS**: managed externally (possibly Hostinger — see [PENDING.md](./PENDING.md) item #1)
-- See [docs/adr/ADR-002-hosting-vercel.md](./docs/adr/ADR-002-hosting-vercel.md) and [docs/ai-context/deployment.md](./docs/ai-context/deployment.md)
+- **Production**: Hostinger shared hosting. Push to `main` → [GitHub Actions](./.github/workflows/ci.yml) builds and uploads `dist/` via FTPS → `https://fenia.com.ar/`
+- **Preview**: ⚠️ **none natively**. PRs only get the CI build check; visual validation must be local (`npm run preview`) or via manual upload to a Hostinger subdomain.
+- **DNS + domain + email**: all on Hostinger (single provider, prepaid 4 years).
+- **Headers / cache / 404 / HTTPS**: versioned in [`public/.htaccess`](./public/.htaccess).
+- **CI quality gate + deploy**: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) — `astro check` + build for all PRs; FTPS upload to Hostinger only on push to `main`.
+- See [docs/adr/ADR-022-pivot-to-hostinger-only.md](./docs/adr/ADR-022-pivot-to-hostinger-only.md), [docs/adr/ADR-023-htaccess-hosting-config.md](./docs/adr/ADR-023-htaccess-hosting-config.md), [docs/adr/ADR-020-ci-minimal-github-actions.md](./docs/adr/ADR-020-ci-minimal-github-actions.md), [docs/adr/ADR-024-observability-on-hostinger.md](./docs/adr/ADR-024-observability-on-hostinger.md), and [docs/ai-context/deployment.md](./docs/ai-context/deployment.md)
+- Historical: [ADR-002](./docs/adr/ADR-002-hosting-vercel.md) + [ADR-018](./docs/adr/ADR-018-migrate-to-cloudflare-pages.md) + [ADR-019](./docs/adr/ADR-019-version-hosting-config.md) + [ADR-021](./docs/adr/ADR-021-observability-baseline.md) — all superseded by the 2026-05-26 pivot ([ADR-022](./docs/adr/ADR-022-pivot-to-hostinger-only.md))
 
 ## For non-technical readers
 

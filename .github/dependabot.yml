@@ -1,0 +1,54 @@
+# Dependabot — https://docs.github.com/en/code-security/dependabot
+#
+# Goal: surface security CVEs in dependencies and minor upgrades without
+# manual checking. Cadence is weekly to avoid PR-noise on a low-churn
+# marketing site.
+
+version: 2
+updates:
+  # npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Argentina/Cordoba"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "automated"
+    # Group minor + patch updates into one PR. Majors stay separate.
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    # Major bumps of the load-bearing libraries get reviewed by hand, not
+    # auto-PR'd. They almost always need ADR-level consideration.
+    ignore:
+      - dependency-name: "astro"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "three"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions versions in .github/workflows/
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Argentina/Cordoba"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"

@@ -1,0 +1,26 @@
+# Normalize line endings across Windows / macOS / Linux contributors.
+# Without this, Windows checkouts CRLF-mangle files and produce noisy
+# diffs ("LF will be replaced by CRLF") for everyone else.
+
+* text=auto eol=lf
+
+# Binary files — leave their bytes alone, no eol or charset translation.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.svg   text
+*.ico   binary
+*.pdf   binary
+*.mp4   binary
+*.webm  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.zip   binary
+
+# Generated lockfile — keep as-is, suppress diff noise in PRs.
+package-lock.json -diff
