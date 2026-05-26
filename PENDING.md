@@ -92,33 +92,33 @@
 ## 🟡 Decisiones de producto pendientes
 
 ### 10. Activación del primer producto real (Guía para evaluar en tiempos de IA) — 2026-05-26
-**Estado:** decisión arquitectónica cerrada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md). El producto está creado como `src/content/products/guia-evaluar-tiempos-ia.md` con `status: "coming-soon"` esperando los datos finales de Fab. Los 3 productos placeholder anteriores pasaron a `status: "draft"` (ocultos del sitio).
+**Estado:** decisión arquitectónica cerrada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md). Infraestructura del sitio **lista para vender**:
 
-**Bloqueantes — Fab debe proveer:**
+- ✅ Producto creado en `src/content/products/guia-evaluar-tiempos-ia.md` con `status: "coming-soon"` (esperando datos de Fab para pasar a `live`).
+- ✅ Los 3 productos placeholder anteriores pasaron a `status: "draft"` (ocultos del sitio).
+- ✅ Página `/gracias` creada en `src/pages/gracias.astro` (mensaje post-compra + WhatsApp de soporte si el email no llega).
+- ✅ Guía paso-a-paso para Fab en [`docs/fab-mercadopago-setup.md`](./docs/fab-mercadopago-setup.md) — pasalá tal cual y volvé con los 5 datos del final.
+
+**Bloqueantes — Fab debe proveer (seguir `docs/fab-mercadopago-setup.md`):**
 1. **Cuenta Mercado Pago Vendedor activa** (o confirmar que usará la existente de la consultoría).
-2. **Crear el producto en Mercado Pago**:
-   - Tipo: producto digital.
-   - Subir el PDF como deliverable.
-   - URL de retorno tras pago exitoso: `https://fenia.com.ar/gracias` (página a crear en sesión 2).
-   - ¿Cuotas sin interés? (recomendado 3 cuotas si precio > AR$ 10.000).
-3. **Pasar al dev el link de cobro**: formato `https://link.mercadopago.com.ar/<id>` o `https://mpago.la/<id>`.
-4. **Confirmar metadatos del producto**:
-   - Título oficial (¿"Guía para evaluar en tiempos de IA" es definitivo?).
-   - Subtítulo / descripción larga (1-2 párrafos para el cuerpo del `.md`).
-   - Precio en pesos argentinos.
-   - Foto/imagen de portada (1200x630 ideal) o confirmar uso de ícono genérico.
-   - Audiencias finales (hoy: las tres).
+2. **Crear el cobro en Mercado Pago** con:
+   - PDF como entrega automática.
+   - URL de retorno: `https://fenia.com.ar/gracias` (ya creada).
+   - Cuotas sin interés según precio (ver guía).
+3. **Link de cobro** generado (formato `https://link.mercadopago.com.ar/<id>` o `https://mpago.la/<id>`).
+4. **Metadatos**: título oficial, descripción larga, precio en ARS, imagen 1200×630 (opcional).
+5. **Test end-to-end** propio antes de pasar el link (Fab compra a sí mismo, valida que llega el email).
 
-**Dev actions una vez recibido todo lo anterior:**
+**Dev actions una vez recibidos los 5 datos:**
 1. Editar `src/content/products/guia-evaluar-tiempos-ia.md`:
    - `status: "live"`.
    - `cta.label: "Comprar ahora"`.
    - `cta.href: <link MP>`.
    - `price: <número>`.
    - Reemplazar el cuerpo del `.md` con la descripción real.
-2. Crear `src/pages/gracias.astro` (página de retorno post-pago — mensaje + CTA a WhatsApp si el email no llega).
+2. (Opcional) Mejorar `Productos.astro` para mostrar precio formateado en cards `live` con price ≠ null. Cambio visual → PROPOSE-THEN-EXECUTE primero.
 3. Push a `dev` → merge a `main` → deploy automático a Hostinger.
-4. Test end-to-end: Fab compra su propio producto con su tarjeta, confirma email + descarga.
+4. Test end-to-end por Fab con compra real.
 
 ### (Cerrado) ¿Sección Productos debe vender o solo informar? — 2026-05-19 → resuelto 2026-05-26
 Decisión tomada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md): **Productos vende**, vía Mercado Pago Link de Pago. Tier-B (checkout embebido + backend PHP) diferido hasta validar con volumen real (≥20 ventas/mes o ≥3 productos live).

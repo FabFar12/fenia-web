@@ -107,8 +107,8 @@ The Tier A → B migration is a refactor, not a rewrite. The `src/content/produc
 
 ## Follow-ups
 
-- **Activation** (this PR): activate the product card in `coming-soon` mode with the data we have. When Fab provides the MP link + final metadata, switch to `live`.
-- **`/gracias` page** ([next sprint](../../PENDING.md)): create `src/pages/gracias.astro` as the URL de retorno from MP. Confirms the purchase visually, invites to share, offers WhatsApp for support.
+- ✅ **Activation scaffolding** (done in this commit + the immediate follow-up): product card created in `coming-soon`, `/gracias` page live, owner walkthrough at [`docs/fab-mercadopago-setup.md`](../fab-mercadopago-setup.md).
+- ⏳ **Real activation**: when Fab provides the MP link + final metadata, switch the `.md` to `live` (1-2 hours of dev work).
 - **Plausible custom event** (when [ADR-024](./ADR-024-observability-on-hostinger.md) lands): `click_buy_pdf` fired on click of the "Comprar ahora" CTA.
 - **Tier B trigger**: revisit this ADR if monthly sales ≥ 20 or live product count ≥ 3.
 - **Privacy policy** ([PENDING.md](../../PENDING.md) #12): once we sell to identifiable buyers (MP captures email), the legal page becomes more relevant.
