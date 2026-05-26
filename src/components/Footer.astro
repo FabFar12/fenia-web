@@ -30,16 +30,16 @@ const pathname = Astro.url.pathname;
       </div>
       <div class="footer-col">
         <h4 class="footer-heading">Contacto</h4>
-        <a href={`https://wa.me/${whatsapp.phone}`} target="_blank" rel="noopener" class="footer-link">{whatsapp.displayPhone}</a>
+        <a href={`https://wa.me/${whatsapp.phone}`} target="_blank" rel="noopener noreferrer" class="footer-link">{whatsapp.displayPhone}</a>
         <div class="footer-social">
           {socials.instagram.url && (
-            <a href={socials.instagram.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.instagram.label}>IG</a>
+            <a href={socials.instagram.url} target="_blank" rel="noopener noreferrer" class="social-icon" aria-label={socials.instagram.label}>IG</a>
           )}
           {socials.linkedin.url && (
-            <a href={socials.linkedin.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.linkedin.label}>IN</a>
+            <a href={socials.linkedin.url} target="_blank" rel="noopener noreferrer" class="social-icon" aria-label={socials.linkedin.label}>IN</a>
           )}
           {socials.youtube.url && (
-            <a href={socials.youtube.url} target="_blank" rel="noopener" class="social-icon" aria-label={socials.youtube.label}>YT</a>
+            <a href={socials.youtube.url} target="_blank" rel="noopener noreferrer" class="social-icon" aria-label={socials.youtube.label}>YT</a>
           )}
         </div>
       </div>

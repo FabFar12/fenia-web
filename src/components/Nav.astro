@@ -29,7 +29,7 @@ const isHome = pathname === '/';
     {navLinks.map((link, i) => (
       <a href={sectionHref(link.href, pathname)} class={`nav-link${i === 0 ? ' nav-link-active' : ''}`}>{link.label}</a>
     ))}
-    <a href={waUrl} target="_blank" rel="noopener" class="nav-cta cta-magnetic">Solicitar un turno</a>
+    <a href={waUrl} target="_blank" rel="noopener noreferrer" class="nav-cta cta-magnetic">Solicitar un turno</a>
   </div>
 </nav>
 
