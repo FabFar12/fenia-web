@@ -109,9 +109,16 @@ jobs:
           local-dir: ./dist/
           server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}
           protocol: ftps
-          # `strict` rejects untrusted certs. If Hostinger uses a cert chain
-          # the runner cannot validate, downgrade to `loose` with a comment.
-          security: strict
+          # `loose` (vs `strict`) skips TLS hostname/IP verification.
+          # Required because HOSTINGER_FTP_HOST is the server IP, while
+          # Hostinger's cert covers `*.hstgr.io` only — strict would reject.
+          # Trade-off: the connection is still TLS-encrypted (creds in
+          # transit are safe), but we do not validate the server's identity.
+          # Acceptable for this deploy: payload is the public site (no
+          # secrets in dist/); FTP creds are the only exposed surface and
+          # they're rotated per the security checklist. Revisit if Fab moves
+          # to a plan with a hostname under `*.hstgr.io` we can use.
+          security: loose
           # Keep prior files that aren't part of dist/ untouched (avoids
           # nuking mail config, Hostinger's own .well-known, etc.).
           dangerous-clean-slate: false
