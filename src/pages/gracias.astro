@@ -1,0 +1,231 @@
+---
+// gracias.astro — landing page after a successful Mercado Pago purchase.
+//
+// Mercado Pago is configured with this URL as "URL de retorno tras pago exitoso".
+// The buyer lands here right after paying; meanwhile MP sends them an email
+// with the PDF download link (auto-delivery configured per ADR-025).
+//
+// This page is marked `noindex` because it has no SEO value and only makes
+// sense as a transient destination after a purchase.
+//
+// See: docs/adr/ADR-025-product-sales-via-mercadopago.md
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { whatsapp, siteMeta } from '../data/site';
+
+const waSupportUrl = whatsapp.url(
+  'Hola FENIA, acabo de comprar la guía y todavía no me llegó el email. ¿Pueden ayudarme?',
+);
+---
+
+<Layout
+  title={`¡Gracias por tu compra! — ${siteMeta.name}`}
+  description="Tu compra fue procesada. Te enviamos el archivo por email."
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, follow" />
+  </Fragment>
+
+  <Nav />
+
+  <main class="thanks-main">
+    <section class="thanks-section">
+      <div class="thanks-inner reveal">
+        <div class="thanks-badge">
+          <div class="thanks-badge-dot" aria-hidden="true"></div>
+          <span class="thanks-badge-text">Compra confirmada</span>
+        </div>
+
+        <h1 class="thanks-title">
+          ¡Gracias por confiar en <span class="thanks-title-accent">FENIA</span>!
+        </h1>
+
+        <p class="thanks-lead">
+          Tu compra fue procesada correctamente por Mercado Pago.
+        </p>
+
+        <div class="thanks-card">
+          <h2 class="thanks-card-title">¿Qué pasa ahora?</h2>
+          <ol class="thanks-steps">
+            <li>
+              <strong>Revisá tu email</strong> (también la carpeta de Spam o Promociones, por las dudas). Mercado Pago te envía el link de descarga del PDF en los próximos minutos.
+            </li>
+            <li>
+              <strong>Descargá el archivo</strong> desde el link del mail y guardalo en tu computadora o teléfono.
+            </li>
+            <li>
+              <strong>Si en 10 minutos no llegó nada</strong>, escribinos por WhatsApp y te lo enviamos directamente.
+            </li>
+          </ol>
+        </div>
+
+        <div class="thanks-actions">
+          <a class="thanks-cta-primary cta-magnetic" href={waSupportUrl} target="_blank" rel="noopener noreferrer">
+            💬 No me llegó el email
+          </a>
+          <a class="thanks-cta-secondary" href="/">
+            Volver al inicio
+          </a>
+        </div>
+
+        <div class="thanks-footer-note">
+          Tu comprobante de pago lo emite Mercado Pago automáticamente y queda
+          disponible en tu cuenta. Cualquier consulta sobre el contenido del
+          material, escribinos cuando quieras.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .thanks-main {
+    background: #0b1a2e;
+    min-height: 80vh;
+  }
+  .thanks-section {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 48px 80px;
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .thanks-inner {
+    text-align: left;
+  }
+  .thanks-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid rgba(0, 180, 216, 0.25);
+    background: rgba(0, 180, 216, 0.06);
+    margin-bottom: 28px;
+  }
+  .thanks-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00b4d8;
+    box-shadow: 0 0 8px #00b4d8;
+  }
+  .thanks-badge-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .thanks-title {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0 0 18px 0;
+  }
+  .thanks-title-accent {
+    background: linear-gradient(135deg, #00b4d8, #00d4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .thanks-lead {
+    font-size: 17px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 0 36px 0;
+    max-width: 560px;
+  }
+  .thanks-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 36px;
+  }
+  .thanks-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 18px 0;
+  }
+  .thanks-steps {
+    margin: 0;
+    padding-left: 22px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .thanks-steps li {
+    margin-bottom: 12px;
+  }
+  .thanks-steps li:last-child {
+    margin-bottom: 0;
+  }
+  .thanks-steps strong {
+    color: #fff;
+    font-weight: 700;
+  }
+  .thanks-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .thanks-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 13px 28px;
+    border-radius: 10px;
+    background: #e8573d;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3);
+    text-decoration: none;
+  }
+  .thanks-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 13px 28px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    text-decoration: none;
+  }
+  .thanks-footer-note {
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 20px;
+  }
+  @media (max-width: 640px) {
+    .thanks-section {
+      padding: 64px 20px 56px;
+    }
+    .thanks-title {
+      font-size: 32px;
+    }
+    .thanks-card {
+      padding: 22px 20px;
+    }
+    .thanks-actions {
+      flex-direction: column;
+    }
+    .thanks-cta-primary,
+    .thanks-cta-secondary {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+</style>
