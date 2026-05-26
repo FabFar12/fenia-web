@@ -51,8 +51,8 @@ const isHome = pathname === '/';
   align-items:center;
   text-decoration:none;
   background:linear-gradient(180deg,#ffffff 0%,#f4faff 100%);
-  border-radius:10px;
-  padding:6px 14px;
+  border-radius:8px;
+  padding:3px 8px;
   box-shadow:
     0 0 0 1px rgba(0,180,216,0.22),
     0 4px 14px -4px rgba(0,180,216,0.35);
@@ -66,9 +66,9 @@ const isHome = pathname === '/';
 }
 .nav-brand-img{
   display:block;
-  height:40px;
+  height:52px;
   width:auto;
-  max-width:240px;
+  max-width:280px;
   object-fit:contain;
 }
 
@@ -82,8 +82,8 @@ const isHome = pathname === '/';
 
 @media(max-width:768px){
   .main-nav{padding:10px 20px}
-  .nav-brand{padding:5px 10px;border-radius:8px}
-  .nav-brand-img{height:32px;max-width:180px}
+  .nav-brand{padding:3px 6px;border-radius:6px}
+  .nav-brand-img{height:40px;max-width:200px}
   .nav-hamburger{display:flex}
   .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(11,26,46,0.98);backdrop-filter:blur(12px);flex-direction:column;padding:24px 20px;gap:0;border-bottom:1px solid rgba(255,255,255,0.08)}
   .nav-link,.nav-cta{padding:14px 0;width:100%;font-size:15px}

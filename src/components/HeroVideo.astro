@@ -107,13 +107,15 @@
 
   /* The plate — light cream with a subtle gradient and layered shadows
      that give it depth without feeling like a sticker.
-     Padding tightened 2026-05-26 (owner feedback: too much whitespace). */
+     Padding tightened twice (2026-05-26): owner asked first for half the
+     whitespace, then for another 50% reduction. Final paddings are tight
+     to the logo bounds. */
   .hero-video-frame {
     position: relative;
     flex-shrink: 0;
     background: linear-gradient(180deg, #ffffff 0%, #f4faff 100%);
-    border-radius: 22px;
-    padding: 14px 24px;
+    border-radius: 18px;
+    padding: 7px 12px;
     /* Layered shadows:
        1. 1px cyan ring → ties the plate to the brand
        2. 24px outward cyan glow → premium "object showcase" feel
@@ -159,7 +161,7 @@
   @media (max-width: 1024px) {
     .hero-video { padding: 56px 20px 72px; }
     .hero-video-stage { gap: 28px; }
-    .hero-video-frame { padding: 12px 18px; border-radius: 18px; }
+    .hero-video-frame { padding: 6px 10px; border-radius: 14px; }
     .hero-video-asset { height: 210px; }
   }
 
@@ -168,8 +170,8 @@
     .hero-video { padding: 44px 16px 60px; }
     .hero-video-stage { gap: 0; max-width: 100%; justify-content: center; }
     .hero-video-frame {
-      padding: 10px 14px;
-      border-radius: 16px;
+      padding: 5px 8px;
+      border-radius: 12px;
       box-shadow:
         0 0 0 1px rgba(0, 180, 216, 0.22),
         0 14px 36px -12px rgba(0, 180, 216, 0.4),
