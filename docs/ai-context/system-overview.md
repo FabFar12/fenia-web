@@ -13,8 +13,10 @@
 ## Live deployment
 
 - Production URL: `https://fenia.com.ar/`
-- Hosting: Vercel (auto-deploy from `main` branch).
-- DNS: managed externally — likely Hostinger (under investigation, see [PENDING.md #2](../../PENDING.md)).
+- Hosting: **Hostinger** shared (web + DNS + domain + email; single provider, prepaid 4 years). Deploy auto from `main` via GitHub Actions FTPS. See [ADR-022](../adr/ADR-022-pivot-to-hostinger-only.md).
+- Hosting config (headers, cache, 404, HTTPS redirect) versioned in [`public/.htaccess`](../../public/.htaccess) — see [ADR-023](../adr/ADR-023-htaccess-hosting-config.md).
+- Migration from Vercel → Hostinger in progress as of 2026-05-26. See [docs/audit/2026-05-26-hosting-pivot-to-hostinger.md](../audit/2026-05-26-hosting-pivot-to-hostinger.md) and [PENDING.md](../../PENDING.md).
+- Historical: an interim plan to move to Cloudflare Pages ([docs/audit/2026-05-26-hosting-migration-decision.md](../audit/2026-05-26-hosting-migration-decision.md), [ADR-018](../adr/ADR-018-migrate-to-cloudflare-pages.md)) was reversed within hours by the owner. Kept as record.
 
 ## Page composition
 
@@ -95,8 +97,8 @@ See [`content-model.md`](./content-model.md) for the operational guide.
 | 4 | ~~No SEO meta (OG, schema.org, sitemap, robots)~~ | dev | **partly resolved 2026-05-19** — OG, Twitter, canonical, sitemap.xml and robots.txt landed. Schema.org `Organization` JSON-LD still pending |
 | 5 | ~~Footer social/legal links are `href="#"` (dead)~~ | dev | **resolved 2026-05-19** — dead links removed; visible ones come from `site.ts` with conditional rendering |
 | 6 | ~~Body text contrast fails WCAG AA in many places~~ | dev | **resolved 2026-05-19** — [ADR-010](../adr/ADR-010-accessibility-pass.md) |
-| 7 | No analytics, no error tracking, no Web Vitals | dev | queued — Fase 3 |
-| 8 | No `vercel.json` versioned (Vercel access pending) | owner | blocked on [PENDING.md #1](../../PENDING.md) |
+| 7 | No analytics, no error tracking, no Web Vitals | dev | queued — implementation tied to [ADR-021](../adr/ADR-021-observability-baseline.md), post-Cloudflare cutover |
+| 8 | ~~No `vercel.json` versioned (Vercel access pending)~~ | dev | **resolved 2026-05-26** — hosting moves to Hostinger; config versioned via [`public/.htaccess`](../../public/.htaccess) ([ADR-022](../adr/ADR-022-pivot-to-hostinger-only.md), [ADR-023](../adr/ADR-023-htaccess-hosting-config.md)) |
 | 9 | ~~"Animated/dynamic visual leap"~~ | dev | **resolved 2026-05-19** — Pack 1+2+3+4 shipped ([ADR-008](../adr/ADR-008-animations-and-3d-neural-network.md)) |
 | 10 | ~~No structured data / 404 page~~ | dev | **resolved 2026-05-19** — Schema.org JSON-LD + branded 404 ([ADR-009](../adr/ADR-009-seo-structured-data.md)) |
 | 11 | ~~Pack v2 premium polish~~ | dev | **resolved 2026-05-19** — Bloom, idle drift, gradient lines, magnetic CTAs, tilt cards, sticky label, custom View Transitions ([ADR-011](../adr/ADR-011-pack-v2-premium-polish.md)) |

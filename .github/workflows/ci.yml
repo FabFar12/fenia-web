@@ -1,0 +1,121 @@
+# CI + Deploy — see docs/adr/ADR-020-ci-minimal-github-actions.md
+#
+# Two jobs:
+#   1. check-and-build  — runs on every push and PR; quality gate.
+#   2. deploy           — runs ONLY on push to main; uploads dist/ to Hostinger
+#                         via FTPS. Requires the HOSTINGER_FTP_* secrets.
+#
+# Configure secrets at:
+#   Repo → Settings → Secrets and variables → Actions → New repository secret
+# Required: HOSTINGER_FTP_HOST, HOSTINGER_FTP_PORT, HOSTINGER_FTP_USER,
+#           HOSTINGER_FTP_PASSWORD, HOSTINGER_FTP_REMOTE_DIR
+
+name: CI + Deploy
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+# Cancel in-progress runs for the same ref when a new push lands.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check-and-build:
+    name: astro check + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # Reads engines.node from package.json — keeps CI in lockstep
+          # with local dev and the build environment.
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Astro check (TypeScript + Astro diagnostics)
+        run: npm run check
+
+      - name: Production build
+        run: npm run build
+
+      - name: Upload dist/ artifact
+        # Only on push to main — preview branches don't deploy, so don't
+        # need to keep the artifact around.
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Hostinger via FTPS
+    needs: check-and-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://fenia.com.ar/
+
+    steps:
+      - name: Download dist/ artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Validate FTPS secrets are configured
+        # Fast-fail with a clear message if the owner hasn't supplied creds.
+        # Otherwise the FTP action errors halfway through with a less obvious
+        # "missing host" message.
+        run: |
+          missing=()
+          [ -z "${{ secrets.HOSTINGER_FTP_HOST }}" ] && missing+=("HOSTINGER_FTP_HOST")
+          [ -z "${{ secrets.HOSTINGER_FTP_PORT }}" ] && missing+=("HOSTINGER_FTP_PORT")
+          [ -z "${{ secrets.HOSTINGER_FTP_USER }}" ] && missing+=("HOSTINGER_FTP_USER")
+          [ -z "${{ secrets.HOSTINGER_FTP_PASSWORD }}" ] && missing+=("HOSTINGER_FTP_PASSWORD")
+          [ -z "${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}" ] && missing+=("HOSTINGER_FTP_REMOTE_DIR")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            echo "::error::Configure at: Repo → Settings → Secrets and variables → Actions"
+            echo "::error::See docs/ai-context/deployment.md for what each value should be."
+            exit 1
+          fi
+
+      - name: Deploy via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          port: ${{ secrets.HOSTINGER_FTP_PORT }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_DIR }}
+          protocol: ftps
+          # `strict` rejects untrusted certs. If Hostinger uses a cert chain
+          # the runner cannot validate, downgrade to `loose` with a comment.
+          security: strict
+          # Keep prior files that aren't part of dist/ untouched (avoids
+          # nuking mail config, Hostinger's own .well-known, etc.).
+          dangerous-clean-slate: false
+          # Diff-sync state file. Speeds up subsequent deploys.
+          state-name: .ftp-deploy-sync-state.json
+          # Don't try to delete files we never uploaded; reduces surprises.
+          dry-run: false

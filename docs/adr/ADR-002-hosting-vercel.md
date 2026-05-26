@@ -1,7 +1,9 @@
 # ADR-002 — Hosting on Vercel (status quo + investigation pending)
 
 ## Status
-Accepted (2026-05-19) for the production deploy. Action items pending — see [PENDING.md #1](../../PENDING.md) and [#2](../../PENDING.md).
+**Superseded by [ADR-018](./ADR-018-migrate-to-cloudflare-pages.md) (2026-05-26).** The site is migrating to Cloudflare Pages. This ADR is kept as historical record of the prior decision and its rationale; do not act on it.
+
+Originally: Accepted (2026-05-19) for the production deploy.
 
 ## Context
 
