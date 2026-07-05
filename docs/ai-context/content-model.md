@@ -60,7 +60,7 @@ Schema and validation: [`src/content.config.ts`](../../src/content.config.ts).
 ```yaml
 ---
 title: "Curso de Neuroliderazgo — Edición 2026"
-type: "Curso"                   # 'Guía' | 'Toolkit' | 'Método' | 'Curso' | 'Workshop' | 'Otro'
+type: "Curso"                   # 'Guía' | 'Caja de herramientas' | 'Método' | 'Curso' | 'Workshop' | 'Otro'
 status: "coming-soon"           # 'draft' | 'coming-soon' | 'live' | 'archived'
 accent: "cyan"                  # 'cyan' | 'coral'
 summary: "Programa intensivo de 8 semanas para directivos."

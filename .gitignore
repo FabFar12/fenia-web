@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 .vercel
 .env*.local
+
+# Playwright + ad-hoc local artifacts
+tmp/

@@ -1,6 +1,6 @@
 ---
 title: "Toolkit de IA para Emprendedores"
-type: "Toolkit"
+type: "Caja de herramientas"
 status: "draft"
 accent: "coral"
 summary: "Herramientas de IA curadas con tutoriales paso a paso. Flujos de trabajo, prompts estratégicos y criterios de selección."
