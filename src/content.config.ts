@@ -24,7 +24,7 @@ const products = defineCollection({
     title: z.string().min(3),
 
     /** Category — drives the badge color & icon. */
-    type: z.enum(['Guía', 'Toolkit', 'Método', 'Curso', 'Workshop', 'Otro']),
+    type: z.enum(['Guía', 'Caja de herramientas', 'Método', 'Curso', 'Workshop', 'Otro']),
 
     /**
      * Lifecycle state. Controls visibility and CTA behavior.
