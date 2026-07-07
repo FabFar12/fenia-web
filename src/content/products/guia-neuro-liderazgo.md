@@ -1,16 +1,16 @@
 ---
 title: "Guía de Neuro-Liderazgo"
 type: "Guía"
-status: "draft"
+status: "hidden"
 accent: "cyan"
 summary: "Principios neurocientíficos aplicados al liderazgo cotidiano. Estrategias validadas para regular emociones y decidir con claridad."
 price: null
-cta:
-  label: "Avisame cuando esté listo"
-  href: "https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20que%20me%20avisen%20cuando%20est%C3%A9%20lista%20la%20Gu%C3%ADa%20de%20Neuro-Liderazgo"
+currency: "ARS"
+deliveryMode: "manual"
 audiences:
   - profesionales
   - empresas
+order: 97
 publishedAt: 2026-05-19
 ---
 

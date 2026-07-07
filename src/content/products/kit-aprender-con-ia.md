@@ -5,23 +5,24 @@ status: "coming-soon"
 accent: "coral"
 summary: "Para estudiar con IA sin que la IA estudie por vos. Un kit para comprender, practicar, producir y verificar ideas con criterio propio, usando la inteligencia artificial como apoyo y no como reemplazo de tu cabeza."
 price: 8000
-cta:
-  label: "Avisame cuando esté disponible"
-  href: "https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20saber%20cu%C3%A1ndo%20est%C3%A9%20disponible%20el%20kit%20Aprender%20con%20IA%20sin%20dejar%20de%20pensar"
+currency: "ARS"
+deliveryMode: "lead-magnet"
 audiences: []
+order: 3
 publishedAt: 2026-07-04
 ---
 
-> **Estado (2026-07-04)**: producto nuevo, cargado en `draft` (invisible en el sitio) a partir del zip `Aprender-con-IA-sin-dejar-de-pensar_Kit-FENIA_v1`, pendiente de revisión final de Fab.
+> **Estado (2026-07-07)**: producto cargado a partir del zip `Aprender-con-IA-sin-dejar-de-pensar_Kit-FENIA_v1`, pendiente de revisión final de Fab. Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado (2026-07-04)**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`.
+> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
 >
-> **Audiencia**: el público principal es *estudiantil* (secundario avanzado, ingreso universitario, universitarios, tesistas), que no encaja en las 3 audiencias del sitio (`profesionales` / `emprendedores` / `empresas`, pensadas para un site B2B/consultoría). Se deja `audiences: []` a propósito, sin forzar — confirmado con Fab que no corresponde asignarle `profesionales`. No bloquea nada hoy porque el campo todavía no filtra nada en `Productos.astro`.
+> **Audiencia**: el público principal es *estudiantil* (secundario avanzado, ingreso universitario, universitarios, tesistas), que no encaja en las 3 audiencias del sitio (`profesionales` / `emprendedores` / `empresas`, pensadas para un site B2B/consultoría). Se deja `audiences: []` a propósito, sin forzar — confirmado con Fab que no corresponde asignarle `profesionales`.
 >
 > **Pendiente antes de pasar a `live`**:
 > - Confirmar viabilidad operativa de la garantía de 7 días sugerida en el copy antes de publicarla.
 > - Imagen de portada (el zip trae `Assets/Portada.png` y un mockup).
-> - Link de cobro de Mercado Pago (o, si se define el cambio a Google Drive para la entrega, el link correspondiente).
+> - `paymentUrl`: link de cobro de Mercado Pago. Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.
+> - Definir qué recurso gratuito entrega el formulario de captura para este kit.
 
 ## La situación, sin rodeos
 

@@ -5,23 +5,24 @@ status: "coming-soon"
 accent: "cyan"
 summary: "Para preparar clases con IA sin que parezcan hechas para un grupo que no existe. Un kit para planificar, explicar, adaptar actividades y revisar propuestas sin perder contexto, presencia docente ni criterio pedagógico."
 price: 8000
-cta:
-  label: "Avisame cuando esté disponible"
-  href: "https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20saber%20cu%C3%A1ndo%20est%C3%A9%20disponible%20el%20kit%20Ense%C3%B1ar%20con%20IA%20sin%20automatizar%20la%20pedagog%C3%ADa"
+currency: "ARS"
+deliveryMode: "lead-magnet"
 audiences:
   - profesionales
   - empresas
+order: 2
 publishedAt: 2026-07-04
 ---
 
-> **Estado (2026-07-04)**: producto nuevo, cargado en `draft` (invisible en el sitio) a partir del zip `Ensenar-con-IA-sin-automatizar-la-pedagogia_Kit-FENIA_v1`, pendiente de revisión final de Fab.
+> **Estado (2026-07-07)**: producto cargado a partir del zip `Ensenar-con-IA-sin-automatizar-la-pedagogia_Kit-FENIA_v1`, pendiente de revisión final de Fab. Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado (2026-07-04)**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`.
+> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
 >
 > **Pendiente antes de pasar a `live`**:
 > - Confirmar viabilidad operativa de la garantía de 7 días sugerida en el copy antes de publicarla.
 > - Imagen de portada (el zip trae `Assets/Portada.png` y dos mockups).
-> - Link de cobro de Mercado Pago (o, si se define el cambio a Google Drive para la entrega, el link correspondiente).
+> - `paymentUrl`: link de cobro de Mercado Pago. Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.
+> - Definir qué recurso gratuito entrega el formulario de captura para este kit (no hay uno documentado todavía en el material fuente, a diferencia de "Evaluar con IA sin vigilar").
 
 ## La situación, sin rodeos
 

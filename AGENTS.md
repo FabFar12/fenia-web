@@ -7,6 +7,7 @@
     <ul>
       <li><strong>Big picture / what the site is</strong> 👉 <code>docs/ai-context/system-overview.md</code> &amp; <code>README.md</code></li>
       <li><strong>Anything that touches site copy, WhatsApp number, social links, hero stats, products, testimonials</strong> 👉 <code>docs/ai-context/content-model.md</code> &amp; <code>docs/adr/ADR-003-content-layer.md</code> — <strong>NEVER hardcode these in components; they live in <code>src/data/site.ts</code> or <code>src/content/</code></strong></li>
+      <li><strong>Product schema, CTA-by-status logic, email lead capture (Mailerlite)</strong> 👉 <code>docs/adr/ADR-027-product-schema-and-lead-capture.md</code> &amp; <code>docs/fab-mailerlite-setup.md</code> (extends <code>ADR-025</code> for Mercado Pago)</li>
       <li><strong>Styles, colors, typography, responsive, animations</strong> 👉 <code>docs/ai-context/style-guide.md</code> &amp; <code>docs/adr/ADR-004-styling-strategy.md</code></li>
       <li><strong>Deployment, hosting, env vars, domain, DNS</strong> 👉 <code>docs/ai-context/deployment.md</code> &amp; <code>docs/adr/ADR-022-pivot-to-hostinger-only.md</code> (current) &amp; <code>docs/adr/ADR-018-migrate-to-cloudflare-pages.md</code> + <code>ADR-002</code> (both superseded, historical) &amp; <code>PENDING.md</code></li>
       <li><strong>HTTP headers (CSP, HSTS), redirects, cache policy</strong> 👉 <code>public/.htaccess</code> &amp; <code>docs/adr/ADR-023-htaccess-hosting-config.md</code></li>

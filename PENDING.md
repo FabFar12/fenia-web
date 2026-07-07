@@ -91,34 +91,23 @@
 
 ## 🟡 Decisiones de producto pendientes
 
-### 10. Activación del primer producto real (Guía para evaluar en tiempos de IA) — 2026-05-26
-**Estado:** decisión arquitectónica cerrada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md). Infraestructura del sitio **lista para vender**:
+### 10. Activación de los 3 productos reales (kits FENIA) — actualizado 2026-07-07
+**Estado:** schema v2 y lógica de CTA por status cerrados en [ADR-027](./docs/adr/ADR-027-product-schema-and-lead-capture.md) (extiende [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md)). Infraestructura del sitio **lista para vender y para capturar leads**:
 
-- ✅ Producto creado en `src/content/products/guia-evaluar-tiempos-ia.md` con `status: "coming-soon"` (esperando datos de Fab para pasar a `live`).
-- ✅ Los 3 productos placeholder anteriores pasaron a `status: "draft"` (ocultos del sitio).
-- ✅ Página `/gracias` creada en `src/pages/gracias.astro` (mensaje post-compra + WhatsApp de soporte si el email no llega).
-- ✅ Guía paso-a-paso para Fab en [`docs/fab-mercadopago-setup.md`](./docs/fab-mercadopago-setup.md) — pasalá tal cual y volvé con los 5 datos del final.
+- ✅ 3 productos reales en `status: "coming-soon"`: `guia-evaluar-tiempos-ia.md`, `kit-ensenar-con-ia.md`, `kit-aprender-con-ia.md`. Precio AR$8.000 cada uno.
+- ✅ Los 3 productos placeholder anteriores (Neuro-Liderazgo, Toolkit Emprendedores, Bienestar Organizacional) en `status: "hidden"`.
+- ✅ CTA de `coming-soon` ahora captura email en `/recursos-gratuitos` (antes solo enlazaba a WhatsApp) — precio formateado ya se muestra en cards `live`.
+- ✅ Guía paso-a-paso para Fab: cobro en [`docs/fab-mercadopago-setup.md`](./docs/fab-mercadopago-setup.md), captura de email en [`docs/fab-mailerlite-setup.md`](./docs/fab-mailerlite-setup.md).
 
-**Bloqueantes — Fab debe proveer (seguir `docs/fab-mercadopago-setup.md`):**
-1. **Cuenta Mercado Pago Vendedor activa** (o confirmar que usará la existente de la consultoría).
-2. **Crear el cobro en Mercado Pago** con:
-   - PDF como entrega automática.
-   - URL de retorno: `https://fenia.com.ar/gracias` (ya creada).
-   - Cuotas sin interés según precio (ver guía).
-3. **Link de cobro** generado (formato `https://link.mercadopago.com.ar/<id>` o `https://mpago.la/<id>`).
-4. **Metadatos**: título oficial, descripción larga, precio en ARS, imagen 1200×630 (opcional).
-5. **Test end-to-end** propio antes de pasar el link (Fab compra a sí mismo, valida que llega el email).
+**Bloqueantes — Fab debe proveer, por kit:**
+1. **Mercado Pago** (seguir `docs/fab-mercadopago-setup.md`): cuenta vendedor, cobro con entrega automática, link de pago, metadatos, test end-to-end.
+2. **Mailerlite** (seguir `docs/fab-mailerlite-setup.md`): cuenta, grupo, formulario embebido, automation con el recurso gratuito. Sin esto, el botón "Quiero el recurso gratis" sigue redirigiendo a WhatsApp (no rompe nada, solo no está automatizado).
+3. Confirmar qué recurso gratuito específico entrega cada kit vía email (el copy de "Evaluar con IA sin vigilar" ya menciona uno: el "Acuerdo de uso de IA"; los otros dos kits no tienen uno definido todavía).
 
-**Dev actions una vez recibidos los 5 datos:**
-1. Editar `src/content/products/guia-evaluar-tiempos-ia.md`:
-   - `status: "live"`.
-   - `cta.label: "Comprar ahora"`.
-   - `cta.href: <link MP>`.
-   - `price: <número>`.
-   - Reemplazar el cuerpo del `.md` con la descripción real.
-2. (Opcional) Mejorar `Productos.astro` para mostrar precio formateado en cards `live` con price ≠ null. Cambio visual → PROPOSE-THEN-EXECUTE primero.
-3. Push a `dev` → merge a `main` → deploy automático a Hostinger.
-4. Test end-to-end por Fab con compra real.
+**Dev actions una vez recibidos los datos, por kit:**
+1. Editar el `.md` del producto: `paymentUrl: <link MP>`, `deliveryMode: "mercadopago-auto"`, `status: "live"`.
+2. Push a `dev` → PR a `main` con aprobación explícita → deploy automático a Hostinger.
+3. Test end-to-end por Fab con compra real.
 
 ### (Cerrado) ¿Sección Productos debe vender o solo informar? — 2026-05-19 → resuelto 2026-05-26
 Decisión tomada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md): **Productos vende**, vía Mercado Pago Link de Pago. Tier-B (checkout embebido + backend PHP) diferido hasta validar con volumen real (≥20 ventas/mes o ≥3 productos live).
