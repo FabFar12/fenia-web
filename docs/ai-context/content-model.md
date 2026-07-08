@@ -61,30 +61,34 @@ Schema and validation: [`src/content.config.ts`](../../src/content.config.ts).
 ---
 title: "Curso de Neuroliderazgo — Edición 2026"
 type: "Curso"                   # 'Guía' | 'Caja de herramientas' | 'Método' | 'Curso' | 'Workshop' | 'Otro'
-status: "coming-soon"           # 'draft' | 'coming-soon' | 'live' | 'archived'
+status: "coming-soon"           # 'coming-soon' | 'live' | 'hidden'
 accent: "cyan"                  # 'cyan' | 'coral'
 summary: "Programa intensivo de 8 semanas para directivos."
-price: null                     # number (ARS) or null for 'consultar'
-cta:
-  label: "Avisame cuando esté listo"
-  href: "https://wa.me/5493513559947?text=Me%20interesa%20el%20Curso%20de%20Neuroliderazgo"
+price: null                     # number or null for 'consultar'
+currency: "ARS"
+paymentUrl:                     # opcional — link de Mercado Pago, solo cuando status: live. NUNCA un link de entrega.
+ctaLabel:                       # opcional — override del texto del botón (si falta, se infiere del status)
+deliveryMode: "lead-magnet"     # 'lead-magnet' | 'mercadopago-auto' | 'manual' — ver ADR-027
 audiences: ["empresas", "profesionales"]
+order: 4                        # orden manual en el grid, ascendente
 publishedAt: 2026-06-01
 ---
 
 Breve descripción adicional en Markdown (opcional). Este cuerpo se puede mostrar en una página de detalle futura o ignorar si solo se usa la card en la home.
 ```
 
-3. Save. Run `npm run dev` — the new card appears (if its `status` is not `draft`).
+3. Save. Run `npm run dev` — the new card appears (if its `status` is not `hidden`).
 
-**Status reference:**
+**Status reference** (ver [ADR-027](../adr/ADR-027-product-schema-and-lead-capture.md) para el detalle completo):
 
 | Status | Where it shows | CTA behavior |
 |---|---|---|
-| `draft` | Nowhere (hidden, even from preview deploys) | n/a |
-| `coming-soon` | Shows in the grid with a "Próximamente" badge | CTA "Avisame cuando esté listo" → WhatsApp |
-| `live` | Shows normally | CTA `cta.label` → `cta.href` (WhatsApp or checkout URL when checkout exists) |
-| `archived` | Hidden from public, kept for history | n/a |
+| `hidden` | Nowhere (hidden, even from preview deploys) | n/a |
+| `coming-soon` | Shows in the grid with a "Próximamente" badge | Captura de email → `/recursos-gratuitos` (suscribe + entrega recurso gratuito vía ESP) |
+| `live` + `paymentUrl` | Shows normally | "Comprar ahora" (o `ctaLabel`) → `paymentUrl` (Mercado Pago) |
+| `live` sin `paymentUrl` | Shows normally, sin botón de compra | n/a — card informativa |
+
+**Nunca** pongas la URL real de entrega (Drive, descarga firmada, etc.) en `paymentUrl`, `ctaLabel` ni en el cuerpo del `.md`. `paymentUrl` es exclusivamente el link de cobro de Mercado Pago; la entrega la maneja Mercado Pago o el ESP de email por fuera del repo.
 
 ### "Agregar un testimonio aprobado"
 

@@ -5,22 +5,23 @@ status: "coming-soon"
 accent: "cyan"
 summary: "Un kit para rediseñar consignas, rúbricas y acuerdos de uso de IA, cuidando autoría, proceso y evidencia de aprendizaje sin convertirte en detective digital."
 price: 8000
-cta:
-  label: "Avisame cuando esté disponible"
-  href: "https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20saber%20cu%C3%A1ndo%20est%C3%A9%20disponible%20el%20kit%20Evaluar%20con%20IA%20sin%20vigilar"
+currency: "ARS"
+deliveryMode: "lead-magnet"
 audiences:
   - profesionales
   - empresas
+order: 1
 publishedAt: 2026-05-26
 ---
 
-> **Estado (2026-07-04)**: el material creció de "guía PDF" a **Kit FENIA completo** (guía + 10 plantillas editables + 2 imprimibles + mini pack de prompts + fuentes). Vuelve a `status: "draft"` hasta que Fab confirme el contenido final del kit (zip recibido, pendiente de revisión). Decisión arquitectónica de cobro: [ADR-025](../../../docs/adr/ADR-025-product-sales-via-mercadopago.md). Flujo operativo para Fab: [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md).
+> **Estado (2026-07-07)**: el material creció de "guía PDF" a **Kit FENIA completo** (guía + 10 plantillas editables + 2 imprimibles + mini pack de prompts + fuentes). Decisión arquitectónica de cobro: [ADR-025](../../../docs/adr/ADR-025-product-sales-via-mercadopago.md). Flujo operativo para Fab: [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md). Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado (2026-07-04)**: precio AR$ 8.000 (sin cambios), `type: "Caja de herramientas"`, `status: "coming-soon"`.
+> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
 >
 > **Pendiente antes de pasar a `live`**:
-> - Link de cobro de Mercado Pago (o, si se define el cambio a Google Drive para la entrega, el link correspondiente).
+> - `paymentUrl`: link de cobro de Mercado Pago (ver [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md)). Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.
 > - Imagen de portada (el zip trae `Assets/Portada.png` — evaluar si se usa).
+> - Confirmar el recurso gratuito que entrega el formulario de "Quiero el recurso gratis" para este kit (el copy de venta menciona el "Acuerdo de uso de IA" como lead magnet — ver `Ventas/Copy_Landing_FAQ_Titulares.md` del zip original).
 
 ## La situación, sin rodeos
 

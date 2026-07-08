@@ -105,23 +105,17 @@ export function sectionHref(anchor: string, pathname: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero stats
-// TODO (PENDING.md #5): align values with reality or derive from real data.
-// `productosCount` should ideally be derived from getCollection('products').filter(p => p.data.status === 'live').length
+// Fixed 2026-07-07: "12+ Productos digitales" was an invented number. Replaced
+// with the real coming-soon/live product count. "100% Enfoque aplicado" was an
+// unsourced claim (PENDING.md #9) and was removed rather than reworded.
+// "6 Áreas de expertise" is untouched — out of scope for this change.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type HeroStat = { label: string; value: string };
 
-// NOTE (PENDING.md #5): preserving current production values verbatim to keep
-// this refactor visually identical. The "6" and "12+" are placeholder values
-// that need to be reconciled with reality in a follow-up PR with owner approval.
-// Proposed honest values (when approved):
-//   - "4" / "Áreas de servicio"   (matches `services` length)
-//   - "3" / "Audiencias"          (matches `audiences` length)
-//   - "100%" / "Enfoque aplicado" (legacy claim, no source)
 export const heroStats: readonly HeroStat[] = [
-  { value: '6', label: 'Áreas de expertise' }, // TODO: align with reality
-  { value: '12+', label: 'Productos digitales' }, // TODO: derive from getCollection('products').filter(live).length
-  { value: '100%', label: 'Enfoque aplicado' }, // TODO: validate or replace
+  { value: '6', label: 'Áreas de expertise' }, // TODO: align with reality — not addressed yet
+  { value: '3', label: 'Kits en camino' },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

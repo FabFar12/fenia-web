@@ -1,20 +1,44 @@
 ---
 // Productos.astro — Sección de productos digitales FENIA
 // Reads from src/content/products/ via Astro Content Collections.
-// Status 'draft' and 'archived' are hidden. 'coming-soon' shows a "PRÓXIMAMENTE" suffix.
-// See: docs/ai-context/content-model.md and docs/adr/ADR-003-content-layer.md
+// Status 'hidden' is never rendered. 'coming-soon' shows a "PRÓXIMAMENTE" suffix.
+// CTA behavior per status/paymentUrl: see ADR-027 and docs/ai-context/content-model.md.
 import { getCollection } from 'astro:content';
 import { whatsapp } from '../data/site';
 
 const allProducts = await getCollection('products');
 const products = allProducts
   .filter((p) => p.data.status === 'live' || p.data.status === 'coming-soon')
-  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+  .sort((a, b) => a.data.order - b.data.order);
 
 const accentText = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573D');
 const accentBg = (a: 'cyan' | 'coral') => (a === 'cyan' ? 'rgba(0,180,216,0.1)' : 'rgba(232,87,61,0.1)');
 
 const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personalizado para mi equipo u organización');
+
+const formatPrice = (price: number, currency: 'ARS') =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price);
+
+/**
+ * CTA per product, driven by status/paymentUrl (see ADR-027):
+ *  - coming-soon           → captura de email (lead magnet), enlaza a /recursos-gratuitos
+ *  - live + paymentUrl     → "Comprar ahora" → Mercado Pago (external)
+ *  - live sin paymentUrl   → sin botón de compra (card informativa)
+ */
+function ctaFor(product: (typeof products)[number]) {
+  const { status, paymentUrl, ctaLabel } = product.data;
+  if (status === 'coming-soon') {
+    return {
+      label: ctaLabel ?? 'Quiero el recurso gratis',
+      href: `/recursos-gratuitos?producto=${encodeURIComponent(product.id)}&titulo=${encodeURIComponent(product.data.title)}`,
+      external: false,
+    };
+  }
+  if (status === 'live' && paymentUrl) {
+    return { label: ctaLabel ?? 'Comprar ahora', href: paymentUrl, external: true };
+  }
+  return null;
+}
 ---
 
 <section id="productos" style="background:#0B1A2E;position:relative;overflow:hidden;">
@@ -44,7 +68,12 @@ const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personali
         const chipLabel = isComingSoon
           ? `${product.data.type} · Próximamente`
           : product.data.type;
-        const footerLeft = isComingSoon ? 'En preparación' : 'Consultar';
+        const footerLeft = isComingSoon
+          ? 'En preparación'
+          : product.data.price != null
+            ? formatPrice(product.data.price, product.data.currency)
+            : 'Consultar';
+        const cta = ctaFor(product);
         return (
           <div class="reveal tilt-card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
             <div style={`position:absolute;top:0;left:0;right:0;height:2px;background:${accentText(product.data.accent)};opacity:0.5;`}></div>
@@ -53,7 +82,16 @@ const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personali
             <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 28px 0;flex:1;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.summary}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
               <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);font-family:'Plus Jakarta Sans',sans-serif;">{footerLeft}</span>
-              <a href={product.data.cta.href} target="_blank" rel="noopener noreferrer" style="font-size:12px;font-weight:600;padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;">{product.data.cta.label} →</a>
+              {cta && (
+                <a
+                  href={cta.href}
+                  target={cta.external ? '_blank' : undefined}
+                  rel={cta.external ? 'noopener noreferrer' : undefined}
+                  style="font-size:12px;font-weight:600;padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;"
+                >
+                  {cta.label} →
+                </a>
+              )}
             </div>
           </div>
         );

@@ -1,0 +1,109 @@
+---
+// recursos-gratuitos.astro — Captura de email para la lista de lanzamiento
+// Cuando PUBLIC_MAILERLITE_FORM_URL está seteada, embebe el form de Mailerlite
+// (mismo patrón que /dejanos-tu-testimonio con Tally). Si no, fallback a WhatsApp.
+// Ver ADR-027 y docs/fab-mailerlite-setup.md.
+//
+// NOTA: el sitio es static output (astro build genera el HTML una sola vez), así
+// que el query string (?producto=&titulo=) NO se puede leer en el frontmatter
+// (Astro.url solo refleja la URL en build time, no la del navegador). La
+// personalización por producto se hace 100% client-side en el <script> de abajo.
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { whatsapp } from '../data/site';
+
+const mailerliteUrl = import.meta.env.PUBLIC_MAILERLITE_FORM_URL as string | undefined;
+const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próximos recursos');
+---
+
+<Layout title="Recursos gratuitos — FENIA">
+  <Nav />
+
+  <main style="background:#0B1A2E;min-height:80vh;">
+    <section style="max-width:760px;margin:0 auto;padding:100px 48px 80px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;">
+
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);margin-bottom:24px;">
+        <div style="width:5px;height:5px;border-radius:50%;background:#00B4D8;box-shadow:0 0 8px #00B4D8;"></div>
+        <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;">Recursos gratuitos</span>
+      </div>
+
+      <h1 style="font-size:40px;font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin:0 0 16px 0;">
+        <span id="lg-title-prefix">Sumate a la lista de lanzamiento de</span>{' '}
+        <span id="lg-title-target" style="background:linear-gradient(135deg,#00B4D8,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FENIA</span>
+      </h1>
+
+      <p style="font-size:17px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 32px 0;max-width:560px;">
+        Dejanos tu email y te avisamos apenas esté disponible. También te mandamos un recurso gratuito para arrancar mientras tanto.
+      </p>
+
+      {mailerliteUrl ? (
+        <div style="margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
+          <iframe
+            id="lg-iframe"
+            data-base-src={mailerliteUrl}
+            src={mailerliteUrl}
+            width="100%"
+            height="480"
+            title="Formulario de suscripción — FENIA"
+            style="display:block;background:transparent;border:0;"
+            loading="lazy"
+          ></iframe>
+        </div>
+      ) : (
+        <div style="margin-top:16px;padding:32px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
+          <h2 style="font-size:18px;font-weight:700;margin:0 0 12px 0;color:#fff;">
+            Estamos terminando el formulario público
+          </h2>
+          <p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 24px 0;">
+            Mientras tanto, escribinos por WhatsApp y te avisamos apenas esté disponible.
+          </p>
+          <a id="lg-wa-link" class="cta-magnetic" href={defaultWaUrl} target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;padding:13px 28px;border-radius:10px;background:#E8573D;color:#fff;box-shadow:0 4px 20px rgba(232,87,61,0.3);text-decoration:none;">
+            💬 Avisame por WhatsApp
+          </a>
+        </div>
+      )}
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:48px 0 32px 0;" />
+
+      <h2 style="font-size:18px;font-weight:700;color:#fff;margin:0 0 16px 0;">Qué hacemos con tu información</h2>
+      <p style="font-size:14px;line-height:1.7;color:rgba(255,255,255,0.55);margin:0;">
+        Usamos tu email solo para avisarte sobre este recurso y novedades de FENIA. Podés darte de baja en cualquier momento desde el mismo mail que te enviemos.
+      </p>
+
+    </section>
+  </main>
+
+  <Footer />
+
+  <script>
+    // Personaliza la página según ?producto=<id>&titulo=<nombre> — tiene que
+    // correr en el cliente porque el sitio es static output (ver nota arriba).
+    const params = new URLSearchParams(window.location.search);
+    const producto = params.get('producto');
+    const titulo = params.get('titulo');
+
+    if (titulo) {
+      const prefix = document.getElementById('lg-title-prefix');
+      const target = document.getElementById('lg-title-target');
+      if (prefix) prefix.textContent = 'Sumate a la lista para';
+      if (target) target.textContent = titulo;
+    }
+
+    const waLink = document.getElementById('lg-wa-link') as HTMLAnchorElement | null;
+    if (waLink && titulo) {
+      const phone = waLink.href.match(/wa\.me\/(\d+)/)?.[1];
+      if (phone) {
+        const message = `Hola FENIA, quiero que me avisen cuando esté disponible "${titulo}"`;
+        waLink.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      }
+    }
+
+    const iframe = document.getElementById('lg-iframe') as HTMLIFrameElement | null;
+    if (iframe && producto) {
+      const base = iframe.dataset.baseSrc ?? iframe.src;
+      const separator = base.includes('?') ? '&' : '?';
+      iframe.src = `${base}${separator}producto=${encodeURIComponent(producto)}`;
+    }
+  </script>
+</Layout>

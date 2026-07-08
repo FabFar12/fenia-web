@@ -59,14 +59,14 @@ Four service lines (shown in `Servicios.jsx` as tabs):
 Visitor lands
    │
    ▼
-Hero CTA "Solicitar un turno" ─────┐
+Hero CTA "Solicitar diagnóstico" ─────┐
    │                               │
    │ scroll                        │
    ▼                               │
 Metodología / Servicios / Productos / Confianza
    │                               │
    ▼                               │
-Contacto CTA "Solicitar un turno" ─┤
+Contacto CTA "Solicitar diagnóstico" ─┤
    │                               │
    │ click                         │
    ▼                               ▼

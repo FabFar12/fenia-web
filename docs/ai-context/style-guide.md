@@ -13,7 +13,7 @@
 | `navy.mid` | `#132847` | Confianza section background |
 | `navy.dark` | `#060E1A` | Footer background |
 | `cyan` | `#00B4D8` | Primary accent — value-prop highlights, primary stats, "neuro" |
-| `coral` | `#E8573D` | Secondary accent — CTAs, "Solicitar un turno" buttons, emprendedores audience |
+| `coral` | `#E8573D` | Secondary accent — CTAs, "Solicitar diagnóstico" buttons, emprendedores audience |
 | `white` | `#FFFFFF` | Headings, primary text |
 | `white/65` | `rgba(255,255,255,0.65)` | Body text (post-WCAG fix; old code uses 0.3–0.45) |
 | `white/30` | `rgba(255,255,255,0.30)` | Labels, captions, decorative text |
@@ -85,7 +85,7 @@ Use cyan dot for "Inicio / Metodología / Servicios / Confianza" eyebrows, coral
 
 | Variant | Background | Text | Use |
 |---|---|---|---|
-| Primary | `bg-coral` | `text-white` | "Solicitar un turno", "Hablemos", "Consultar →" |
+| Primary | `bg-coral` | `text-white` | "Solicitar diagnóstico", "Hablemos", "Consultar →" |
 | Secondary outline | `bg-white/[0.03]` `border-white/15` | `text-white` | "Comprar productos digitales", "Ver soluciones →" |
 | Subtle / inline | none, just colored text | `text-cyan` or `text-coral` | "Ver soluciones →" link inside cards |
 

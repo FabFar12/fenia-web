@@ -1,15 +1,15 @@
 ---
 title: "Método de Bienestar Organizacional"
 type: "Método"
-status: "draft"
+status: "hidden"
 accent: "cyan"
 summary: "Marco diagnóstico y plan de acción para evaluar y mejorar la salud organizacional. Incluye instrumentos y métricas."
 price: null
-cta:
-  label: "Avisame cuando esté listo"
-  href: "https://wa.me/5493513559947?text=Hola%20FENIA%2C%20quiero%20que%20me%20avisen%20cuando%20est%C3%A9%20listo%20el%20M%C3%A9todo%20de%20Bienestar%20Organizacional"
+currency: "ARS"
+deliveryMode: "manual"
 audiences:
   - empresas
+order: 98
 publishedAt: 2026-05-19
 ---
 
