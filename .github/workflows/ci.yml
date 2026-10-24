@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # Reads engines.node from package.json — keeps CI in lockstep
           # with local dev and the build environment.
