@@ -1,7 +1,9 @@
 # ADR-025 — Product sales via Mercado Pago Link de Pago (MVP)
 
 ## Status
-Accepted (2026-05-26). Closes [PENDING.md](../../PENDING.md) "¿Productos vende o solo informa?" (item #10 of 2026-05-26 list). Tier-A MVP — Tier-B (embedded checkout with PHP backend) deferred until validated by sales volume.
+**Partially superseded by [ADR-028](./ADR-028-own-sales-circuit-on-hostinger.md) (2026-11-06).** Two factual assumptions in this ADR were verified false: Mercado Pago Link de Pago does **not** deliver files to the buyer, and Mercado Pago does **not** issue the seller's factura (its receipt does not replace it). Do not act on the delivery and invoicing parts below ("How it works" steps 1 and 3, and the "what Mercado Pago handles" table). Still valid: Mercado Pago as the payment processor, ARS pricing, and the rejection of Gumroad / Hotmart / Stripe and similar.
+
+Originally: Accepted (2026-05-26). Closes [PENDING.md](../../PENDING.md) "¿Productos vende o solo informa?" (item #10 of 2026-05-26 list). Tier-A MVP — Tier-B (embedded checkout with PHP backend) deferred until validated by sales volume.
 
 ## Context
 
