@@ -2,7 +2,7 @@
 
 > **Leé esto primero.** Es el punto de entrada para cualquier persona o sesión de IA que trabaje en la venta de kits.
 > Arquitectura: [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) · Riesgos (anti-estafa y bugs): [threat-model.md](./threat-model.md) · Pruebas: [test-plan.md](./test-plan.md) · Tareas humanas de la Fase 1: [guia-fase-1.md](./guia-fase-1.md)
-> Última actualización: 2026-11-06.
+> Última actualización: 2026-11-07 (lanzamiento).
 
 ## Objetivo
 
@@ -45,9 +45,9 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
 | | 3.2b Staging configurado (2026-11-07). Config y ZIPs de prueba (D21) subidos por el buzón con la API de archivos de Hostinger (TUS); PHP los movió a la carpeta privada y el buzón quedó vacío. `health`: `{"ok":true,"sales":true,"kits":true}`, con base MySQL migrada. **Checkout real contra el sandbox de MP OK**: $13.000 aunque el pedido decía `price: 1` (S-12), sin efectivo (D4), regreso a `/gracias`, "FENIA" en el resumen. Falta la clave del webhook | 🟡 Dev: webhook en MP | dev |
 | | 3.2 `Shop` (todo el flujo), `Api` (arranque que falla cerrado, logs en la carpeta privada), cliente de MP (Orders), endpoints `checkout` · `webhook` · `status` · `download` · `resend` · `health` y `.htaccess` de `/api` (lista blanca + `no-store`). **139 tests** (flujo completo con MP y mail falsos) y mutación verificada. Suite de seguridad: las pendientes pasaron a tests reales | ✅ Código (2026-11-07). 🟡 Falta la config de staging y el webhook en MP | dev |
-| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1 vendorizado). Texto aprobado por el dev (5 descargas, 2026-11-07). Prueba real `kits@` → `kits@`: llegó a la bandeja de entrada en 5 s con **DKIM, SPF y DMARC en pass**. Falta verlo salir desde el PHP de staging, con la compra de prueba | 🟡 | dev |
+| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1). Texto aprobado por el dev. Enviado desde el PHP de staging en las compras de prueba: llegó a la bandeja de entrada en ~1 s, con DKIM, SPF y DMARC en pass | ✅ 2026-11-07 | dev |
 | | 3.4 Tarea horaria (`Cron` + `hourly.php`): conciliación, limpieza de límites, avisos por mail con explicación y resumen diario después de las 9. **Creada en staging** por API (a los :07 de cada hora; los avisos van a `kits@`). En producción se crea en el lanzamiento, y falta decidir quién recibe los avisos | ✅ staging | dev |
-| | 3.5 `.htaccess` de `/api` (lista blanca + `no-store`) ✅. Archivos ocultos negados y **`www` → `fenia.com.ar`** (H-08) en el `.htaccess` base. En staging, sin regresiones. Llega a producción con el merge | 🟡 merge | dev |
+| | 3.5 `.htaccess` de `/api` (lista blanca + `no-store`). Archivos ocultos negados (H-01) y `www` → `fenia.com.ar` (H-08), verificados en producción. HTML con `no-cache` (siempre fresco, ADR-023) | ✅ 2026-11-07 | dev |
 | **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | ✅ Aprobada por el dev (2026-11-06) | dev |
 | | 4.2a Implementada en staging (`PUBLIC_SALES_PREVIEW`: ahí los kits están "en venta"; producción no cambia). Revisada con capturas de escritorio y celular. Además: H-03 cerrado y bug del layout corregido (no tenía slot `head`, así que el `noindex` de `/gracias` nunca se publicaba) | ✅ | dev |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
@@ -62,42 +62,23 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
   - reembolso → link anulado en <5 s.
 
   Dos bugs encontrados y corregidos: H-09 y H-10. Suite de seguridad: 68 OK, 0 fallas | ✅ staging | dev |
-| **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
+| **6. Lanzamiento** | 6.1 Docs: [guía de ventas para Fabián](./guia-fab-ventas.md) (resumen diario, avisos, P-01, P-02, reembolsos, contracargos, promo), `deployment.md` (operación de la API), ADR-023 y ADR-027 actualizados. Falta ensayar P-01/P-02 con Fab | ✅ docs · ⏳ ensayo | dev + Fab |
 | | 6.2 PR #18 `dev` → `main` (D13), 2026-11-07. **Infraestructura en producción, sin ventas habilitadas**: los kits siguen "Próximamente" y la API responde 503 hasta tener config. Capturas antes/después: la home queda idéntica; `/gracias` y `/recursos-gratuitos`, como se aprobaron. CDN purgada (D18). Verificado en vivo: `www` → 301 (H-08 ✅), archivo de estado → 403 (H-01 ✅). Suite ✱ contra producción: 54 OK, 0 fallas | ✅ infraestructura | dev |
-| | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
-| | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
+| | 6.3 Compra real + reembolso en producción. Orden real de producción ya inspeccionada sin pagar ($13.000, cuenta real, URLs y medios de pago correctos) | ⏳ Compra del dev; el reembolso lo hace la IA | dev |
+| | 6.4 **Kits a la venta desde el 2026-11-07** con la promo de lanzamiento (D23) y la franja de la home. Faltan: 72 h de monitoreo (tarea horaria + resumen diario a soporte@), anuncio a la lista y DMARC (H-02) | 🟡 en venta | Fab + dev |
 
-**Próximo paso:**
-Próximo:
-1. ✅ Webhook de prueba y compra completa en el sandbox (2026-11-07).
-2. ✅ Infraestructura en producción (PR #18).
-3. **Dev/Fab:** desactivar los 3 Links de Pago viejos (D6, guía 2.7). Ahora volverían a una `/gracias` que dice "No encontramos tu compra".
-4. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
-   - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
-   - ensayo del protocolo de soporte con Fab;
-   - quién recibe los avisos de la tarea horaria.
-   Son decisiones del dev y de Fab.
-4. **Producción — hecho el 2026-11-07:**
-   - token de producción validado (cuenta real MLA, app FENIA kits);
-   - base `fenia_prod` creada;
-   - config subida, con avisos a `soporte@` (D22) y resumen diario apagado hasta el lanzamiento;
-   - ZIP reales subidos (Enseñar, el corregido);
-   - `health` OK;
-   - tarea horaria a los :17;
-   - suite ✱: 67 OK, 0 fallas.
+**Próximo paso (pendientes al cierre del 2026-11-07):**
 
-   **Falta:**
-   - clave del webhook productivo (dev);
-   - el día del lanzamiento: config con `LAUNCHED=1` (resumen diario), kits a `live`, purga de la CDN, y compra real + reembolso.
-5. Lo que sigue es el plan original de producción, como referencia:
-   - crear la base;
-   - config con el token de producción y el webhook productivo;
-   - subir los ZIP reales (el de Enseñar, el corregido);
-   - crear la tarea horaria;
-   - merge a `main` y purga de la CDN;
-   - verificar `www` (H-08) y la IP detrás de la CDN (H-06);
-   - compra real + reembolso;
-   - kits a `live`.
+Del dev o de Fab:
+1. **Compra real** de un kit en fenia.com.ar. La IA la reembolsa y verifica que se anule el link (6.3).
+2. **Desactivar los 3 Links de Pago viejos** de Mercado Pago (D6).
+3. **Ensayar P-01 y P-02** con Fab, usando la [guía](./guia-fab-ventas.md).
+4. **Legales y facturación** (Bloque 5): términos definitivos con el abogado y cómo se factura cada venta.
+5. **Anuncio** (el lunes 9/11) y, después, DMARC a `p=quarantine` (H-02).
+
+De la IA:
+6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
+7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
 
 ## Cómo se corren las pruebas
 
@@ -186,6 +167,8 @@ Próximo:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (22)** — Cierre del lanzamiento. La franja de la home queda con mejor contraste (WCAG AA), jerarquía y un brillo suave. Guía de ventas para Fabián. Tracker al día. Todo en producción y verificado (ver "Próximo paso").
 
 - **2026-11-07 (21)** — El dev aprobó el cartel final y lo pasó a producción (PR #21). Fabián pidió algo llamativo arriba de todo: franja coral sobre el menú, con 56% OFF, cuenta regresiva y link a los kits; desaparece sola al vencer. El dev no la veía en staging porque su navegador tenía la página guardada (las páginas HTML tenían 1 hora de caché). Ahora el HTML se revalida siempre (`no-cache`, ADR-023).
 
