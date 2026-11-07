@@ -24,13 +24,22 @@ Para evitar errores en un panel que no conocés, el dev configura Hostinger por 
   3. Copiá el token: se muestra una sola vez.
   4. En una terminal, `notepad $HOME\fenia-secrets\hostinger-token.txt` → pegalo → **Guardar** → cerrá.
 - [ ] **P2 — Mercado Pago: aplicación + token de prueba (5 min)**
-  1. Entrá a [Tus integraciones](https://www.mercadopago.com.ar/developers/panel/app) con la cuenta de Fab → **Crear aplicación**. Datos:
-     - nombre `FENIA Kits`;
-     - desarrollo propio;
-     - pagos online;
-     - si lo pregunta, *Checkout Pro*.
-  2. En la aplicación → *Credenciales*, con el selector arriba en **Prueba** → copiá el **Access Token**.
-  3. `notepad $HOME\fenia-secrets\mp-test-token.txt` → pegalo → **Guardar** → cerrá.
+
+  > **Desde noviembre de 2025 el flujo es más corto:** al crear la aplicación, Mercado Pago entrega solo las credenciales de prueba. **No hace falta** crear cuentas de prueba ni activar producción para empezar ([novedad oficial](https://www.mercadopago.com.mx/developers/es/news/2025/11/19/Streamlined-integration-testing-with-automatic-credentials)).
+
+  1. Entrá a **https://www.mercadopago.com.ar/developers/panel/app** con la cuenta de Fab, la que cobra.
+  2. Tocá **Crear aplicación** (arriba a la derecha) y completá el asistente:
+     - **nombre:** `FENIA Kits`;
+     - **cómo vas a integrar:** desarrollo propio (no plataforma);
+     - **tipo de pago:** pagos online;
+     - **producto**, si lo pregunta: *Checkout Pro*.
+
+     Aceptá y confirmá.
+  3. Te abre la aplicación en **Inicio**. Arriba hay un selector **Prueba / Producción**: dejalo en **Prueba**.
+  4. En el bloque de credenciales, o en el menú izquierdo → **Credenciales**, copiá el **Access Token** (empieza con `APP_USR-`) con el **ícono de copiar**.
+  5. Avisale al dev "copiado": lo toma del portapapeles y lo valida contra Mercado Pago con una consulta de solo lectura. Si es el de **producción** en vez del de prueba, no lo guarda.
+
+  **Si te trabás:** decile al dev qué texto ves en pantalla.
 - [ ] **P3 — Avisale al dev "listo".**
 
 **Qué hace el dev con esos permisos:**

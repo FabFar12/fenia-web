@@ -30,11 +30,11 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 0.5 Marcar lo obsoleto: ADR-025, guía de MP para Fab, PENDING #10 | ✅ | dev |
 | **1. Prerrequisitos** — [guia-fase-1.md](./guia-fase-1.md) (los pasos internos de cada bloque se numeran en la guía) | Bloque 1 · Hostinger por API (D11). Plan Business, PHP 8.3 con las extensiones necesarias (incluida `nd_pdo_mysql`). Creados: la base de staging, el subdominio `staging.fenia.com.ar` con SSL activo y el cron disponible por API. La carpeta privada la crea PHP (Q5). Los datos de acceso están en `~/fenia-secrets`, **nunca en el repo** | ✅ 2026-11-06 | dev |
 | | Bloque 2 · Mercado Pago: aplicación + token de prueba (P2). Cuentas de prueba y activación de producción, más adelante. Desactivar los Links de Pago viejos | 🟡 Esperando P2 | dev / Fab |
-| | Bloque 3 · Mail: **`kits@` creada** por API (D10). Falta decidir la dirección visible, porque **`soporte@` no existe** (la única casilla previa es `contacto@`). Después, mail de prueba | 🟡 Esperando decisión | dev |
+| | Bloque 3 · Mail: `kits@` creada por API (D10). `soporte@` creado como **alias de `contacto@`** (OK explícito del dev, 2026-11-06): lo que llega a soporte cae en la bandeja de contacto. Falta el mail de prueba | 🟡 Falta mail de prueba (paso 3.3) | dev |
 | | Bloque 4 · ZIP final de cada kit + nombres y precio confirmados | ⏸️ Al final, antes de la Fase 5 (D9) | Fab |
 | | Bloque 5 · Contador · abogado · garantía de 7 días sí/no | 🟡 Guía entregada | Fab |
-| **2. Entorno de pruebas** | 2.1 `staging.fenia.com.ar` + deploy automático de `dev` | ⏳ Necesita 1.1 | dev |
-| | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Local · ⏳ primera corrida en GitHub | dev |
+| **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`). El ensayo (dry-run) salió OK: 41 archivos, todos en `/staging/`. La primera subida real falla con `ECONNRESET`: el FTP de Hostinger corta la conexión cuando falta el archivo de estado del deploy. El arreglo propuesto (sembrar un estado vacío desde CI) quedó **bloqueado por el clasificador de seguridad** hasta que el dev lo apruebe. Mientras tanto, cada push a `dev` deja este job en rojo, sin tocar producción | 🟡 Esperando aprobación | dev |
+| | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Verde en GitHub (2026-11-06) | dev |
 | | 2.3 Suite de seguridad `npm run test:ventas` (S-09, S-11, S-22, S-24 andando; el resto escrito como pendiente) | ✅ | dev |
 | **3. Backend** | 3.1a Núcleo puro con tests: firma, reglas de pago y estados, tokens, validación, montos, catálogo generado por el build | ✅ 80 tests | dev |
 | | 3.1b Configuración, base de datos con transiciones atómicas, limitador de frecuencia | ⏳ **Próximo** | dev |
@@ -84,7 +84,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | # | Pregunta | Cómo se responde |
 |---|---|---|
 | Q1 | ✅ Respondida 2026-11-06 por API: plan **Business**, PHP **8.3.36** (disponibles de 7.3 a 8.5), `nd_pdo_mysql`, `curl`, `openssl`, `mbstring`, `zip`, `fileinfo` y `posix` activos. Cierra también [PENDING #3](../../PENDING.md) | — |
-| Q6 | ¿Desactivar la CDN de Hostinger en staging, para que las pruebas no vean páginas cacheadas? ¿Cómo se purga la CDN de producción después de cada deploy? (H-06) | Decisión del dev antes del 2.1 |
+| Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
 | Q3 | ¿El firewall de Hostinger deja pasar los avisos de MP? Confirmado que **hay un firewall activo**: responde 403 a `<script>` en la URL | Prueba INT-09 en staging |
 | Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | Diseño en el paso 2.1; pruebas en S-11 |
@@ -110,6 +110,12 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (8)** — El dev aprobó explícitamente las dos acciones bloqueadas. Alias `soporte@` → `contacto@` creado y activo. Se agrega a CI el paso que siembra el archivo de estado vacío en `/staging/`: solo si falta y solo ese archivo.
+- **2026-11-06 (7)** — CDN de staging desactivada por API (con OK del dev; producción intacta).
+  - Pasos de Mercado Pago corregidos: desde nov-2025 la aplicación trae solo las credenciales de prueba, sin cuentas de prueba ni activación de producción.
+  - Commits `78552c2` (docs) y `d406238` (núcleo PHP + CI) subidos a `dev`. Primera corrida en GitHub: PHP 8.1 y 8.3, build y U-31 en verde.
+  - El ensayo del deploy a staging salió OK. La subida real falló dos veces con `ECONNRESET` (`b8bf235`).
+  - El clasificador de seguridad bloqueó dos acciones que quedan para el dev: el alias `soporte@` y sembrar el archivo de estado del deploy usando el FTP de producción. El cambio local se deshizo; nada de eso se aplicó.
 - **2026-11-06 (6)** — Token de Hostinger tomado del portapapeles, validado contra la API antes de guardarlo y portapapeles vaciado.
   - Configuración por API: base de staging, subdominio `staging` (SSL activo, PHP 8.3 respondiendo) y casilla `kits@`.
   - Verificado por DNS público que MX, SPF, DKIM y DMARC quedaron intactos.

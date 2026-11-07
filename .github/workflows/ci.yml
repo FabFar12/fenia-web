@@ -162,6 +162,33 @@ jobs:
       - name: Make the build staging-only (host lock, noindex, hidden files)
         run: node scripts/prepare-staging.mjs dist
 
+      - name: First publish only — seed an empty sync-state file
+        # Approved by the dev on 2026-11-06 (docs/ventas, bitácora). With no
+        # state file in the target, FTP-Deploy-Action 4.3.5 tries to download
+        # it, Hostinger's FTP server resets the data socket on the missing
+        # file, and the action aborts with ECONNRESET (run 42315549131 and its
+        # re-run). An empty state makes it upload everything as new. Writes
+        # only <STAGING_SERVER_DIR>.ftp-deploy-sync-state.json, and only if it
+        # is missing; the existence check uses SIZE (curl -I), which opens no
+        # data connection.
+        env:
+          FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          FTP_PORT: ${{ secrets.HOSTINGER_FTP_PORT }}
+          FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          FTP_PASS: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        run: |
+          umask 077
+          printf 'machine %s login %s password %s\n' "$FTP_HOST" "$FTP_USER" "$FTP_PASS" > "$RUNNER_TEMP/netrc"
+          url="ftp://${FTP_HOST}:${FTP_PORT}${STAGING_SERVER_DIR}.ftp-deploy-sync-state.json"
+          if curl -sS -I --ssl-reqd --insecure --netrc-file "$RUNNER_TEMP/netrc" "$url" > /dev/null 2>&1; then
+            echo "State file already on the server: nothing to seed."
+          else
+            printf '{"description":"DO NOT DELETE THIS FILE. Seeded empty by CI for the first staging publish (docs/ventas 2.1).","version":"1.0.0","generatedTime":%s000,"data":[]}' "$(date +%s)" > "$RUNNER_TEMP/state.json"
+            curl -sS --ssl-reqd --insecure --netrc-file "$RUNNER_TEMP/netrc" -T "$RUNNER_TEMP/state.json" "$url"
+            echo "Seeded an empty state file in ${STAGING_SERVER_DIR}."
+          fi
+          rm -f "$RUNNER_TEMP/netrc"
+
       - name: Deploy via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
