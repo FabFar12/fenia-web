@@ -1,5 +1,7 @@
 # Cómo armar el cobro del primer producto en Mercado Pago
 
+> ⚠️ **GUÍA OBSOLETA (2026-11-06) — no la sigas.** Partía de dos supuestos que resultaron falsos: el Link de Pago de Mercado Pago **no** manda el archivo al comprador, y Mercado Pago **no** emite tu factura (el comprobante de MP no la reemplaza). La venta de los kits se rearma con un circuito propio ([ADR-028](./adr/ADR-028-own-sales-circuit-on-hostinger.md)). Lo que vas a tener que hacer en Mercado Pago (crear una "aplicación" y pasar unas claves) va a estar en una guía nueva, paso a paso. Mientras tanto, mirá la Fase 1 en [docs/ventas/README.md](./ventas/README.md). Lo único que sigue valiendo de esta guía: tener tu cuenta de Mercado Pago activa.
+
 > **Audiencia**: Fab (dueño no técnico de FENIA).
 > **Objetivo**: dejar el cobro de la *Guía para evaluar en tiempos de IA* listo para vender.
 > **Tiempo estimado**: 20-30 minutos.

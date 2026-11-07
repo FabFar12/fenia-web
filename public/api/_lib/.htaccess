@@ -1,0 +1,11 @@
+# Shared PHP code for the sales API (ADR-028). Never served over HTTP:
+# endpoints include these files from disk. Covered by test S-11
+# (docs/ventas/test-plan.md). Both syntaxes so it holds on Apache 2.2/2.4
+# and LiteSpeed.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

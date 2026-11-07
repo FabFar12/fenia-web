@@ -28,3 +28,14 @@ pnpm-debug.log*
 
 # Playwright + ad-hoc local artifacts
 tmp/
+
+# PHP dev tooling (ADR-028) — never deployed
+/vendor/
+.phpunit.cache/
+
+# Paid kit files must NEVER enter this PUBLIC repo (docs/ventas/threat-model.md E4).
+# Deliverable ZIPs live outside the repo (C:\Fenia\entregables) and on the
+# server outside public_html. CI also fails if one is ever committed.
+*.zip
+*.7z
+*.rar

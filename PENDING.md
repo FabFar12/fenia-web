@@ -25,7 +25,10 @@
   - OR pause it directly: Vercel dashboard → `fenia-web` project → Settings → Git → Disconnect / Pause auto-deploys. Then confirm to dev.
 **After 7 stable days:** delete the Vercel project; if on a paid plan, cancel the subscription.
 
-### 3. Hostinger plan tier confirmation — carried over
+### 3. Hostinger plan tier confirmation — ✅ RESUELTO 2026-11-06
+**Plan Business** (consultado por la API de Hostinger), PHP 8.3. Hay CDN de Hostinger activa: ver [docs/ventas/README.md](./docs/ventas/README.md), H-06. Este ítem se puede borrar en la próxima limpieza de PENDING.
+
+*(Texto original:)*
 **Why it matters:** We know the plan was prepaid for 4 years at ARS 200K. We don't know the exact tier (Premium / Business / Cloud Startup / …). The tier affects:
   - Whether SSH/SFTP is available (would let us switch the deploy from FTPS to SFTP).
   - Daily backup window and retention.
@@ -91,23 +94,22 @@
 
 ## 🟡 Decisiones de producto pendientes
 
-### 10. Activación de los 3 productos reales (kits FENIA) — actualizado 2026-07-07
-**Estado:** schema v2 y lógica de CTA por status cerrados en [ADR-027](./docs/adr/ADR-027-product-schema-and-lead-capture.md) (extiende [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md)). Infraestructura del sitio **lista para vender y para capturar leads**:
+### 10. Venta de los 3 kits FENIA — actualizado 2026-11-06
+**Estado:** el plan anterior (Link de Pago de Mercado Pago, [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md)) **no sirve**: se verificó que el Link de Pago no manda el archivo al comprador y que Mercado Pago no emite la factura de Fab. Se decidió armar un **circuito propio en Hostinger** ([ADR-028](./docs/adr/ADR-028-own-sales-circuit-on-hostinger.md)): cobro con Mercado Pago, verificación del pago, entrega automática por mail y link de descarga protegido, con pruebas anti-estafa antes de lanzar.
 
-- ✅ 3 productos reales en `status: "coming-soon"`: `guia-evaluar-tiempos-ia.md`, `kit-ensenar-con-ia.md`, `kit-aprender-con-ia.md`. Precio AR$8.000 cada uno.
-- ✅ Los 3 productos placeholder anteriores (Neuro-Liderazgo, Toolkit Emprendedores, Bienestar Organizacional) en `status: "hidden"`.
-- ✅ CTA de `coming-soon` ahora captura email en `/recursos-gratuitos` (antes solo enlazaba a WhatsApp) — precio formateado ya se muestra en cards `live`.
-- ✅ Guía paso-a-paso para Fab: cobro en [`docs/fab-mercadopago-setup.md`](./docs/fab-mercadopago-setup.md), captura de email en [`docs/fab-mailerlite-setup.md`](./docs/fab-mailerlite-setup.md).
+**Plan, estado y próximo paso:** [`docs/ventas/README.md`](./docs/ventas/README.md) — es la fuente de verdad; este item solo resume.
 
-**Bloqueantes — Fab debe proveer, por kit:**
-1. **Mercado Pago** (seguir `docs/fab-mercadopago-setup.md`): cuenta vendedor, cobro con entrega automática, link de pago, metadatos, test end-to-end.
-2. **Mailerlite** (seguir `docs/fab-mailerlite-setup.md`): cuenta, grupo, formulario embebido, automation con el recurso gratuito. Sin esto, el botón "Quiero el recurso gratis" sigue redirigiendo a WhatsApp (no rompe nada, solo no está automatizado).
-3. Confirmar qué recurso gratuito específico entrega cada kit vía email (el copy de "Evaluar con IA sin vigilar" ya menciona uno: el "Acuerdo de uso de IA"; los otros dos kits no tienen uno definido todavía).
+- ✅ 3 kits reales en `status: "coming-soon"` (AR$ 8.000 c/u); los 3 placeholder en `hidden`.
+- ✅ CTA de `coming-soon` captura email en `/recursos-gratuitos` ([ADR-027](./docs/adr/ADR-027-product-schema-and-lead-capture.md)).
+- ⚠️ [`docs/fab-mercadopago-setup.md`](./docs/fab-mercadopago-setup.md) quedó **obsoleta**: no seguirla.
 
-**Dev actions una vez recibidos los datos, por kit:**
-1. Editar el `.md` del producto: `paymentUrl: <link MP>`, `deliveryMode: "mercadopago-auto"`, `status: "live"`.
-2. Push a `dev` → PR a `main` con aprobación explícita → deploy automático a Hostinger.
-3. Test end-to-end por Fab con compra real.
+**Fab — lo que hace falta (Fase 1 del plan). Paso a paso detallado, con checkboxes: [`docs/ventas/guia-fase-1.md`](./docs/ventas/guia-fase-1.md)**
+1. **Hostinger:** confirmar plan y versión de PHP, base de datos MySQL, tareas programadas (cron) y si se puede crear `staging.fenia.com.ar` (ver también #3).
+2. **Mercado Pago:** crear una "aplicación" en Mercado Pago Developers y pasar las credenciales (guía nueva en preparación).
+3. **Mail:** crear la casilla `kits@fenia.com.ar`.
+4. **Archivos:** el ZIP final de cada kit.
+5. **Contador:** cómo se factura cada venta. **Abogado:** términos y condiciones, política de privacidad (#12) y botón de arrepentimiento. Decidir si va la garantía de 7 días que sugiere el copy de dos kits.
+6. **Mailerlite** (sigue vigente, [`docs/fab-mailerlite-setup.md`](./docs/fab-mailerlite-setup.md)): cuenta, grupo, formulario y recurso gratuito por kit. Sin esto, "Quiero el recurso gratis" sigue yendo a WhatsApp.
 
 ### (Cerrado) ¿Sección Productos debe vender o solo informar? — 2026-05-19 → resuelto 2026-05-26
 Decisión tomada en [ADR-025](./docs/adr/ADR-025-product-sales-via-mercadopago.md): **Productos vende**, vía Mercado Pago Link de Pago. Tier-B (checkout embebido + backend PHP) diferido hasta validar con volumen real (≥20 ventas/mes o ≥3 productos live).
