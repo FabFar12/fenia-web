@@ -176,9 +176,9 @@ jobs:
           security: loose
           dangerous-clean-slate: false
           state-name: .ftp-deploy-sync-state.json
-          # First run is a rehearsal: it prints what it would upload and
-          # where, without writing. Flip to false once the log is reviewed.
-          dry-run: true
+          # The dry-run rehearsal (run 42315393927) was reviewed: 41 files,
+          # all under /staging/. Real uploads from here on.
+          dry-run: false
 
   deploy:
     name: Deploy to Hostinger via FTPS
