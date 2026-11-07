@@ -33,9 +33,9 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | Bloque 3 · Mail: `kits@` creada por API (D10). `soporte@` creado como **alias de `contacto@`** (OK explícito del dev, 2026-11-06): lo que llega a soporte cae en la bandeja de contacto. Falta el mail de prueba | 🟡 Falta mail de prueba (paso 3.3) | dev |
 | | Bloque 4 · ZIP final de cada kit + nombres y precio confirmados | ⏸️ Al final, antes de la Fase 5 (D9) | Fab |
 | | Bloque 5 · Contador · abogado · garantía de 7 días sí/no | 🟡 Guía entregada | Fab |
-| **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`). El ensayo (dry-run) salió OK: 41 archivos, todos en `/staging/`. La primera subida real falla con `ECONNRESET`: el FTP de Hostinger corta la conexión cuando falta el archivo de estado del deploy. El arreglo propuesto (sembrar un estado vacío desde CI) quedó **bloqueado por el clasificador de seguridad** hasta que el dev lo apruebe. Mientras tanto, cada push a `dev` deja este job en rojo, sin tocar producción | 🟡 Esperando aprobación | dev |
+| **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`, corrida 42317545237). Primera publicación resuelta sembrando el archivo de estado (aprobado por el dev). Staging solo responde en su host (C20 cerrado), es `noindex`, no tiene CDN y bloquea archivos ocultos, `_lib/` y `default.php` | ✅ 2026-11-06 | dev |
 | | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Verde en GitHub (2026-11-06) | dev |
-| | 2.3 Suite de seguridad `npm run test:ventas` (S-09, S-11, S-22, S-24 andando; el resto escrito como pendiente) | ✅ | dev |
+| | 2.3 Suite de seguridad `npm run test:ventas`. Contra staging: **42 OK, 0 fallas**, 22 pendientes hasta que existan los endpoints. Contra producción: 41 OK y 1 falla conocida (H-01) | ✅ | dev |
 | **3. Backend** | 3.1a Núcleo puro con tests: firma, reglas de pago y estados, tokens, validación, montos, catálogo generado por el build | ✅ 80 tests | dev |
 | | 3.1b Configuración, base de datos con transiciones atómicas, limitador de frecuencia | ⏳ **Próximo** | dev |
 | | 3.2 Endpoints: checkout, webhook, estado, descarga, reenvío, health | ⏳ | dev |
@@ -50,7 +50,9 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
-**Próximo paso:** el dev da los permisos P1 y P2 ([guía, camino automático](./guia-fase-1.md#camino-elegido-lo-configura-el-dev-por-api-d11)). Con eso se configura Hostinger por API y se arma staging (2.1). En paralelo, 3.1b.
+**Próximo paso:**
+- **Dev:** el permiso P2, el token de prueba de Mercado Pago ([guía](./guia-fase-1.md#camino-elegido-lo-configura-el-dev-por-api-d11)).
+- **IA:** 3.1b (configuración + base de datos + limitador), con diseño de Q5 (cómo llegan los secretos a la carpeta privada).
 
 ## Cómo se corren las pruebas
 
@@ -94,10 +96,10 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 | # | Fecha | Hallazgo | Impacto | Se corrige en |
 |---|---|---|---|---|
-| H-01 | 2026-11-06 | `https://fenia.com.ar/.ftp-deploy-sync-state.json` es público (HTTP 200): lista los archivos desplegados con sus hashes. La suite lo detecta (S-11 en rojo) | Mínimo: el repo es público, así que la lista ya se ve en GitHub. Se corrige por higiene | Paso 3.5, validado en staging |
+| H-01 | 2026-11-06 | `https://fenia.com.ar/.ftp-deploy-sync-state.json` es público (HTTP 200): lista los archivos desplegados con sus hashes. La suite lo detecta (S-11 en rojo) | Mínimo: el repo es público, así que la lista ya se ve en GitHub. Se corrige por higiene | La regla ya funciona en staging (403, S-11 verde). Falta llevarla al `.htaccess` de producción en el paso 3.5 |
 | H-02 | 2026-11-06 | DMARC de `fenia.com.ar` en `p=none`: los proveedores no rechazan mails que se hacen pasar por `@fenia.com.ar`. SPF y DKIM están bien | Medio una vez que haya ventas (phishing a compradores, B4) | Paso 6.4, coordinado con Mailerlite: primero reportes (`rua`), después `p=quarantine` |
 | H-03 | 2026-11-06 | `/recursos-gratuitos?titulo=…` muestra cualquier texto como título. Sirve para armar links de aspecto oficial. No es XSS (usa `textContent`) | Bajo | Paso 4.2: el título sale del id del producto, nunca de la URL |
-| H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | Paso 2.1: `.htaccess` de staging que rechaza otros hosts + bloqueo de `default.php` |
+| H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
 | H-04 | 2026-11-06 | **El repositorio de GitHub es público** | Ningún archivo pago ni secreto puede entrar. Protegido por `.gitignore` + barrera en CI (OPS-01, OPS-06). La seguridad nunca depende de que el código no se vea | Hecho (2.2) |
@@ -110,6 +112,9 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (9)** — **Staging andando:** corrida 42317545237, 41 archivos.
+  - Verificado desde afuera: C20 y H-05 cerrados, la regla de H-01 funciona en LiteSpeed y producción quedó intacta.
+  - Suite contra staging: 42 OK y 0 fallas. Contra producción: 41 OK y 1 falla conocida (H-01).
 - **2026-11-06 (8)** — El dev aprobó explícitamente las dos acciones bloqueadas. Alias `soporte@` → `contacto@` creado y activo. Se agrega a CI el paso que siembra el archivo de estado vacío en `/staging/`: solo si falta y solo ese archivo.
 - **2026-11-06 (7)** — CDN de staging desactivada por API (con OK del dev; producción intacta).
   - Pasos de Mercado Pago corregidos: desde nov-2025 la aplicación trae solo las credenciales de prueba, sin cuentas de prueba ni activación de producción.
