@@ -6,12 +6,12 @@ accent: "cyan"
 summary: "Un kit para rediseñar consignas, rúbricas y acuerdos de uso de IA, cuidando autoría, proceso y evidencia de aprendizaje sin convertirte en detective digital."
 price: 30000
 currency: "ARS"
-# Launch promo (docs/ventas D23): 7 days from launch, real deadline.
+# Launch promo (docs/ventas D23): 9 days from launch, real deadline.
 promo:
   price: 13000
   label: "Precio de lanzamiento"
-  starts: 2026-11-07T00:00:00-03:00
-  ends: 2026-11-14T23:59:59-03:00
+  starts: 2026-11-07T13:00:00-03:00
+  ends: 2026-11-16T23:59:59-03:00
 deliveryMode: "lead-magnet"
 audiences:
   - profesionales

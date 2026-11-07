@@ -3,10 +3,13 @@
 // Any element with `data-offer='{"regular","promo","starts","ends","currency"}'`
 // (built by offerFor() in src/lib/sales.ts) gets its children updated every
 // second:
-//   [data-offer-price]      price to pay now
-//   [data-offer-promo]      everything that only exists while the promo runs
-//                           (label, badge, crossed-out price, deadline)
-//   [data-offer-countdown]  "Termina en 6 días 23:59:59"
+//   [data-offer-price]        price to pay now
+//   [data-offer-promo]        everything that only exists while the promo runs
+//                             (label, badge, crossed-out price, deadline, banner)
+//   [data-offer-lead]         "Quedan 7 días" / "¡Último día!"
+//   [data-offer-rest]         "10 h 40 min 39 s"
+//   [data-offer-unit=X]       one number per box; X = days | hours | minutes |
+//                             seconds | totalHours (hours counting the days)
 // When the promo ends, the promo parts disappear and the regular price shows,
 // at the same instant the backend starts charging it. The countdown is the
 // same for everyone and never restarts. Times come from the server's clock
@@ -24,11 +27,15 @@ interface OfferData {
 const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 const two = (n: number) => String(n).padStart(2, '0');
 
-function countdown(ms: number): string {
+function parts(ms: number) {
   const total = Math.max(0, Math.floor(ms / 1000));
-  const days = Math.floor(total / 86400);
-  const clock = `${two(Math.floor((total % 86400) / 3600))}:${two(Math.floor((total % 3600) / 60))}:${two(total % 60)}`;
-  return days > 0 ? `${days} ${days === 1 ? 'día' : 'días'} ${clock}` : clock;
+  return {
+    days: Math.floor(total / 86400),
+    hours: Math.floor((total % 86400) / 3600),
+    minutes: Math.floor((total % 3600) / 60),
+    seconds: total % 60,
+    totalHours: Math.floor(total / 3600),
+  };
 }
 
 const offers: { el: HTMLElement; data: OfferData }[] = [];
@@ -46,11 +53,24 @@ function render(): void {
   const now = Date.now() + offset;
   for (const { el, data } of offers) {
     const running = now >= data.starts && now < data.ends;
-    const price = el.querySelector<HTMLElement>('[data-offer-price]');
-    if (price) price.textContent = money.format(running ? data.promo : data.regular);
+    for (const price of el.querySelectorAll<HTMLElement>('[data-offer-price]')) {
+      price.textContent = money.format(running ? data.promo : data.regular);
+    }
     for (const part of el.querySelectorAll<HTMLElement>('[data-offer-promo]')) part.hidden = !running;
-    const clock = el.querySelector<HTMLElement>('[data-offer-countdown]');
-    if (clock) clock.textContent = running ? `Termina en ${countdown(data.ends - now)}` : '';
+    if (!running) continue;
+
+    const left = parts(data.ends - now);
+    for (const lead of el.querySelectorAll<HTMLElement>('[data-offer-lead]')) {
+      lead.textContent = left.days > 0 ? `Quedan ${left.days} ${left.days === 1 ? 'día' : 'días'}` : '¡Último día!';
+    }
+    for (const rest of el.querySelectorAll<HTMLElement>('[data-offer-rest]')) {
+      rest.textContent = `${left.hours} h ${two(left.minutes)} min ${two(left.seconds)} s`;
+    }
+    for (const box of el.querySelectorAll<HTMLElement>('[data-offer-unit]')) {
+      const unit = box.dataset.offerUnit as keyof ReturnType<typeof parts>;
+      const value = left[unit];
+      if (typeof value === 'number') box.textContent = unit === 'days' || unit === 'totalHours' ? String(value) : two(value);
+    }
   }
 }
 

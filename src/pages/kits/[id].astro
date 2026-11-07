@@ -51,9 +51,17 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
                     <s class="kit-price-regular" data-offer-promo hidden={!offer.activeAtBuild}>{offer.regular}</s>
                     <span data-offer-price>{offer.activeAtBuild ? offer.promoPrice : offer.regular}</span>
                   </p>
-                  <p class="kit-countdown" data-offer-countdown aria-hidden="true"></p>
                   <p class="kit-deadline" data-offer-promo hidden={!offer.activeAtBuild}>
-                    Hasta el {offer.deadline} (hora de Argentina). Después, {offer.regular}.
+                    Promo de {offer.days} días · termina el {offer.deadline} (hora de Argentina).
+                  </p>
+                  <div class="kit-countdown" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
+                    <span class="kit-box"><span data-offer-unit="days">–</span><small>días</small></span>
+                    <span class="kit-box"><span data-offer-unit="hours">–</span><small>horas</small></span>
+                    <span class="kit-box"><span data-offer-unit="minutes">–</span><small>min</small></span>
+                    <span class="kit-box"><span data-offer-unit="seconds">–</span><small>seg</small></span>
+                  </div>
+                  <p class="kit-deadline" data-offer-promo hidden={!offer.activeAtBuild}>
+                    Ahorrás {offer.savings}. Después, {offer.regular}.
                   </p>
                 </div>
               ) : (
@@ -192,8 +200,10 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
   .kit-offer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e8573d; margin: 0 0 8px 0; }
   .kit-offer-badge { background: #e8573d; color: #fff; border-radius: 5px; padding: 2px 7px; margin-left: 6px; letter-spacing: 0.02em; }
   .kit-price-regular { font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.5); margin-right: 10px; letter-spacing: 0; }
-  .kit-countdown { font-size: 16px; font-weight: 700; color: #ffb4a6; font-variant-numeric: tabular-nums; margin: 8px 0 0 0; }
-  .kit-countdown:empty { display: none; }
+  .kit-countdown:not([hidden]) { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 10px 0; }
+  .kit-box { display: flex; flex-direction: column; align-items: center; padding: 10px 4px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); }
+  .kit-box > span { font-size: 24px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .kit-box > small { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.65); margin-top: 6px; }
   .kit-deadline { font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 4px 0 0 0; }
   .kit-soon-title { font-size: 22px; font-weight: 800; margin: 0; }
 

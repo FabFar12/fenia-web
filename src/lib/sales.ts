@@ -30,6 +30,10 @@ export interface Offer {
   label: string;
   /** Rounded down: never advertise more discount than there is. */
   percent: number;
+  /** "$ 17.000" */
+  savings: string;
+  /** Whole days the promo lasts, rounded down ("Promo de 9 días"). */
+  days: number;
   /** "sábado 14/11 a las 23:59" in Argentina time. */
   deadline: string;
   /** Promo running at build time (the script corrects it on load). */
@@ -49,6 +53,8 @@ export function offerFor(product: CollectionEntry<'products'>, now = new Date())
     promoPrice: formatPrice(promo.price, currency),
     label: promo.label,
     percent: Math.floor(((price - promo.price) / price) * 100),
+    savings: formatPrice(price - promo.price, currency),
+    days: Math.floor((promo.ends.getTime() - promo.starts.getTime()) / 86_400_000),
     deadline: `${part('weekday')} ${part('day')}/${part('month')} a las ${part('hour')}:${part('minute')}`,
     activeAtBuild: now >= promo.starts && now < promo.ends,
     json: JSON.stringify({ regular: price, promo: promo.price, starts: promo.starts.getTime(), ends: promo.ends.getTime(), currency }),
