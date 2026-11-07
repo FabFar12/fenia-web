@@ -6,6 +6,7 @@
 //   [data-offer-price]        price to pay now
 //   [data-offer-promo]        everything that only exists while the promo runs
 //                             (label, badge, crossed-out price, deadline, banner)
+//   [data-offer-urgency]      "Termina en" / "¡Último día! Termina en"
 //   [data-offer-lead]         "Quedan 7 días" / "¡Último día!"
 //   [data-offer-rest]         "10 h 40 min 39 s"
 //   [data-offer-unit=X]       one number per box; X = days | hours | minutes |
@@ -60,6 +61,9 @@ function render(): void {
     if (!running) continue;
 
     const left = parts(data.ends - now);
+    for (const urgency of el.querySelectorAll<HTMLElement>('[data-offer-urgency]')) {
+      urgency.textContent = left.days > 0 ? 'Termina en' : '¡Último día! Termina en';
+    }
     for (const lead of el.querySelectorAll<HTMLElement>('[data-offer-lead]')) {
       lead.textContent = left.days > 0 ? `Quedan ${left.days} ${left.days === 1 ? 'día' : 'días'}` : '¡Último día!';
     }
