@@ -81,15 +81,17 @@ const productLd = buyable && data.price != null
                     <s class="kit-price-regular" data-offer-promo hidden={!offer.activeAtBuild}>{offer.regular}</s>
                     <span data-offer-price>{offer.activeAtBuild ? offer.promoPrice : offer.regular}</span>
                   </p>
-                  <p class="kit-urgency" data-offer-promo data-offer-urgency hidden={!offer.activeAtBuild} aria-hidden="true">Termina en</p>
-                  <div class="kit-countdown" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
-                    <span class="kit-box"><span data-offer-unit="days">–</span><small>días</small></span>
-                    <span class="kit-box"><span data-offer-unit="hours">–</span><small>horas</small></span>
-                    <span class="kit-box"><span data-offer-unit="minutes">–</span><small>min</small></span>
-                    <span class="kit-box"><span data-offer-unit="seconds">–</span><small>seg</small></span>
+                  <p class="kit-savings" data-offer-promo hidden={!offer.activeAtBuild}>Ahorrás {offer.savings}</p>
+                  <div class="kit-left" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
+                    <span class="kit-left-label" data-offer-label>Quedan</span>
+                    <span class="kit-left-big" data-offer-big></span>
+                    <span class="kit-left-small" data-offer-small></span>
+                  </div>
+                  <div class="kit-progress" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
+                    {Array.from({ length: offer.totalDays }, (_, i) => <span data-offer-seg={i + 1}></span>)}
                   </div>
                   <p class="kit-deadline" data-offer-promo hidden={!offer.activeAtBuild}>
-                    Termina el {offer.deadline} (hora de Argentina). <strong class="kit-savings">Ahorrás {offer.savings}.</strong>
+                    <strong data-offer-day>Día 1 de {offer.totalDays}</strong> · Oferta de {offer.totalDays} días: {offer.period}, hasta las 23:59 (hora de Argentina).
                   </p>
                 </div>
               ) : (
@@ -228,12 +230,15 @@ const productLd = buyable && data.price != null
   .kit-offer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e8573d; margin: 0 0 8px 0; }
   .kit-offer-badge { background: #e8573d; color: #fff; border-radius: 5px; padding: 2px 7px; margin-left: 6px; letter-spacing: 0.02em; }
   .kit-price-regular { font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.5); margin-right: 10px; letter-spacing: 0; }
-  .kit-urgency { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb4a6; margin: 14px 0 0 0; }
-  .kit-savings { color: #ffb4a6; }
-  .kit-countdown:not([hidden]) { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 10px 0; }
-  .kit-box { display: flex; flex-direction: column; align-items: center; padding: 10px 4px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); }
-  .kit-box > span { font-size: 24px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-  .kit-box > small { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.65); margin-top: 6px; }
+  .kit-savings { font-size: 14px; font-weight: 700; color: #ffb4a6; margin: 6px 0 0 0; }
+  .kit-left:not([hidden]) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 16px 0 0 0; }
+  .kit-left-label { flex-basis: 100%; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb4a6; }
+  .kit-left-big { font-size: 28px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kit-left-small { font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, 0.8); font-variant-numeric: tabular-nums; }
+  .kit-progress:not([hidden]) { display: flex; gap: 4px; margin: 12px 0 6px 0; }
+  .kit-progress > span { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+  .kit-progress > span[data-state='past'] { background: rgba(232, 87, 61, 0.5); }
+  .kit-progress > span[data-state='today'] { background: #e8573d; }
   .kit-deadline { font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 4px 0 0 0; }
   .kit-soon-title { font-size: 22px; font-weight: 800; margin: 0; }
 

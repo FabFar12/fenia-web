@@ -62,24 +62,22 @@ function ctaFor(product: (typeof products)[number]) {
     </div>
 
     {bannerOffer && (
-      <!-- Launch promo banner (D23): one countdown for the 3 kits. -->
-      <div class="promo-banner" data-offer={bannerOffer.json} style="margin-bottom:20px;">
-        <div data-offer-promo hidden={!bannerOffer.activeAtBuild} style="padding:22px 28px;border-radius:18px;background:rgba(232,87,61,0.07);border:1px solid rgba(232,87,61,0.35);font-family:'Plus Jakarta Sans',sans-serif;">
-          <div class="promo-banner-row">
-            <div>
-              <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;border-radius:5px;background:#E8573D;color:#fff;white-space:nowrap;">−{bannerOffer.percent}% · Lanzamiento</span>
-              <p style="font-size:18px;font-weight:800;color:#fff;margin:12px 0 4px 0;">{bannerOffer.label} en los 3 kits</p>
-              <p style="font-size:13.5px;color:rgba(255,255,255,0.7);margin:0;">Termina el {bannerOffer.deadline} (hora de Argentina).</p>
+      <!-- Launch promo banner (D23): total length, days already run, time left. -->
+      <div class="promo-banner" data-offer={bannerOffer.json}>
+        <div class="promo-card" data-offer-promo hidden={!bannerOffer.activeAtBuild}>
+          <div class="promo-info">
+            <span class="promo-chip">−{bannerOffer.percent}% · Lanzamiento</span>
+            <p class="promo-title">{bannerOffer.label} en los 3 kits</p>
+            <p class="promo-period">Oferta de {bannerOffer.totalDays} días: {bannerOffer.period}, hasta las 23:59 (hora de Argentina).</p>
+            <div class="promo-progress" aria-hidden="true">
+              {Array.from({ length: bannerOffer.totalDays }, (_, i) => <span data-offer-seg={i + 1}></span>)}
             </div>
-            <div aria-hidden="true">
-              <p data-offer-urgency style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#ffb4a6;margin:0 0 8px 0;">Termina en</p>
-              <div class="promo-boxes">
-                <span style="display:flex;flex-direction:column;align-items:center;min-width:64px;padding:10px 8px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);"><span data-offer-unit="days" style="font-size:26px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums;">–</span><span style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.65);margin-top:6px;">días</span></span>
-                <span style="display:flex;flex-direction:column;align-items:center;min-width:64px;padding:10px 8px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);"><span data-offer-unit="hours" style="font-size:26px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums;">–</span><span style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.65);margin-top:6px;">horas</span></span>
-                <span style="display:flex;flex-direction:column;align-items:center;min-width:64px;padding:10px 8px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);"><span data-offer-unit="minutes" style="font-size:26px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums;">–</span><span style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.65);margin-top:6px;">min</span></span>
-                <span style="display:flex;flex-direction:column;align-items:center;min-width:64px;padding:10px 8px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);"><span data-offer-unit="seconds" style="font-size:26px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums;">–</span><span style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.65);margin-top:6px;">seg</span></span>
-              </div>
-            </div>
+            <p class="promo-day" data-offer-day>Día 1 de {bannerOffer.totalDays}</p>
+          </div>
+          <div class="promo-left" aria-hidden="true">
+            <p class="promo-left-label" data-offer-label>Quedan</p>
+            <p class="promo-left-big" data-offer-big></p>
+            <p class="promo-left-small" data-offer-small></p>
           </div>
         </div>
       </div>
@@ -161,8 +159,28 @@ function ctaFor(product: (typeof products)[number]) {
 
 <style is:global>
   /* Launch promo banner (D23). */
-  .promo-banner-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .promo-boxes { display: flex; gap: 8px; }
+  .promo-banner { margin-bottom: 20px; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .promo-card { padding: 22px 28px; border-radius: 18px; background: rgba(232, 87, 61, 0.07); border: 1px solid rgba(232, 87, 61, 0.35); }
+  .promo-card:not([hidden]) { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .promo-info { flex: 1 1 360px; min-width: 0; }
+  .promo-chip { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 5px; background: #e8573d; color: #fff; white-space: nowrap; }
+  .promo-title { font-size: 18px; font-weight: 800; color: #fff; margin: 12px 0 4px 0; }
+  .promo-period { font-size: 13.5px; color: rgba(255, 255, 255, 0.72); margin: 0; }
+  .promo-progress { display: flex; gap: 4px; max-width: 420px; margin: 14px 0 6px 0; }
+  .promo-progress > span { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+  .promo-progress > span[data-state='past'] { background: rgba(232, 87, 61, 0.5); }
+  .promo-progress > span[data-state='today'] { background: #e8573d; }
+  .promo-day { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.75); margin: 0; }
+  .promo-left { text-align: right; }
+  .promo-left-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb4a6; margin: 0 0 2px 0; }
+  .promo-left-big { font-size: 36px; font-weight: 800; color: #fff; line-height: 1.1; margin: 0; font-variant-numeric: tabular-nums; }
+  .promo-left-small { font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, 0.8); margin: 2px 0 0 0; font-variant-numeric: tabular-nums; }
+  .promo-left-small:empty { display: none; }
+  @media (max-width: 640px) {
+    .promo-card { padding: 20px; }
+    .promo-left { text-align: left; }
+    .promo-left-big { font-size: 30px; }
+  }
   /* "Comprar con 56% OFF" must stay inside the card. */
   .productos-grid a.cta-magnetic { padding-left: 14px !important; padding-right: 14px !important; }
 </style>
