@@ -43,9 +43,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 2.3 Suite de seguridad `npm run test:ventas`. Contra staging: **42 OK, 0 fallas**, 22 pendientes hasta que existan los endpoints. Contra producción: 41 OK y 1 falla conocida (H-01) | ✅ | dev |
 | **3. Backend** | 3.1a Núcleo puro con tests: firma, **reglas de orden (`OrderRules`, API de Orders, D14)**, tokens, validación, montos, catálogo generado por el build. Bug corregido: `$` en las regex aceptaba un `\n` final (modificador `D`) | ✅ | dev |
 | | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
-| | **3.2 Próximo:** cliente de MP (Orders) + `bootstrap` + endpoints | ⏳ | dev |
-| | 3.2 Endpoints: checkout (crea la orden en MP), webhook, estado, descarga, reenvío, health | ⏳ | dev |
-| | 3.3 Mail de entrega (SMTP de Hostinger) | ⏳ | dev |
+| | 3.2 `Shop` (todo el flujo), `Api` (arranque que falla cerrado, logs en la carpeta privada), cliente de MP (Orders), endpoints `checkout` · `webhook` · `status` · `download` · `resend` · `health` y `.htaccess` de `/api` (lista blanca + `no-store`). **139 tests** (flujo completo con MP y mail falsos) y mutación verificada. Suite de seguridad: las pendientes pasaron a tests reales | ✅ Código (2026-11-07). 🟡 Falta la config de staging y el webhook en MP | dev |
+| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1 vendorizado). Código y texto listos; falta el envío real desde staging | 🟡 | dev |
 | | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
 | | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
 | **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | ✅ Aprobada por el dev (2026-11-06) | dev |
@@ -58,8 +57,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-- **Dev:** revisión de productos y ZIP (2026-11-07). El resumen de tareas humanas está en [guia-fase-1.md](./guia-fase-1.md).
-- **IA:** 3.2. Cliente de MP para Orders, `bootstrap` (buzón → config → DB, falla cerrada) y endpoints, empezando por checkout y webhook.
+- **IA:** subir a staging la config y los ZIP por el buzón (autorizado por el dev el 2026-11-07) y probar `health`.
+- **Dev:** configurar el webhook de prueba en MP y pasar su clave secreta (pasos cortos en el chat). Después, compra de prueba en el sandbox.
 
 ## Cómo se corren las pruebas
 
@@ -83,6 +82,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D20 | 2026-11-07 | **`/gracias` muestra el link de descarga solo durante 24 h** después del pago. Después, el link está únicamente en el mail (y en "No me llegó"). Así, si alguien encuentra el código de orden en un historial, no le sirve | ✅ Técnica |
+| D19 | 2026-11-07 | **"No me llegó" con un link vencido o agotado manda uno nuevo** (otros 30 días / 5 descargas), como dice la página de descarga. Máximo 2 renovaciones por compra; después lo resuelve soporte. Si el link todavía funciona, se reenvía el mismo, sin renovar. Solo al email de la compra (A15) y con límite de 3 pedidos por día | ✅ Técnica (dentro de D3) |
 | D18 | 2026-11-06 | **Después de cada deploy a producción se purga la CDN de Hostinger** (`DELETE …/cdn/purge`, lo hace la IA al mergear). Sin eso, algunos visitantes ven la versión vieja durante días (H-06, comprobado: un pedido viejo y otro nuevo en la misma página). Antes del lanzamiento, decidir si se automatiza | ✅ |
 | D17 | 2026-11-06 | Hasta el lanzamiento, los kits "Próximamente" muestran **"Avisame cuando esté disponible"**. `/recursos-gratuitos` ya no promete un recurso gratis que no existe. Aprobado por el dev; en producción con PR #17 | ✅ |
 | D16 | 2026-11-06 | Contenido de los kits (decisiones del dev):
@@ -128,6 +129,12 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (15)** — El dev pidió revisar las descripciones de los kits y autorizó subir la config a staging.
+  - Descripciones contra los PDF: Evaluar (29 págs., 8 prompts) y Aprender (30 págs., 25 prompts) OK. **Enseñar decía 25 páginas y tiene 37**; los 25 prompts están dentro del PDF (sección 8). Corregido.
+  - **Para el dev:** el PDF de Enseñar menciona un archivo `Mini_Pack_de_Prompts.md` que no está en el ZIP. Hay que agregarlo o sacar esa frase del PDF.
+  - 3.2 hecho (código). Decisiones D19 y D20. Comprobado con 139 tests de PHP y mutaciones. Una mutación sobrevivió y es equivalente: el compare-and-set ya impide ese cambio.
+  - Pendiente antes del lanzamiento: verificar qué IP ve PHP detrás de la CDN de producción (H-06). Si todos los pedidos llegan con la IP de la CDN, los límites por IP no sirven.
 
 - **2026-11-06 (14)** — El dev aprobó la propuesta visual y pidió verla y probarla.
   - **PR #17 a producción:** título "Evaluar en tiempos de IA" + botón D17. Hubo capturas antes y después, y se corrigió un rótulo que se partía en dos renglones.

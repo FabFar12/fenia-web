@@ -22,10 +22,10 @@ Este kit enseña a usar la IA para lo que sí sirve: pensar mejores clases. Clar
 
 ## Qué incluye
 
-- PDF principal del kit (25 páginas): el problema, el principio "la IA no conoce tu grupo", la matriz FENIA de riesgos, el método en 5 pasos (Foco, Contexto, Diseño, Criterio, Ajuste), 10 usos concretos, 5 casos Antes/Después, 25 prompts y checklist final.
+- PDF principal del kit (37 páginas): el problema, el principio "la IA no conoce tu grupo", la matriz FENIA de riesgos, el método en 5 pasos (Foco, Contexto, Diseño, Criterio, Ajuste), 10 usos concretos, 5 casos Antes/Después, 25 prompts y checklist final.
 - 8 fichas editables interactivas: ficha de clase con IA, mapa de objetivo de aprendizaje, anticipador de dificultades, diseño de actividad con IA, explicación en tres niveles, banco de ejemplos situados, revisión pedagógica y cierre y transferencia. Se completan en el navegador, se copian para usarlas con la IA o se guardan en PDF, y funcionan sin internet.
 - Las 8 plantillas en versión imprimible, para trabajar en papel.
-- Mini pack de 25 prompts organizados por función pedagógica, cada uno con su advertencia de uso.
+- Mini pack de 25 prompts organizados por función pedagógica, cada uno con su advertencia de uso (incluido en el PDF).
 - Fuentes y base de criterio.
 
 ## Para quién es

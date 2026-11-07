@@ -1,0 +1,3 @@
+PHPMailer v7.1.1, copied verbatim from https://github.com/PHPMailer/PHPMailer (tag v7.1.1).
+License: LGPL 2.1 (see LICENSE). Used by Mailer.php for SMTP delivery (ADR-028).
+No Composer on the server, so the three source files are vendored here; this folder is denied over HTTP by _lib/.htaccess.

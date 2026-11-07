@@ -24,10 +24,23 @@
 
 ## Catálogo de pruebas
 
-**Implementadas al 2026-11-06:**
+**Implementadas al 2026-11-07:**
 - U-01…U-05, U-10…U-18, U-20, U-21, U-30, U-32: [`tests/php/`](../../tests/php). U-10 y U-18 cubren la decisión (`OrderRules`) y la transición atómica en la base (`OrderStore`), sobre SQLite; contra MySQL se verifican en staging.
+- Flujo completo a nivel servicio ([`ShopTest`](../../tests/php/ShopTest.php), con MP y mail falsos y reloj simulado). Cubre:
+  - el checkout con el precio del catálogo (S-12);
+  - la entrega única;
+  - el pago tardío leído desde `/gracias`;
+  - 5 descargas y la sexta rechazada (S-13);
+  - el vencimiento (S-14);
+  - el ZIP alterado;
+  - el reembolso;
+  - "No me llegó" (D19);
+  - el mail caído y la conciliación.
 - U-31: [`scripts/verify-catalog.mjs`](../../scripts/verify-catalog.mjs).
-- S-09, S-11, S-22, S-25 y S-24 (parcial): [`tests/security/`](../../tests/security).
+- Suite de seguridad en [`tests/security/`](../../tests/security):
+  - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25 son ✱, seguras en producción; se saltean si `/api/health.php` no responde OK;
+  - S-13, S-16 y S-18 son solo para staging y necesitan variables opcionales (ver el encabezado de `api.test.mjs`);
+  - S-03 y S-04 se prueban en INT.
 - OPS-01 y OPS-06: barrera automática en CI.
 
 El resto está escrito como pendiente y se implementa en el paso que construye cada pieza.

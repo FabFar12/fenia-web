@@ -1,0 +1,24 @@
+# Sales API (ADR-028). Only the endpoints and the build's catalogue answer;
+# anything else in this folder (for example an `error_log` file PHP could
+# write here) is denied. _lib/ and _inbox/ have their own deny-all.
+# Keep endpoint names unique: a file with one of these names inside _lib/
+# would be let through by this allowlist.
+<IfModule mod_authz_core.c>
+  Require all denied
+  <FilesMatch "^((checkout|webhook|status|download|resend|health)\.php|catalog\.json)$">
+    Require all granted
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order deny,allow
+  Deny from all
+  <FilesMatch "^((checkout|webhook|status|download|resend|health)\.php|catalog\.json)$">
+    Allow from all
+  </FilesMatch>
+</IfModule>
+
+# Never cached by the browser or Hostinger's CDN (threat model C21, test S-24).
+<IfModule mod_headers.c>
+  Header always set Cache-Control "no-store"
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>

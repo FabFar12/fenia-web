@@ -37,6 +37,12 @@ final class OrderStore
     }
 
     /** @return array<string, mixed>|null */
+    public function findById(int $id): ?array
+    {
+        return $this->one('SELECT * FROM orders WHERE id = ?', [$id]);
+    }
+
+    /** @return array<string, mixed>|null */
     public function findByReference(string $reference): ?array
     {
         return $this->one('SELECT * FROM orders WHERE reference = ?', [$reference]);
@@ -59,9 +65,37 @@ final class OrderStore
     /** Compare-and-set. True only for the one caller that made the change. */
     public function transition(int $id, string $from, string $to, ?string $reason, string $now): bool
     {
-        $stmt = $this->pdo->prepare('UPDATE orders SET status = ?, status_reason = ?, updated_at = ? WHERE id = ? AND status = ?');
-        $stmt->execute([$to, $reason, $now, $id, $from]);
+        $stmt = $this->pdo->prepare(
+            "UPDATE orders SET status = ?, status_reason = ?, updated_at = ?,
+                    paid_at = COALESCE(paid_at, CASE WHEN ? = 'paid' THEN ? ELSE NULL END)
+             WHERE id = ? AND status = ?"
+        );
+        $stmt->execute([$to, $reason, $now, $to, $now, $id, $from]);
         return $stmt->rowCount() === 1;
+    }
+
+    public function markEmailSent(int $id, string $now): void
+    {
+        $this->pdo->prepare('UPDATE orders SET email_sent_at = ?, updated_at = ? WHERE id = ?')->execute([$now, $now, $id]);
+    }
+
+    /**
+     * Paid orders whose delivery email has not gone out yet (reconciliation
+     * retries them; threat model C2).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function paidWithoutEmail(): array
+    {
+        return $this->pdo->query("SELECT * FROM orders WHERE status = 'paid' AND email_sent_at IS NULL ORDER BY id")->fetchAll();
+    }
+
+    /** @return list<array<string, mixed>> pending orders already bound to an MP order */
+    public function pendingWithMpOrder(string $createdAfter): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM orders WHERE status = 'pending' AND mp_order_id IS NOT NULL AND created_at > ? ORDER BY id");
+        $stmt->execute([$createdAfter]);
+        return $stmt->fetchAll();
     }
 
     /**
