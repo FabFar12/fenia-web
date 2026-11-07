@@ -45,6 +45,7 @@
 | A14 | Compartir el link de descarga en un grupo | Vence a los 30 días, máximo 5 descargas (D3), registro de IPs y alerta si un link se usa desde muchas IPs distintas | U-21, S-13, S-14 |
 | A15 | Usar "No me llegó" para mandarse el kit a otro email | Solo reenvía al email guardado en la compra. La respuesta es idéntica exista o no la compra (no revela quién compró) | S-15 |
 | A16 | Ver el link de otra persona desde el endpoint de estado (IDOR) | Exige id de pago + código de orden; sin coincidencia, respuesta genérica | S-05 |
+| A17 | **Staging regala los kits.** Staging es público, su URL figura en el repo, y el sandbox de MP acepta las tarjetas de prueba que MP publica (APRO). Si staging entregara los kits reales, cualquiera los "compraría" gratis | Staging entrega **ZIPs de prueba** con los mismos nombres (D21); los reales solo están en la carpeta privada de producción. La integridad del ZIP real (E2E-02) se verifica en la compra real del lanzamiento (6.3) | D21, 6.3 |
 
 ## B. Estafas con dinero
 
