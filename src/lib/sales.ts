@@ -50,7 +50,11 @@ export function offerFor(product: CollectionEntry<'products'>, now = new Date())
     timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
   }).formatToParts(promo.ends);
   const part = (type: string) => deadline.find((p) => p.type === type)?.value ?? '';
-  const dayOf = (d: Date) => new Intl.DateTimeFormat('es-AR', { timeZone: AR_TZ, weekday: 'long', day: 'numeric', month: 'numeric' }).format(d).replace(',', '');
+  const dayOf = (d: Date) => {
+    const p = new Intl.DateTimeFormat('es-AR', { timeZone: AR_TZ, weekday: 'long', day: 'numeric', month: 'numeric' }).formatToParts(d);
+    const get = (type: string) => p.find((x) => x.type === type)?.value ?? '';
+    return `${get('weekday')} ${get('day')}/${get('month')}`;
+  };
   const firstDay = artDate(promo.starts);
   return {
     regular: formatPrice(price, currency),
