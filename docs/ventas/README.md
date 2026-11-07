@@ -134,7 +134,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 - **2026-11-07 (15)** — El dev pidió revisar las descripciones de los kits y autorizó subir la config a staging.
   - Descripciones contra los PDF: Evaluar (29 págs., 8 prompts) y Aprender (30 págs., 25 prompts) OK. **Enseñar decía 25 páginas y tiene 37**; los 25 prompts están dentro del PDF (sección 8). Corregido.
-  - **Para el dev:** el PDF de Enseñar menciona un archivo `Mini_Pack_de_Prompts.md` que no está en el ZIP. Hay que agregarlo o sacar esa frase del PDF.
+  - El PDF de Enseñar mencionaba un archivo `Mini_Pack_de_Prompts.md` que no está en el ZIP. **El dev pidió sacar la frase**, porque los prompts ya están en el cuerpo del PDF. Se borró solo esa oración (pág. 27, el resto del PDF idéntico) en una copia: `C:\Fenia\entregables\corregido\`, con la carpeta interna renombrada a "Enseñar con IA". El original no se tocó. Esa copia es la que se sube en el lanzamiento.
   - 3.2 hecho (código). Decisiones D19 y D20. Comprobado con 139 tests de PHP y mutaciones. Una mutación sobrevivió y es equivalente: el compare-and-set ya impide ese cambio.
   - Staging configurado (3.2b). Riesgo nuevo A17 → D21 (ZIPs de prueba en staging).
   - Mejora encontrada en vivo: los pedidos inválidos gastaban el cupo de compras de la IP. Corregido: ahora solo cuentan los intentos que crearían una orden.
