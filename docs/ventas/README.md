@@ -45,9 +45,9 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
 | | 3.2b Staging configurado (2026-11-07). Config y ZIPs de prueba (D21) subidos por el buzón con la API de archivos de Hostinger (TUS); PHP los movió a la carpeta privada y el buzón quedó vacío. `health`: `{"ok":true,"sales":true,"kits":true}`, con base MySQL migrada. **Checkout real contra el sandbox de MP OK**: $13.000 aunque el pedido decía `price: 1` (S-12), sin efectivo (D4), regreso a `/gracias`, "FENIA" en el resumen. Falta la clave del webhook | 🟡 Dev: webhook en MP | dev |
 | | 3.2 `Shop` (todo el flujo), `Api` (arranque que falla cerrado, logs en la carpeta privada), cliente de MP (Orders), endpoints `checkout` · `webhook` · `status` · `download` · `resend` · `health` y `.htaccess` de `/api` (lista blanca + `no-store`). **139 tests** (flujo completo con MP y mail falsos) y mutación verificada. Suite de seguridad: las pendientes pasaron a tests reales | ✅ Código (2026-11-07). 🟡 Falta la config de staging y el webhook en MP | dev |
-| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1 vendorizado). Código y texto listos; falta el envío real desde staging | 🟡 | dev |
-| | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
-| | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
+| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1 vendorizado). Texto aprobado por el dev (5 descargas, 2026-11-07). Prueba real `kits@` → `kits@`: llegó a la bandeja de entrada en 5 s con **DKIM, SPF y DMARC en pass**. Falta verlo salir desde el PHP de staging, con la compra de prueba | 🟡 | dev |
+| | 3.4 Tarea horaria (`Cron` + `hourly.php`): conciliación, limpieza de límites, avisos por mail con explicación y resumen diario después de las 9. **Creada en staging** por API (a los :07 de cada hora; los avisos van a `kits@`). En producción se crea en el lanzamiento, y falta decidir quién recibe los avisos | ✅ staging | dev |
+| | 3.5 `.htaccess` de `/api` (lista blanca + `no-store`) ✅. Archivos ocultos negados y **`www` → `fenia.com.ar`** (H-08) en el `.htaccess` base. En staging, sin regresiones. Llega a producción con el merge | 🟡 merge | dev |
 | **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | ✅ Aprobada por el dev (2026-11-06) | dev |
 | | 4.2a Implementada en staging (`PUBLIC_SALES_PREVIEW`: ahí los kits están "en venta"; producción no cambia). Revisada con capturas de escritorio y celular. Además: H-03 cerrado y bug del layout corregido (no tenía slot `head`, así que el `noindex` de `/gracias` nunca se publicaba) | ✅ | dev |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
@@ -58,8 +58,23 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-- **Dev:** configurar el webhook de prueba en MP y pasar su clave secreta (pasos cortos en el chat).
-- **IA:** con la clave, actualizar la config de staging y hacer la compra de prueba completa (pago, aviso, mail, descarga, reembolso).
+Plan para el 2026-11-08:
+1. **Dev:** webhook de prueba en MP + clave secreta al portapapeles.
+2. **IA:** actualizar la config de staging y hacer la compra de prueba completa: pago, aviso, mail, descarga y reembolso. Hacerla **antes** de correr la suite de seguridad, que gasta el cupo de descargas de la IP por una hora.
+3. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
+   - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
+   - ensayo del protocolo de soporte con Fab;
+   - quién recibe los avisos de la tarea horaria.
+   Son decisiones del dev y de Fab.
+4. **Producción** (cuando la compuerta esté OK):
+   - crear la base;
+   - config con el token de producción y el webhook productivo;
+   - subir los ZIP reales (el de Enseñar, el corregido);
+   - crear la tarea horaria;
+   - merge a `main` y purga de la CDN;
+   - verificar `www` (H-08) y la IP detrás de la CDN (H-06);
+   - compra real + reembolso;
+   - kits a `live`.
 
 ## Cómo se corren las pruebas
 
@@ -109,7 +124,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
 | Q3 | ¿El firewall de Hostinger deja pasar los avisos de MP? Confirmado que **hay un firewall activo**: responde 403 a `<script>` en la URL | Prueba INT-09 en staging |
-| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Falta decidir el canal de subida a staging (API de archivos de Hostinger, con OK del dev) en el 3.2 |
+| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Canal: API de archivos de Hostinger (TUS) al buzón, usado en staging el 2026-11-07 |
 | Q4 | Ruta exacta de la carpeta privada y carpeta del subdominio de staging. Respondida en parte: Hostinger crea el subdominio en `public_html/staging`, dentro del sitio real, y se protege con C20. La carpeta privada se crea desde la casita (⌂) del Administrador de archivos | Guía, Bloque 1, pasos 1.3–1.4 |
 
 ## Hallazgos
@@ -122,6 +137,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
+| H-08 | 2026-11-07 | `www.fenia.com.ar` servía el sitio entero sin redirigir. Una compra empezada ahí habría fallado: la API exige que el pedido venga de `fenia.com.ar`. Además, Google veía dos copias | **Alto para el lanzamiento** | 3.5: redirección 301 en `public/.htaccess`. Verificar en producción después del merge |
 | H-04 | 2026-11-06 | **El repositorio de GitHub es público** | Ningún archivo pago ni secreto puede entrar. Protegido por `.gitignore` + barrera en CI (OPS-01, OPS-06). La seguridad nunca depende de que el código no se vea | Hecho (2.2) |
 
 ## Lo que hoy está mal y se corrige en este plan
@@ -131,6 +147,13 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (16)** — El dev aprobó el mail y las 5 descargas, y pidió sacar del PDF de Enseñar la mención al `.md` (hecho, ver (15)). Mañana pasa la clave del webhook. Repaso general:
+  - **H-08:** `www` no redirigía y habría roto las compras empezadas ahí. Corregido en el `.htaccess` (3.5).
+  - **Origin `null`:** el estándar permite que algunos navegadores lo manden en `/descarga`, que tiene `no-referrer`. Chrome, Edge y Firefox 150 mandan el origen bien (verificado con navegadores reales). Igual se cubre con `Sec-Fetch-Site`, para Safari y modos de privacidad.
+  - 3.4: tarea horaria hecha y creada en staging.
+  - 3.3: mail real con DKIM, SPF y DMARC en pass.
+  - Suite contra staging: 68 OK, 0 fallas. PHP: 154 tests.
 
 - **2026-11-07 (15)** — El dev pidió revisar las descripciones de los kits y autorizó subir la config a staging.
   - Descripciones contra los PDF: Evaluar (29 págs., 8 prompts) y Aprender (30 págs., 25 prompts) OK. **Enseñar decía 25 páginas y tiene 37**; los 25 prompts están dentro del PDF (sección 8). Corregido.

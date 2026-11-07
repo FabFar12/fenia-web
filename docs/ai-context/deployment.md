@@ -151,6 +151,22 @@ The migration from Vercel to Hostinger is staged so production is never at risk:
 7. **Watch 24–72 h**: UptimeRobot (once configured) catches origin issues; manual checks confirm headers and `.htaccess` behavior.
 8. **Vercel cleanup**: after 1 week of stable Hostinger operation, delete the Vercel project. Owner cancels the Vercel plan if applicable.
 
+## Sales API operations (docs/ventas, ADR-028)
+
+The PHP sales API ships inside `dist/api/` with every deploy, but what makes it run never lives in git:
+
+- **Secrets and kit ZIPs** live in `~/fenia-private/<env>/` (outside `public_html`). They arrive through the
+  `api/_inbox/` drop folder (denied over HTTP), uploaded with Hostinger's file API. The first API request moves
+  them into the private folder (`Inbox.php`). Deploys never touch them, and neither do database contents.
+- **Health check:** `GET /api/health.php` → `{"ok":true,"sales":true,"kits":true,…}`. A `503` means the API is
+  failing closed (missing or invalid config, database down): nothing can be bought, nothing breaks.
+- **Hourly job:** Hostinger cron runs `php ~/domains/fenia.com.ar/public_html[/staging]/api/_lib/hourly.php`
+  (reconciliation, alert mails, daily report). Its last output is readable through Hostinger's API.
+- **Kill switch:** `sales_enabled => false` in the config (re-uploaded through the inbox) stops new checkouts
+  without a deploy. Paid links keep working.
+- **After every production deploy, purge Hostinger's CDN** (decision D18 in docs/ventas).
+- **Never change `hash_salt`** in a config after the first sale: download links are derived from it.
+
 ## Rollback strategy
 
 Hostinger has no atomic "promote previous deploy". Two paths, in order of preference:
