@@ -29,20 +29,26 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 0.4 [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) (arquitectura) | ✅ Aceptado | dev |
 | | 0.5 Marcar lo obsoleto: ADR-025, guía de MP para Fab, PENDING #10 | ✅ | dev |
 | **1. Prerrequisitos** — [guia-fase-1.md](./guia-fase-1.md) (los pasos internos de cada bloque se numeran en la guía) | Bloque 1 · Hostinger por API (D11). Plan Business, PHP 8.3 con las extensiones necesarias (incluida `nd_pdo_mysql`). Creados: la base de staging, el subdominio `staging.fenia.com.ar` con SSL activo y el cron disponible por API. La carpeta privada la crea PHP (Q5). Los datos de acceso están en `~/fenia-secrets`, **nunca en el repo** | ✅ 2026-11-06 | dev |
-| | Bloque 2 · Mercado Pago: aplicación + token de prueba (P2). Cuentas de prueba y activación de producción, más adelante. Desactivar los Links de Pago viejos | 🟡 Esperando P2 | dev / Fab |
+| | Bloque 2 · Mercado Pago: aplicación "FENIA kits" creada (Checkout Pro vía **Orders**, D14). Producción activada. **Token de prueba validado** contra `/users/me` (usuario `test_user`, MLA) y guardado en `~/fenia-secrets`. Pendientes para más adelante: webhooks (cuando exista el endpoint), comprador de prueba (Fase 5), token de producción (lanzamiento) y decidir qué hacer con los Links de Pago viejos | ✅ 2026-11-06 (lo de ahora) | dev |
 | | Bloque 3 · Mail: `kits@` creada por API (D10). `soporte@` creado como **alias de `contacto@`** (OK explícito del dev, 2026-11-06): lo que llega a soporte cae en la bandeja de contacto. Falta el mail de prueba | 🟡 Falta mail de prueba (paso 3.3) | dev |
-| | Bloque 4 · ZIP final de cada kit + nombres y precio confirmados | ⏸️ Al final, antes de la Fase 5 (D9) | Fab |
+| | Bloque 4 · ZIP de cada kit en `C:\Fenia\entregables` (2026-11-06) + precio AR$ 13.000 (D15). Los tres revisados y OK (D16):
+  - **Evaluar ✅**.
+  - **Aprender ✅**: el dev sacó el `.md` interno (ZIP del 23:26).
+  - **Enseñar ✅**: formato distinto pero completo. 8 fichas editables interactivas (HTML: completar / copiar para la IA / PDF) y 8 imprimibles, verificadas en Edge con y sin internet; la página ya lo describe así.
+
+  Al subirlos se renombran con el id del kit, y en Enseñar se corrige la carpeta interna "…mejorado para final" (en una copia; el original no se toca) | ✅ (se suben con el circuito) | dev |
 | | Bloque 5 · Contador · abogado · garantía de 7 días sí/no | 🟡 Guía entregada | Fab |
 | **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`, corrida 42317545237). Primera publicación resuelta sembrando el archivo de estado (aprobado por el dev). Staging solo responde en su host (C20 cerrado), es `noindex`, no tiene CDN y bloquea archivos ocultos, `_lib/` y `default.php` | ✅ 2026-11-06 | dev |
 | | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Verde en GitHub (2026-11-06) | dev |
 | | 2.3 Suite de seguridad `npm run test:ventas`. Contra staging: **42 OK, 0 fallas**, 22 pendientes hasta que existan los endpoints. Contra producción: 41 OK y 1 falla conocida (H-01) | ✅ | dev |
-| **3. Backend** | 3.1a Núcleo puro con tests: firma, reglas de pago y estados, tokens, validación, montos, catálogo generado por el build | ✅ 80 tests | dev |
-| | 3.1b Configuración, base de datos con transiciones atómicas, limitador de frecuencia | ⏳ **Próximo** | dev |
-| | 3.2 Endpoints: checkout, webhook, estado, descarga, reenvío, health | ⏳ | dev |
+| **3. Backend** | 3.1a Núcleo puro con tests: firma, **reglas de orden (`OrderRules`, API de Orders, D14)**, tokens, validación, montos, catálogo generado por el build. Bug corregido: `$` en las regex aceptaba un `\n` final (modificador `D`) | ✅ | dev |
+| | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
+| | **3.2 Próximo:** cliente de MP (Orders) + `bootstrap` + endpoints | ⏳ | dev |
+| | 3.2 Endpoints: checkout (crea la orden en MP), webhook, estado, descarga, reenvío, health | ⏳ | dev |
 | | 3.3 Mail de entrega (SMTP de Hostinger) | ⏳ | dev |
 | | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
 | | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
-| **4. Frontend** | 4.1 Propuesta visual: página del kit, `/gracias`, "No me llegó", links legales | ⏳ | dev → aprobación |
+| **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | 🟡 Escrita, esperando aprobación | dev → aprobación |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
 | **5. Pruebas en staging** | 5.1 Compuerta completa: suite de seguridad, sandbox de MP, E2E, revisión de seguridad del código | ⏳ | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
@@ -51,8 +57,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-- **Dev:** el permiso P2, el token de prueba de Mercado Pago ([guía](./guia-fase-1.md#camino-elegido-lo-configura-el-dev-por-api-d11)).
-- **IA:** 3.1b (configuración + base de datos + limitador), con diseño de Q5 (cómo llegan los secretos a la carpeta privada).
+- **Dev:** revisión de productos y ZIP (2026-11-07). El resumen de tareas humanas está en [guia-fase-1.md](./guia-fase-1.md).
+- **IA:** 3.2. Cliente de MP para Orders, `bootstrap` (buzón → config → DB, falla cerrada) y endpoints, empezando por checkout y webhook.
 
 ## Cómo se corren las pruebas
 
@@ -76,6 +82,14 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D16 | 2026-11-06 | Contenido de los kits (decisiones del dev):
+  - "Markdown fuente" sale de las tres descripciones.
+  - El kit 1 se llama **"Evaluar en tiempos de IA"**.
+  - Enseñar se describe con su formato real (fichas interactivas + imprimibles).
+  - Las notas internas al comienzo de cada `.md` no se publican cuando exista la página del kit (paso 4.2) | ✅ |
+| D15 | 2026-11-06 | **Precio de cada kit: AR$ 13.000** (antes 8.000), cargado en los `.md`. El catálogo y lo cobrado salen de ahí (U-31). Mientras los kits estén en "Próximamente", no se ve en el sitio | ✅ Decisión del dev |
+| D14 | 2026-11-06 | **Corregida el mismo día:** la aplicación de MP es **Checkout Pro vía Orders API**. Al crearla, MP avisa que la API de Preferences "será descontinuada pronto", y su documentación indica Orders para integraciones nuevas. El flujo es: `POST /v1/orders` → `checkout_url`; `external_reference` obligatorio; URLs de regreso en `config.online`; aviso de tipo `order` con `x-signature`; `GET /v1/orders/{id}` como fuente de verdad. Lo ya construido sirve (firma, tokens, validación, montos, catálogo). En 3.1b se adaptan `PaymentRules` y `Validate` (los ids de orden son alfanuméricos) y se revisan ADR-028 y el threat model | ✅ Técnica |
+| D13 | 2026-11-06 | El dev autorizó a la IA a mergear `dev` → `main` cuando lo considere listo. Siempre por PR, con CI en verde y verificación de producción antes y después. **No reemplaza** la compuerta de lanzamiento ([test-plan.md](./test-plan.md#compuerta-de-lanzamiento)) ni la aprobación previa de cambios visuales (AGENTS.md) | ✅ |
 | D9 | 2026-11-06 | Los ZIP finales llegan **al final**, después de la revisión final del material, antes de la Fase 5. Staging se prueba con ZIPs de prueba. En esa revisión se confirman el nombre (el link viejo dice "Educar con IA", el sitio "Enseñar con IA…") y el precio de cada kit | ✅ Confirmada por el dev |
 | D10 | 2026-11-06 | Los compradores ven y responden a `soporte@fenia.com.ar`. Los mails salen desde `kits@` (Reply-To a `soporte@`), así la contraseña de soporte nunca vive en el servidor. `kits@` la crea el dev por la API de mail. Si el plan no tiene cupo de casillas, se usa `soporte@` | ✅ |
 | D11 | 2026-11-06 | **Decisión del dev:** Hostinger se configura por su API, para evitar errores en el panel. El dev sabe que el token no se puede limitar (acceso total a la cuenta, incluidos el dominio y el DNS). Resguardos: vence en 3 meses (elección del dev), y se recomienda revocarlo al terminar staging y crear uno nuevo para el lanzamiento; vive en `~/fenia-secrets`, nunca en el chat; solo se usan endpoints de lectura y de creación de base, subdominio, SSL, casilla y cron (nunca DNS, dominios, facturación ni borrados); se revoca al terminar | ✅ |
@@ -89,7 +103,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
 | Q3 | ¿El firewall de Hostinger deja pasar los avisos de MP? Confirmado que **hay un firewall activo**: responde 403 a `<script>` en la URL | Prueba INT-09 en staging |
-| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | Diseño en el paso 2.1; pruebas en S-11 |
+| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Falta decidir el canal de subida a staging (API de archivos de Hostinger, con OK del dev) en el 3.2 |
 | Q4 | Ruta exacta de la carpeta privada y carpeta del subdominio de staging. Respondida en parte: Hostinger crea el subdominio en `public_html/staging`, dentro del sitio real, y se protege con C20. La carpeta privada se crea desde la casita (⌂) del Administrador de archivos | Guía, Bloque 1, pasos 1.3–1.4 |
 
 ## Hallazgos
@@ -112,6 +126,29 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (13)** — El dev dejó los ZIP en `C:\Fenia\entregables`. Se revisaron sin extraer (listado + SHA-256):
+  - Evaluar: OK.
+  - Aprender: trae un archivo que parece interno.
+  - Enseñar: no coincide con lo que promete la página.
+
+  Precio a AR$ 13.000 (D15). El dev pidió cambiar "recurso gratis" por "Comprar": queda para el lanzamiento, porque un botón de compra sin circuito sería mentir (regla de AGENTS.md). Propuesta visual escrita ([propuesta-visual.md](./propuesta-visual.md)), con un botón honesto para mientras tanto.
+- **2026-11-06 (12)** — Núcleo adaptado a la API de Orders, con campos verificados en el SDK oficial `mercadopago/sdk-php`:
+  - rutas `/v1/orders` y `/v1/orders/{id}`;
+  - campos `status`, `status_detail`, `total_amount` y `total_paid_amount` (strings), `currency`, `user_id` y `transactions.chargebacks`;
+  - **sin `live_mode`**: el control de sandbox lo hace `user_id`.
+
+  `PaymentRules` reemplazado por `OrderRules`. Bug real encontrado por un test nuevo: `$` en las regex aceptaba un `\n` final; corregido con `/D` en todas.
+
+  Paso 3.1b hecho: 114 tests, con mutación verificada sobre el límite de descargas y el compare-and-set.
+- **2026-11-06 (11)** — Aplicación de MP creada (Checkout Pro vía Orders; Preferences avisa que "será descontinuada pronto", D14).
+  - En el panel nuevo, las credenciales no se ven desde el menú de la documentación: se llega con el link directo de la aplicación.
+  - Token de prueba pasado del celular por WhatsApp a sí mismo (aceptable solo por ser de prueba), validado contra MP y guardado. El de producción se pasará de otra forma.
+  - Los productos y los ZIP se revisan el 2026-11-07.
+- **2026-11-06 (10)** — **PR #16 mergeado a `main`** (`ca72899`) con autorización del dev (D13). Deploy a producción OK (corrida 42318156057).
+  - Subieron solo `/api/_lib/*` y `/api/catalog.json` (11 cambios, 17 kB). Ningún archivo existente fue reemplazado.
+  - Antes del merge se comparó el HTML de `dev` con producción: idéntico, salvo dos `uid` aleatorios de Astro.
+  - Verificado después: las páginas responden 200, `/api/_lib` da 403 y el catálogo sirve los 3 kits en `coming-soon`. Suite ✱: 41 OK y 1 falla conocida (H-01).
+  - Observación: Vercel sigue conectado al repo y hace deploys propios (no sirve el dominio). Es el pendiente #2 de [PENDING.md](../../PENDING.md).
 - **2026-11-06 (9)** — **Staging andando:** corrida 42317545237, 41 archivos.
   - Verificado desde afuera: C20 y H-05 cerrados, la regla de H-01 funciona en LiteSpeed y producción quedó intacta.
   - Suite contra staging: 42 OK y 0 fallas. Contra producción: 41 OK y 1 falla conocida (H-01).

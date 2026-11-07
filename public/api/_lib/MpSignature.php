@@ -39,7 +39,8 @@ final class MpSignature
         }
         $ts = $parts['ts'] ?? '';
         $v1 = $parts['v1'] ?? '';
-        if (!preg_match('/^\d{1,20}$/', $ts) || !preg_match('/^[0-9a-fA-F]{64}$/', $v1)) {
+        // `D`: without it, `$` also matches before a trailing "\n".
+        if (!preg_match('/^\d{1,20}$/D', $ts) ||!preg_match('/^[0-9a-fA-F]{64}$/D', $v1)) {
             return null;
         }
         return ['ts' => $ts, 'v1' => strtolower($v1)];

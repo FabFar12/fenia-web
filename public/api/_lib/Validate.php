@@ -34,18 +34,21 @@ final class Validate
     /** Product ids are the .md file slugs, e.g. `kit-ensenar-con-ia`. */
     public static function kitId(string $id): bool
     {
-        return strlen($id) <= 64 && (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $id);
+        return strlen($id) <= 64 && (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $id);
     }
 
-    /** MP payment ids are numeric; anything else never reaches MP's API URL. */
-    public static function paymentId(string $id): bool
+    /**
+     * MP resource ids (orders look like `ORD01JQ…`, payments like `PAY01…`):
+     * letters and digits only, so nothing else ever reaches MP's API URL.
+     */
+    public static function mpId(string $id): bool
     {
-        return (bool) preg_match('/^\d{1,20}$/', $id);
+        return (bool) preg_match('/^[A-Za-z0-9]{1,64}$/D', $id);
     }
 
     /** Our order code (`external_reference`): 128 random bits as 32 hex chars. */
     public static function orderReference(string $reference): bool
     {
-        return (bool) preg_match('/^[a-f0-9]{32}$/', $reference);
+        return (bool) preg_match('/^[a-f0-9]{32}$/D', $reference);
     }
 }

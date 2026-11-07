@@ -23,23 +23,33 @@ Para evitar errores en un panel que no conocés, el dev configura Hostinger por 
   2. *Nuevo token* → nombre `claude-fenia-setup` → vencimiento **7 días** → *Generar*.
   3. Copiá el token: se muestra una sola vez.
   4. En una terminal, `notepad $HOME\fenia-secrets\hostinger-token.txt` → pegalo → **Guardar** → cerrá.
-- [ ] **P2 — Mercado Pago: aplicación + token de prueba (5 min)**
+- [x] **P2 — Mercado Pago: aplicación + token de prueba (5 min)**. ✅ Hecho 2026-11-06. Si las credenciales no aparecen en el panel, el link directo es `https://www.mercadopago.com.ar/developers/panel/app/<NÚMERO DE LA APP>?env=test#credentials` (el número está en la barra de direcciones, después de `/app/`).
 
   > **Desde noviembre de 2025 el flujo es más corto:** al crear la aplicación, Mercado Pago entrega solo las credenciales de prueba. **No hace falta** crear cuentas de prueba ni activar producción para empezar ([novedad oficial](https://www.mercadopago.com.mx/developers/es/news/2025/11/19/Streamlined-integration-testing-with-automatic-credentials)).
 
-  1. Entrá a **https://www.mercadopago.com.ar/developers/panel/app** con la cuenta de Fab, la que cobra.
-  2. Tocá **Crear aplicación** (arriba a la derecha) y completá el asistente:
-     - **nombre:** `FENIA Kits`;
-     - **cómo vas a integrar:** desarrollo propio (no plataforma);
-     - **tipo de pago:** pagos online;
-     - **producto**, si lo pregunta: *Checkout Pro*.
+  **Crear la aplicación** (se puede hacer desde el celular). Pantalla verificada el 2026-11-06:
+  1. Entrá a **https://www.mercadopago.com.ar/developers/panel/app** con la cuenta de Fab, la que cobra → **Crear aplicación**.
+  2. En **"Elegí una solución para integrar"** tocá **Checkout Pro** ("Usa un checkout listo que redirige a Mercado Pago"). ❌ **No** elijas "Plataforma de e-commerce": es para tiendas hechas en Shopify, WooCommerce o Tiendanube.
+  3. Si sigue apareciendo **"Elegí la plataforma"**, no elijas ninguna.
+  4. Abrí **"Otros datos"** y completá lo que pida:
+     - nombre: `FENIA Kits`;
+     - sitio web: `https://fenia.com.ar`;
+     - **Tipo de API: "API de Orders"**. La de Preferences muestra "Esta API será descontinuada pronto" (D14);
+     - rubro: el más cercano a educación;
+     - aceptá los términos.
+  5. Tocá **Crear aplicación**.
 
-     Aceptá y confirmá.
-  3. Te abre la aplicación en **Inicio**. Arriba hay un selector **Prueba / Producción**: dejalo en **Prueba**.
-  4. En el bloque de credenciales, o en el menú izquierdo → **Credenciales**, copiá el **Access Token** (empieza con `APP_USR-`) con el **ícono de copiar**.
-  5. Avisale al dev "copiado": lo toma del portapapeles y lo valida contra Mercado Pago con una consulta de solo lectura. Si es el de **producción** en vez del de prueba, no lo guarda.
+     ⚠️ Si la pantalla siguiente muestra el **Access Token** a la vista, no le saques captura (o tapalo).
 
-  **Si te trabás:** decile al dev qué texto ves en pantalla.
+  **Pasarle el token al dev** (en la **compu**, no en el celular: el portapapeles del celu no llega a la compu):
+  1. En la compu, entrá a **https://www.mercadopago.com.ar/developers/panel/app** → tocá la tarjeta **FENIA Kits**.
+  2. Arriba, el selector en **Prueba**.
+  3. En **Credenciales**, copiá el **Access Token** (empieza con `APP_USR-`) con el **ícono de copiar**.
+  4. Escribile al dev **"copiado"**. Lo toma del portapapeles, lo valida contra Mercado Pago con una consulta de solo lectura y lo guarda. Si es el de **producción** en vez del de prueba, no lo guarda.
+
+  ❗ No te mandes el token del celu a la compu por WhatsApp ni por mail: quedaría guardado ahí.
+
+  **Si te trabás:** mandale al dev una captura (sin claves a la vista).
 - [ ] **P3 — Avisale al dev "listo".**
 
 **Qué hace el dev con esos permisos:**
@@ -154,11 +164,11 @@ Decidido: los compradores **ven y responden a `soporte@fenia.com.ar`**.
 
 **Se hace al final**, después de la revisión final del material (decisión D9). Mientras tanto, staging funciona con ZIPs de prueba que armo yo. En esa revisión final confirmamos también:
 - el **nombre** de cada kit (el link viejo dice "Educar con IA" y el sitio dice "Enseñar con IA sin automatizar la pedagogía");
-- el **precio final**. Lo que se cobra sale del sitio: hoy AR$ 8.000 por kit.
+- el **precio final**. Lo que se cobra sale del sitio: hoy AR$ 13.000 por kit.
 
 - [ ] **4.1** Un ZIP por kit con **solo lo que recibe el comprador**: PDF, DOCX, plantillas, imprimibles, prompts, fuentes. **Sacá todo lo interno**: carpetas como `Ventas/` o `Assets/`, borradores, mockups, copys de venta.
 - [ ] **4.2** Nombres exactos:
-  - `guia-evaluar-tiempos-ia.zip` (*Evaluar con IA sin vigilar*);
+  - `guia-evaluar-tiempos-ia.zip` (*Evaluar en tiempos de IA*);
   - `kit-ensenar-con-ia.zip` (*Enseñar con IA sin automatizar la pedagogía*);
   - `kit-aprender-con-ia.zip` (*Aprender con IA sin dejar de pensar*).
 - [ ] **4.3** Guardalos en `C:\Fenia\entregables\`.
@@ -171,7 +181,7 @@ Decidido: los compradores **ven y responden a `soporte@fenia.com.ar`**.
 Esto no bloquea el desarrollo, pero sí el lanzamiento. Preguntas concretas para llevar:
 
 **Contador**
-- [ ] ¿Cómo facturamos cada venta de AR$ 8.000 a consumidor final: a mano en ARCA, o con un servicio que se conecta a Mercado Pago y factura solo?
+- [ ] ¿Cómo facturamos cada venta de AR$ 13.000 a consumidor final: a mano en ARCA, o con un servicio que se conecta a Mercado Pago y factura solo?
 - [ ] ¿La categoría de monotributo de Fab aguanta este ingreso extra?
 - [ ] ¿Hace falta mostrar algo en el sitio por vender online (por ejemplo, el QR de Data Fiscal de ARCA)?
 

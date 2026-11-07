@@ -29,7 +29,7 @@
 
 | ID | Riesgo | Cómo lo evitamos | Pruebas |
 |---|---|---|---|
-| A1 | **Aviso de pago falso:** alguien manda al webhook un POST que dice "el pago 123 está aprobado" | Verificamos la firma `x-signature` (HMAC-SHA256, comparación en tiempo constante). Aunque la firma sea válida, consultamos el pago a la API de MP con nuestro token: la verdad la dice la API, nunca el aviso | U-01…U-05, S-01, S-02, S-03 |
+| A1 | **Aviso de pago falso:** alguien manda al webhook un POST que dice "el pago 123 está aprobado" | Verificamos la firma `x-signature` (HMAC-SHA256, comparación en tiempo constante). Aunque la firma sea válida, consultamos la orden a la API de MP con nuestro token (`GET /v1/orders/{id}`, D14): la verdad la dice la API, nunca el aviso | U-01…U-05, S-01, S-02, S-03 |
 | A2 | Reenviar un aviso viejo y legítimo (replay) | El procesamiento es idempotente: un pago entrega una sola vez (id de pago único en la base + cambio de estado "compare-and-set"). Repetir un aviso no crea entregas | U-10, S-04 |
 | A3 | Escribir a mano la URL de regreso (`/gracias?status=approved&payment_id=…`) | `/gracias` no confía en los parámetros: pregunta al servidor, que exige el id de pago **y** el código de la orden (128 bits aleatorios, imposible de adivinar) | S-05, S-06 |
 | A4 | Adivinar o probar links de descarga en masa | Tokens aleatorios de 256 bits, guardados solo como hash; límite de intentos fallidos por IP | U-20, S-07, S-08 |
@@ -38,9 +38,9 @@
 | A7 | Leer secretos o código: config, logs, `.git`, `api/_lib/*.php`, `composer.json`, el estado del deploy (ver H-01) | Config, ZIPs y logs fuera de `public_html`. `api/_lib/` bloqueado por `.htaccess` y con guarda en cada archivo. Archivos ocultos bloqueados. Errores genéricos, sin trazas | S-11 |
 | A8 | **Cambiar el precio desde el navegador** (pagar AR$ 1) | El navegador solo manda el id del kit; el precio lo pone el servidor desde el catálogo. Al aprobarse, se compara `transaction_amount` y `currency_id` con lo esperado: si no coincide, no se entrega, queda "en revisión" y se avisa | U-11, S-12 |
 | A9 | Pagar un kit y recibir otro | La orden fija el kit; el pago se vincula a la orden por `external_reference` | U-12 |
-| A10 | Que un pago pendiente, en revisión o solo autorizado cuente como pagado | Solo entrega `status: approved` + `status_detail: accredited`. `binary_mode` (D4) elimina los pendientes. Máquina de estados con transiciones válidas | U-13, U-14, INT-03 |
-| A11 | Que un pago de prueba (sandbox) valga en producción | Producción rechaza `live_mode: false`; credenciales y base separadas por entorno | U-15 |
-| A12 | Que un pago de otra cuenta, o de otra cosa que cobra Fab, libere un kit | Consultamos con nuestro token (solo ve pagos de la cuenta de Fab) y validamos `collector_id` + `external_reference` de una orden nuestra | U-16 |
+| A10 | Que un pago pendiente, en revisión o solo autorizado cuente como pagado | Solo entrega la orden con `status: processed` + `status_detail: accredited` (`OrderRules`). Los pendientes (`created`, `processing`, `action_required`) no entregan; D4 se aplica excluyendo medios de pago diferidos al crear la orden. Máquina de estados con transiciones válidas | U-13, U-14, INT-03 |
+| A11 | Que un pago de prueba (sandbox) valga en producción | Las órdenes no traen `live_mode`; las de sandbox pertenecen al usuario de prueba, así que producción las rechaza por `user_id` ≠ la cuenta real. Credenciales y base separadas por entorno | U-15 |
+| A12 | Que un pago de otra cuenta, o de otra cosa que cobra Fab, libere un kit | Consultamos con nuestro token (solo ve órdenes de la cuenta) y validamos `user_id`, `external_reference` y el id de la orden de MP atada a la nuestra al crearla | U-12, U-16 |
 | A13 | Pedir reembolso o contracargo después de descargar | No se puede impedir del todo (ver riesgo residual). Al pasar a `refunded`, `charged_back` o `in_mediation` se revocan los links. Guardamos evidencia para disputas: aceptación de términos con fecha, IP, entrega y descargas | INT-05 |
 | A14 | Compartir el link de descarga en un grupo | Vence a los 30 días, máximo 5 descargas (D3), registro de IPs y alerta si un link se usa desde muchas IPs distintas | U-21, S-13, S-14 |
 | A15 | Usar "No me llegó" para mandarse el kit a otro email | Solo reenvía al email guardado en la compra. La respuesta es idéntica exista o no la compra (no revela quién compró) | S-15 |
@@ -112,7 +112,7 @@
 Lo que este diseño **reduce pero no elimina**, a sabiendas:
 
 - **Quien pagó puede compartir los archivos.** Protegemos el link, no el contenido. Una marca de agua con el email del comprador en el PDF queda como mejora futura.
-- **Contracargos:** el Programa de Protección al Vendedor de Mercado Pago **no cubre productos digitales**. Con un ticket de AR$ 8.000 y evidencia guardada, se acepta el riesgo.
+- **Contracargos:** el Programa de Protección al Vendedor de Mercado Pago **no cubre productos digitales**. Con un ticket de AR$ 13.000 y evidencia guardada, se acepta el riesgo.
 - **Si Mercado Pago está caído, no se vende.** No hay medio de cobro alternativo.
 
 ## Fuentes

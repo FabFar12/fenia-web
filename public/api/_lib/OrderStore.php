@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fenia\Api;
+
+defined('FENIA_API') || exit;
+
+/**
+ * Our orders. Status changes are compare-and-set (`… WHERE status = :from`):
+ * when MP notifies the same payment twice at the same time, exactly one
+ * request wins and only that one delivers (threat model A2, C3, C5; tests
+ * U-10, U-18).
+ */
+final class OrderStore
+{
+    private \PDO $pdo;
+
+    public function __construct(\PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
+    /**
+     * @param array{reference: string, kit_id: string, email: string, expected_cents: int, currency: string, client_ip_hash: ?string} $order
+     */
+    public function create(array $order, string $now): int
+    {
+        $this->pdo->prepare(
+            'INSERT INTO orders (reference, kit_id, email, expected_cents, currency, status, client_ip_hash, terms_accepted_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([
+            $order['reference'], $order['kit_id'], $order['email'], $order['expected_cents'], $order['currency'],
+            'pending', $order['client_ip_hash'], $now, $now, $now,
+        ]);
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /** @return array<string, mixed>|null */
+    public function findByReference(string $reference): ?array
+    {
+        return $this->one('SELECT * FROM orders WHERE reference = ?', [$reference]);
+    }
+
+    /** @return array<string, mixed>|null */
+    public function findByMpOrderId(string $mpOrderId): ?array
+    {
+        return $this->one('SELECT * FROM orders WHERE mp_order_id = ?', [$mpOrderId]);
+    }
+
+    /** Binds our order to the MP order created for it, once and only once. */
+    public function bindMpOrder(int $id, string $mpOrderId, string $now): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE orders SET mp_order_id = ?, updated_at = ? WHERE id = ? AND mp_order_id IS NULL');
+        $stmt->execute([$mpOrderId, $now, $id]);
+        return $stmt->rowCount() === 1;
+    }
+
+    /** Compare-and-set. True only for the one caller that made the change. */
+    public function transition(int $id, string $from, string $to, ?string $reason, string $now): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE orders SET status = ?, status_reason = ?, updated_at = ? WHERE id = ? AND status = ?');
+        $stmt->execute([$to, $reason, $now, $id, $from]);
+        return $stmt->rowCount() === 1;
+    }
+
+    /**
+     * Paid orders for "No me llegó" (threat model A15): only ever resent to
+     * the email stored with the purchase.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function paidByEmail(string $email): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM orders WHERE email = ? AND status = 'paid' ORDER BY id");
+        $stmt->execute([$email]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param list<mixed> $params
+     * @return array<string, mixed>|null
+     */
+    private function one(string $sql, array $params): ?array
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $row = $stmt->fetch();
+        return $row === false ? null : $row;
+    }
+}

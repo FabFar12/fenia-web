@@ -1,10 +1,10 @@
 ---
-title: "Evaluar con IA sin vigilar"
+title: "Evaluar en tiempos de IA"
 type: "Caja de herramientas"
 status: "coming-soon"
 accent: "cyan"
 summary: "Un kit para rediseñar consignas, rúbricas y acuerdos de uso de IA, cuidando autoría, proceso y evidencia de aprendizaje sin convertirte en detective digital."
-price: 8000
+price: 13000
 currency: "ARS"
 deliveryMode: "lead-magnet"
 audiences:
@@ -16,7 +16,7 @@ publishedAt: 2026-05-26
 
 > **Estado (2026-07-07)**: el material creció de "guía PDF" a **Kit FENIA completo** (guía + 10 plantillas editables + 2 imprimibles + mini pack de prompts + fuentes). Decisión arquitectónica de cobro: [ADR-025](../../../docs/adr/ADR-025-product-sales-via-mercadopago.md). Flujo operativo para Fab: [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md). Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
+> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
 >
 > **Pendiente antes de pasar a `live`**:
 > - `paymentUrl`: link de cobro de Mercado Pago (ver [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md)). Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.
@@ -32,7 +32,7 @@ No necesitás probar que usaron IA. Necesitás que deje de importar: cuando la e
 ## Qué incluye
 
 - Guía PDF de 29 páginas: problema, checklist de vulnerabilidad, matriz FENIA de 4 zonas de uso de IA, método de 5 pasos, 7 casos Antes/Después, implementación sin "policía de IA" y anexo de educación superior.
-- DOCX editable y Markdown fuente de la guía.
+- DOCX editable de la guía.
 - 10 plantillas editables (DOCX): rediseño de consigna, checklist de vulnerabilidad, matriz FENIA, 3 rúbricas (autoría, proceso, defensa y transferencia), acuerdo de uso de IA del curso, declaración del estudiante, bitácora de proceso y feedback accionable.
 - 2 imprimibles (PDF): checklist de vulnerabilidad y acuerdo de uso de IA.
 - Mini pack de 8 prompts para docentes, cada uno con su advertencia de uso.
@@ -53,4 +53,4 @@ No necesitás probar que usaron IA. Necesitás que deje de importar: cuando la e
 
 ## Formato
 
-PDF + DOCX editable + Markdown fuente + 10 plantillas editables + 2 imprimibles. Descarga inmediata. Primera aplicación en 60-90 minutos sobre una evaluación real.
+PDF + DOCX editable + 10 plantillas editables + 2 imprimibles. Descarga inmediata. Primera aplicación en 60-90 minutos sobre una evaluación real.

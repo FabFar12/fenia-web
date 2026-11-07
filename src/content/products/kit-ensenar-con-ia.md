@@ -4,7 +4,7 @@ type: "Caja de herramientas"
 status: "coming-soon"
 accent: "cyan"
 summary: "Para preparar clases con IA sin que parezcan hechas para un grupo que no existe. Un kit para planificar, explicar, adaptar actividades y revisar propuestas sin perder contexto, presencia docente ni criterio pedagógico."
-price: 8000
+price: 13000
 currency: "ARS"
 deliveryMode: "lead-magnet"
 audiences:
@@ -16,7 +16,7 @@ publishedAt: 2026-07-04
 
 > **Estado (2026-07-07)**: producto cargado a partir del zip `Ensenar-con-IA-sin-automatizar-la-pedagogia_Kit-FENIA_v1`, pendiente de revisión final de Fab. Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
+> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
 >
 > **Pendiente antes de pasar a `live`**:
 > - Confirmar viabilidad operativa de la garantía de 7 días sugerida en el copy antes de publicarla.
@@ -33,9 +33,8 @@ Este kit enseña a usar la IA para lo que sí sirve: pensar mejores clases. Clar
 ## Qué incluye
 
 - PDF principal del kit (25 páginas): el problema, el principio "la IA no conoce tu grupo", la matriz FENIA de riesgos, el método en 5 pasos (Foco, Contexto, Diseño, Criterio, Ajuste), 10 usos concretos, 5 casos Antes/Después, 25 prompts y checklist final.
-- DOCX editable y Markdown fuente del contenido principal.
-- 8 plantillas editables (DOCX): ficha de clase con IA, mapa de objetivo de aprendizaje, anticipador de dificultades, diseño de actividad con IA, explicación en tres niveles, banco de ejemplos situados, revisión pedagógica y cierre y transferencia.
-- 4 plantillas imprimibles (PDF) para trabajar en papel.
+- 8 fichas editables interactivas: ficha de clase con IA, mapa de objetivo de aprendizaje, anticipador de dificultades, diseño de actividad con IA, explicación en tres niveles, banco de ejemplos situados, revisión pedagógica y cierre y transferencia. Se completan en el navegador, se copian para usarlas con la IA o se guardan en PDF, y funcionan sin internet.
+- Las 8 plantillas en versión imprimible, para trabajar en papel.
 - Mini pack de 25 prompts organizados por función pedagógica, cada uno con su advertencia de uso.
 - Fuentes y base de criterio.
 
@@ -57,4 +56,4 @@ Es la otra mitad de la línea educativa FENIA junto con "Evaluar en tiempos de I
 
 ## Formato
 
-PDF + DOCX editable + Markdown fuente + 8 plantillas editables + 4 imprimibles. Descarga inmediata. Primera clase preparada con el método en 60-90 minutos.
+PDF + 8 fichas editables interactivas + 8 plantillas imprimibles. Descarga inmediata. Primera clase preparada con el método en 60-90 minutos.

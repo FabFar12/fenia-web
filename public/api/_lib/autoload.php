@@ -18,7 +18,7 @@ spl_autoload_register(static function (string $class): void {
         return;
     }
     $name = substr($class, strlen($prefix));
-    if (!preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $name)) {
+    if (!preg_match('/^[A-Za-z][A-Za-z0-9]*$/D', $name)) {
         return;
     }
     $file = __DIR__ . '/' . $name . '.php';

@@ -1,0 +1,9 @@
+# Drop zone for config.php and kit ZIPs on their way to the private folder
+# (Inbox.php, docs/ventas Q5). Never served over HTTP; covered by test S-11.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

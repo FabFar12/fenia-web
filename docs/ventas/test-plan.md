@@ -25,8 +25,7 @@
 ## Catálogo de pruebas
 
 **Implementadas al 2026-11-06:**
-- U-01…U-05, U-11…U-17, U-20, U-21, U-32: [`tests/php/`](../../tests/php).
-- U-10 y U-18: la parte de decisión; la transición atómica en la base llega en el paso 3.1b.
+- U-01…U-05, U-10…U-18, U-20, U-21, U-30, U-32: [`tests/php/`](../../tests/php). U-10 y U-18 cubren la decisión (`OrderRules`) y la transición atómica en la base (`OrderStore`), sobre SQLite; contra MySQL se verifican en staging.
 - U-31: [`scripts/verify-catalog.mjs`](../../scripts/verify-catalog.mjs).
 - S-09, S-11, S-22, S-25 y S-24 (parcial): [`tests/security/`](../../tests/security).
 - OPS-01 y OPS-06: barrera automática en CI.
@@ -45,10 +44,10 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | U-10 | El mismo pago notificado N veces | Una sola entrega y un solo mail |
 | U-11 | Monto o moneda distintos (7999.99, 8000.00, USD, UYU) | 8000.00 entrega; el resto no y queda "en revisión" |
 | U-12 | Un pago de una orden del kit A | Nunca libera el kit B |
-| U-13 | Cada estado de MP: `pending`, `in_process`, `authorized`, `rejected`, `cancelled`, `approved` sin `accredited` | Ninguno entrega; solo `approved` + `accredited` |
+| U-13 | Cada estado de orden de MP: `created`, `processing`, `action_required`, `failed`, `canceled`, `refunded`, `processed` sin `accredited`, estados nuevos | Ninguno entrega; solo `processed` + `accredited` |
 | U-14 | Transiciones inválidas (aprobado → pendiente); aprobado → `refunded` / `charged_back` / `in_mediation` | Las inválidas se descartan; las de reembolso o disputa revocan los links |
-| U-15 | `live_mode: false` en producción | No entrega |
-| U-16 | `collector_id` ajeno o `external_reference` desconocido | No entrega |
+| U-15 | Orden de sandbox en producción (`user_id` del usuario de prueba) | No entrega |
+| U-16 | `user_id` ajeno o ausente, `external_reference` desconocido | No entrega |
 | U-17 | Segundo pago aprobado para la misma orden | No duplica la entrega; marca para reembolso y alerta |
 | U-18 | Dos procesamientos simultáneos del mismo pago | Una sola entrega |
 | U-20 | Generación de tokens | 256 bits aleatorios; solo se guarda el hash; comparación en tiempo constante |
