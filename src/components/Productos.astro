@@ -5,7 +5,7 @@
 // CTA behavior: see ADR-027, ADR-028 and docs/ventas/propuesta-visual.md.
 import { getCollection } from 'astro:content';
 import { whatsapp } from '../data/site';
-import { formatPrice, isPurchasable, kitUrl, notifyUrl } from '../lib/sales';
+import { formatPrice, isPurchasable, kitUrl, notifyUrl, offerFor } from '../lib/sales';
 
 const allProducts = await getCollection('products');
 const products = allProducts
@@ -72,15 +72,33 @@ function ctaFor(product: (typeof products)[number]) {
             ? formatPrice(product.data.price, product.data.currency)
             : 'Consultar';
         const cta = ctaFor(product);
+        // Launch promo (D23): price, badge and countdown switch live (src/scripts/offers.ts).
+        const offer = buyable ? offerFor(product) : null;
         return (
-          <div class="reveal tilt-card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+          <div class="reveal tilt-card" data-offer={offer?.json} style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
             <div style={`position:absolute;top:0;left:0;right:0;height:2px;background:${accentText(product.data.accent)};opacity:0.5;`}></div>
-            <span style={`display:inline-block;width:fit-content;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;border-radius:5px;background:${accentBg(product.data.accent)};color:${accentText(product.data.accent)};margin-bottom:18px;font-family:'Plus Jakarta Sans',sans-serif;`}>{chipLabel}</span>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+              <span style={`display:inline-block;width:fit-content;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;border-radius:5px;background:${accentBg(product.data.accent)};color:${accentText(product.data.accent)};font-family:'Plus Jakarta Sans',sans-serif;`}>{chipLabel}</span>
+              {offer && (
+                <span data-offer-promo hidden={!offer.activeAtBuild} style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;border-radius:5px;background:#E8573D;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;">−{offer.percent}% · Lanzamiento</span>
+              )}
+            </div>
             <h3 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.title}</h3>
             <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 28px 0;flex:1;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.summary}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
               <span style="display:flex;flex-direction:column;gap:2px;margin-right:12px;font-family:'Plus Jakarta Sans',sans-serif;">
-                <span style={`font-size:${buyable ? '16px' : '13px'};font-weight:700;color:${buyable ? '#fff' : 'rgba(255,255,255,0.7)'};white-space:nowrap;`}>{footerLeft}</span>
+                {offer ? (
+                  <>
+                    <span style="white-space:nowrap;">
+                      <s data-offer-promo hidden={!offer.activeAtBuild} style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.5);margin-right:6px;">{offer.regular}</s>
+                      <span data-offer-price style="font-size:16px;font-weight:700;color:#fff;">{offer.activeAtBuild ? offer.promoPrice : offer.regular}</span>
+                    </span>
+                    <span data-offer-countdown aria-hidden="true" style="font-size:11px;font-weight:700;color:#ffb4a6;font-variant-numeric:tabular-nums;white-space:nowrap;"></span>
+                    <span data-offer-promo hidden={!offer.activeAtBuild} style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">{offer.label} hasta el {offer.deadline}, hora de Argentina. Después, {offer.regular}.</span>
+                  </>
+                ) : (
+                  <span style={`font-size:${buyable ? '16px' : '13px'};font-weight:700;color:${buyable ? '#fff' : 'rgba(255,255,255,0.7)'};white-space:nowrap;`}>{footerLeft}</span>
+                )}
                 {buyable && <span style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.65);white-space:nowrap;">Descarga inmediata</span>}
               </span>
               {cta && (
@@ -107,3 +125,8 @@ function ctaFor(product: (typeof products)[number]) {
     </div>
   </div>
 </section>
+
+<script>
+  // Live launch-promo price and countdown (docs/ventas D23).
+  import '../scripts/offers';
+</script>

@@ -1,6 +1,7 @@
 // Test U-31 (docs/ventas/test-plan.md): the built sales catalogue must match
-// the product .md files exactly — same visible products, status, price and
-// currency — so the price on the card is the price charged (threat model C12).
+// the product .md files exactly — same visible products, status, price,
+// currency and launch promo (D23) — so the price on the card is the price
+// charged (threat model C12).
 // Runs in CI after `npm run build`. No dependencies.
 //
 //   node scripts/verify-catalog.mjs [path/to/catalog.json]
@@ -21,12 +22,21 @@ function frontmatter(file) {
     return m ? m[1].trim().replace(/^["']|["']$/g, '') : undefined;
   };
   const price = field('price');
+  // Nested `promo:` block (indented `price`, `starts`, `ends`).
+  const promoBlock = /^promo:[ \t]*\r?\n((?:[ \t]+\S.*(?:\r?\n|$))+)/m.exec(block[1]);
+  const sub = (name) => {
+    const m = promoBlock && new RegExp(`^[ \\t]+${name}:\\s*(.*)$`, 'm').exec(promoBlock[1]);
+    return m ? m[1].trim().replace(/^["']|["']$/g, '') : undefined;
+  };
   return {
     id: file.replace(/\.md$/, ''),
     title: field('title'),
     status: field('status'),
     price: price === undefined || price === 'null' || price === '' ? null : Number(price),
     currency: field('currency') ?? 'ARS',
+    promo: promoBlock
+      ? { price: Number(sub('price')), starts: new Date(sub('starts')).toISOString(), ends: new Date(sub('ends')).toISOString() }
+      : null,
   };
 }
 
@@ -52,6 +62,13 @@ for (const want of expected) {
   }
   for (const key of ['title', 'status', 'price', 'currency']) {
     if (got[key] !== want[key]) errors.push(`${want.id}.${key}: catalogue=${JSON.stringify(got[key])} md=${JSON.stringify(want[key])}`);
+  }
+  const gotPromo = got.promo ? { price: got.promo.price, starts: got.promo.starts, ends: got.promo.ends } : null;
+  if (JSON.stringify(gotPromo) !== JSON.stringify(want.promo)) {
+    errors.push(`${want.id}.promo: catalogue=${JSON.stringify(gotPromo)} md=${JSON.stringify(want.promo)}`);
+  }
+  if (want.promo && !(want.promo.price > 0 && want.promo.price < want.price && want.promo.ends > want.promo.starts)) {
+    errors.push(`${want.id}.promo: must be cheaper than the price and end after it starts`);
   }
   if (got.status === 'live' && !(Number.isInteger(got.price) && got.price > 0)) {
     errors.push(`${want.id}: live product needs a positive integer price`);

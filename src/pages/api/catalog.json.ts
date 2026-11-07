@@ -20,6 +20,15 @@ export const GET: APIRoute = async () => {
       status: isPurchasable(p) ? 'live' : p.data.status,
       price: p.data.price,
       currency: p.data.currency,
+      // The backend charges promo.price while starts <= now < ends (D23).
+      promo: p.data.promo
+        ? {
+            price: p.data.promo.price,
+            label: p.data.promo.label,
+            starts: p.data.promo.starts.toISOString(),
+            ends: p.data.promo.ends.toISOString(),
+          }
+        : null,
     }));
 
   return new Response(JSON.stringify({ products }, null, 2), {

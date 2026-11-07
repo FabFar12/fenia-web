@@ -8,7 +8,7 @@ import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 import { sales } from '../../data/site';
-import { formatPrice, isPurchasable, notifyUrl } from '../../lib/sales';
+import { formatPrice, isPurchasable, notifyUrl, offerFor } from '../../lib/sales';
 
 export async function getStaticPaths() {
   const products = await getCollection('products', (p) => p.data.status !== 'hidden');
@@ -19,6 +19,8 @@ const { product } = Astro.props;
 const { Content } = await render(product);
 const data = product.data;
 const buyable = isPurchasable(product);
+// Launch promo (D23): switches live in the browser (src/scripts/offers.ts).
+const offer = buyable ? offerFor(product) : null;
 const accent = data.accent === 'coral' ? 'coral' : 'cyan';
 ---
 
@@ -40,7 +42,23 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
           {buyable && data.price != null ? (
             <>
               <h2 id="buy-title" class="sr-only">Comprar</h2>
-              <p class="kit-price">{formatPrice(data.price, data.currency)}</p>
+              {offer ? (
+                <div data-offer={offer.json}>
+                  <p class="kit-offer-label" data-offer-promo hidden={!offer.activeAtBuild}>
+                    {offer.label} <span class="kit-offer-badge">−{offer.percent}%</span>
+                  </p>
+                  <p class="kit-price">
+                    <s class="kit-price-regular" data-offer-promo hidden={!offer.activeAtBuild}>{offer.regular}</s>
+                    <span data-offer-price>{offer.activeAtBuild ? offer.promoPrice : offer.regular}</span>
+                  </p>
+                  <p class="kit-countdown" data-offer-countdown aria-hidden="true"></p>
+                  <p class="kit-deadline" data-offer-promo hidden={!offer.activeAtBuild}>
+                    Hasta el {offer.deadline} (hora de Argentina). Después, {offer.regular}.
+                  </p>
+                </div>
+              ) : (
+                <p class="kit-price">{formatPrice(data.price, data.currency)}</p>
+              )}
               <p class="kit-price-note">Pago único · Descarga inmediata</p>
 
               <form id="buy-form" class="kit-form" data-kit={product.id} novalidate>
@@ -84,6 +102,10 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
 
   <Footer />
 </Layout>
+
+<script>
+  import '../../scripts/offers';
+</script>
 
 <script>
   // Checkout: validate here for a clear message, then let the server decide
@@ -167,6 +189,12 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
   .kit-buy { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 28px; }
   .kit-price { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
   .kit-price-note { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin: 4px 0 22px 0; }
+  .kit-offer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e8573d; margin: 0 0 8px 0; }
+  .kit-offer-badge { background: #e8573d; color: #fff; border-radius: 5px; padding: 2px 7px; margin-left: 6px; letter-spacing: 0.02em; }
+  .kit-price-regular { font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.5); margin-right: 10px; letter-spacing: 0; }
+  .kit-countdown { font-size: 16px; font-weight: 700; color: #ffb4a6; font-variant-numeric: tabular-nums; margin: 8px 0 0 0; }
+  .kit-countdown:empty { display: none; }
+  .kit-deadline { font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 4px 0 0 0; }
   .kit-soon-title { font-size: 22px; font-weight: 800; margin: 0; }
 
   .kit-form { display: flex; flex-direction: column; }

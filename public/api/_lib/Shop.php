@@ -101,7 +101,7 @@ final class Shop
         }
 
         $kitId = is_string($in['kit'] ?? null) ? $in['kit'] : '';
-        $product = $this->catalog->purchasable($kitId);
+        $product = $this->catalog->purchasable($kitId, $this->now());
         if ($product === null || $this->config->kit($kitId) === null) {
             return [404, ['error' => 'not_for_sale']];
         }
