@@ -63,20 +63,33 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
   Dos bugs encontrados y corregidos: H-09 y H-10. Suite de seguridad: 68 OK, 0 fallas | ✅ staging | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
-| | 6.2 PR `dev` → `main` con aprobación | ⏳ | dev + aprobación |
+| | 6.2 PR #18 `dev` → `main` (D13), 2026-11-07. **Infraestructura en producción, sin ventas habilitadas**: los kits siguen "Próximamente" y la API responde 503 hasta tener config. Capturas antes/después: la home queda idéntica; `/gracias` y `/recursos-gratuitos`, como se aprobaron. CDN purgada (D18). Verificado en vivo: `www` → 301 (H-08 ✅), archivo de estado → 403 (H-01 ✅). Suite ✱ contra producción: 54 OK, 0 fallas | ✅ infraestructura | dev |
 | | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
 Próximo:
 1. ✅ Webhook de prueba y compra completa en el sandbox (2026-11-07).
-2. Antes de la compra real en producción, ver que la tarea horaria de staging corra sin error con los arreglos.
-3. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
+2. ✅ Infraestructura en producción (PR #18).
+3. **Dev/Fab:** desactivar los 3 Links de Pago viejos (D6, guía 2.7). Ahora volverían a una `/gracias` que dice "No encontramos tu compra".
+4. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
    - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
    - ensayo del protocolo de soporte con Fab;
    - quién recibe los avisos de la tarea horaria.
    Son decisiones del dev y de Fab.
-4. **Producción** (cuando la compuerta esté OK):
+4. **Producción — hecho el 2026-11-07:**
+   - token de producción validado (cuenta real MLA, app FENIA kits);
+   - base `fenia_prod` creada;
+   - config subida, con avisos a `soporte@` (D22) y resumen diario apagado hasta el lanzamiento;
+   - ZIP reales subidos (Enseñar, el corregido);
+   - `health` OK;
+   - tarea horaria a los :17;
+   - suite ✱: 67 OK, 0 fallas.
+
+   **Falta:**
+   - clave del webhook productivo (dev);
+   - el día del lanzamiento: config con `LAUNCHED=1` (resumen diario), kits a `live`, purga de la CDN, y compra real + reembolso.
+5. Lo que sigue es el plan original de producción, como referencia:
    - crear la base;
    - config con el token de producción y el webhook productivo;
    - subir los ZIP reales (el de Enseñar, el corregido);
@@ -108,6 +121,12 @@ Próximo:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D23 | 2026-11-07 | **Promo de lanzamiento** (decisión del dev):
+  - precio normal **$30.000**;
+  - **$13.000** desde el lanzamiento hasta el **sábado 14/11 a las 23:59 (hora argentina)**, 7 días;
+  - en las tarjetas y la página del kit: etiqueta "−56% · Lanzamiento" (56,7% redondeado para abajo), precio tachado y cuenta regresiva.
+
+  Todo sale del campo `promo` de cada `.md`. El sitio y Mercado Pago cambian solos al vencer, sin deploy. La cuenta regresiva es igual para todos y nunca se reinicia. El plazo es real: no se extiende en silencio (ley de defensa del consumidor). Se descartó vender un día a $30.000 antes del descuento | ✅ Decisión del dev |
 | D22 | 2026-11-08 | **En producción, los avisos y el resumen diario de la tarea horaria van a `soporte@`** (decisión del dev). En staging van a `kits@`, para no llenar la bandeja de Fab con pruebas | ✅ Decisión del dev |
 | D21 | 2026-11-07 | **Staging entrega ZIPs de prueba, nunca los kits reales** (A17): su sandbox se paga con tarjetas de prueba públicas. Los kits reales (renombrados con el id; Enseñar con la carpeta interna corregida) se suben solo a producción en el lanzamiento | ✅ Técnica |
 | D20 | 2026-11-07 | **`/gracias` muestra el link de descarga solo durante 24 h** después del pago. Después, el link está únicamente en el mail (y en "No me llegó"). Así, si alguien encuentra el código de orden en un historial, no le sirve | ✅ Técnica |
@@ -146,7 +165,7 @@ Próximo:
 | H-02 | 2026-11-06 | DMARC de `fenia.com.ar` en `p=none`: los proveedores no rechazan mails que se hacen pasar por `@fenia.com.ar`. SPF y DKIM están bien | Medio una vez que haya ventas (phishing a compradores, B4) | Paso 6.4, coordinado con Mailerlite: primero reportes (`rua`), después `p=quarantine` |
 | H-03 | 2026-11-06 | `/recursos-gratuitos?titulo=…` muestra cualquier texto como título. Sirve para armar links de aspecto oficial. No es XSS (usa `textContent`) | Bajo | ✅ Cerrado en 4.2a: el título sale de un mapa id → título armado en el build; `?titulo=` se ignora |
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
-| H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
+| H-06 | 2026-11-06 | ✅ Parte IP cerrada el 2026-11-07: `health` de producción muestra la IP real del visitante detrás de la CDN, así que los límites por IP funcionan. Sigue vigente la purga después de cada deploy (D18). Detalle original: | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
 | H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
 | H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
@@ -160,6 +179,11 @@ Próximo:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (19)** — El dev pasó el token de producción. Producción quedó configurada, sin vender todavía (ver "Próximo", punto 4). La suite ✱ tuvo 2 fallas que eran de las pruebas, no del sistema: el firewall de Hostinger responde 403 a `../`, y antes del lanzamiento el kit se rechaza con 404 antes de mirar el email. Se ajustaron.
+  - El dev propone mostrar un descuento en el cartel, con un precio de $30.000. Va como propuesta visual, que espera su OK, y antes se aclara qué precio se cobra.
+
+- **2026-11-07 (18)** — PR #18 a producción (D13), con los kits en "Próximamente". Ver 6.2. Pendientes de producción: config, ZIP reales, tarea horaria, H-06 (IP detrás de la CDN, se ve en `health` cuando haya config) y la compra real.
 
 - **2026-11-07 (17)** — El dev pasó la clave del webhook de prueba y decidió D22 (avisos a `soporte@`). Compras reales en el sandbox de MP: 3 pagos aprobados con tarjeta de prueba, un reembolso.
   - Detección de navegador automático en MP: con un navegador normal, la pantalla de pago carga bien.

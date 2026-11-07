@@ -66,6 +66,11 @@ accent: "cyan"                  # 'cyan' | 'coral'
 summary: "Programa intensivo de 8 semanas para directivos."
 price: null                     # number or null for 'consultar'
 currency: "ARS"
+promo:                          # opcional — precio por tiempo limitado (docs/ventas D23)
+  price: 13000                  #   menor que `price`; se cobra mientras starts <= ahora < ends
+  label: "Precio de lanzamiento"
+  starts: 2026-11-07T00:00:00-03:00
+  ends: 2026-11-14T23:59:59-03:00  # plazo real: al vencer, rige `price` solo (sitio + Mercado Pago)
 paymentUrl:                     # opcional — link de Mercado Pago, solo cuando status: live. NUNCA un link de entrega.
 ctaLabel:                       # opcional — override del texto del botón (si falta, se infiere del status)
 deliveryMode: "lead-magnet"     # 'lead-magnet' | 'mercadopago-auto' | 'manual' — ver ADR-027

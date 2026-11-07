@@ -53,9 +53,9 @@ final class ShopTest extends TestCase
     }
 
     /** @param array<string, mixed> $overrides */
-    private function shop(array $overrides = []): Shop
+    private function config(array $overrides = []): Config
     {
-        $config = Config::fromArray(EnvConfigInboxTest::validConfig($overrides + [
+        return Config::fromArray(EnvConfigInboxTest::validConfig($overrides + [
             'env' => 'test',
             'site_url' => 'https://staging.example',
             'db_user' => 'u',
@@ -64,6 +64,12 @@ final class ShopTest extends TestCase
             'mail_reply_to' => 'soporte@example.com',
             'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => hash_file('sha256', $this->kitsDir . '/kit-a.zip')]],
         ]), 'test');
+    }
+
+    /** @param array<string, mixed> $overrides */
+    private function shop(array $overrides = []): Shop
+    {
+        $config = $this->config($overrides);
         $catalog = Catalog::fromJson((string) json_encode(['products' => [
             ['id' => 'kit-a', 'title' => 'Kit <A> & más', 'status' => 'live', 'price' => 13000, 'currency' => 'ARS'],
             ['id' => 'kit-b', 'title' => 'Kit B', 'status' => 'coming-soon', 'price' => 13000, 'currency' => 'ARS'],
@@ -152,6 +158,28 @@ final class ShopTest extends TestCase
         self::assertSame(1300000, (int) $order['expected_cents']);
         self::assertSame('ORD01TEST1', $order['mp_order_id']);
         self::assertNotSame(self::IP, $order['client_ip_hash']);
+    }
+
+    public function testCheckoutChargesThePromoPriceOnlyWhileItRuns(): void
+    {
+        $catalog = Catalog::fromJson((string) json_encode(['products' => [
+            ['id' => 'kit-a', 'title' => 'Kit A', 'status' => 'live', 'price' => 30000, 'currency' => 'ARS',
+             'promo' => ['price' => 13000, 'label' => 'Precio de lanzamiento', 'starts' => '2026-11-07T03:00:00.000Z', 'ends' => '2026-11-15T02:59:59.000Z']],
+        ]]));
+        $shop = fn (): Shop => new Shop($this->config(), $catalog, $this->pdo, new MpClient('TEST-token', $this->mp), $this->mailer, $this->kitsDir,
+            static function (): void {}, fn (): \DateTimeImmutable => $this->now);
+
+        $this->now = new \DateTimeImmutable('2026-11-15 02:59:58', new \DateTimeZone('UTC'));
+        $shop()->checkout(self::form(), '1.1.1.1');
+        self::assertSame('13000.00', end($this->mp->requests)['body']['total_amount'], 'last second of the promo');
+
+        $this->now = new \DateTimeImmutable('2026-11-15 02:59:59', new \DateTimeZone('UTC'));
+        $shop()->checkout(self::form(['email' => 'b@example.com', 'email_confirm' => 'b@example.com']), '1.1.1.2');
+        $sent = end($this->mp->requests)['body'];
+        self::assertSame('30000.00', $sent['total_amount'], 'promo over: regular price, with no deploy');
+        self::assertSame('30000.00', $sent['items'][0]['unit_price']);
+        $expected = $this->pdo->query('SELECT expected_cents FROM orders ORDER BY id')->fetchAll(\PDO::FETCH_COLUMN);
+        self::assertSame([1300000, 3000000], array_map('intval', $expected), 'each order expects what it was created at');
     }
 
     public function testCheckoutRefusesBadInput(): void

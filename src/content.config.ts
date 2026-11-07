@@ -51,6 +51,24 @@ const products = defineCollection({
     currency: z.enum(['ARS']).default('ARS'),
 
     /**
+     * Time-limited price (docs/ventas D23). While `starts <= now < ends` the
+     * kit costs `promo.price` instead of `price`, and the card, the kit page,
+     * the countdown and Mercado Pago switch on their own at those instants
+     * (no deploy needed). `ends` is a real deadline: when it passes, `price`
+     * applies again. Never extend it silently (consumer law); `price` must be
+     * the genuine regular price.
+     */
+    promo: z
+      .object({
+        price: z.number().positive(),
+        label: z.string().min(3).default('Precio de lanzamiento'),
+        starts: z.coerce.date(),
+        ends: z.coerce.date(),
+      })
+      .refine((p) => p.ends > p.starts, { message: 'promo.ends must be after promo.starts' })
+      .optional(),
+
+    /**
      * Mercado Pago "Link de Pago" for this product (see ADR-025). Only set
      * once the owner has an active payment link. NEVER a delivery/download
      * URL — Mercado Pago handles delivery post-payment on its own side.
@@ -84,6 +102,8 @@ const products = defineCollection({
 
     /** Metadata only — no longer used for sorting (see `order`). */
     publishedAt: z.coerce.date(),
+  }).refine((p) => !p.promo || (p.price != null && p.promo.price < p.price), {
+    message: 'promo.price must be lower than the regular price',
   }),
 });
 
