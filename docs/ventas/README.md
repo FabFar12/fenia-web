@@ -77,7 +77,19 @@ Próximo:
    - ensayo del protocolo de soporte con Fab;
    - quién recibe los avisos de la tarea horaria.
    Son decisiones del dev y de Fab.
-4. **Producción** (cuando la compuerta esté OK):
+4. **Producción — hecho el 2026-11-07:**
+   - token de producción validado (cuenta real MLA, app FENIA kits);
+   - base `fenia_prod` creada;
+   - config subida, con avisos a `soporte@` (D22) y resumen diario apagado hasta el lanzamiento;
+   - ZIP reales subidos (Enseñar, el corregido);
+   - `health` OK;
+   - tarea horaria a los :17;
+   - suite ✱: 67 OK, 0 fallas.
+
+   **Falta:**
+   - clave del webhook productivo (dev);
+   - el día del lanzamiento: config con `LAUNCHED=1` (resumen diario), kits a `live`, purga de la CDN, y compra real + reembolso.
+5. Lo que sigue es el plan original de producción, como referencia:
    - crear la base;
    - config con el token de producción y el webhook productivo;
    - subir los ZIP reales (el de Enseñar, el corregido);
@@ -147,7 +159,7 @@ Próximo:
 | H-02 | 2026-11-06 | DMARC de `fenia.com.ar` en `p=none`: los proveedores no rechazan mails que se hacen pasar por `@fenia.com.ar`. SPF y DKIM están bien | Medio una vez que haya ventas (phishing a compradores, B4) | Paso 6.4, coordinado con Mailerlite: primero reportes (`rua`), después `p=quarantine` |
 | H-03 | 2026-11-06 | `/recursos-gratuitos?titulo=…` muestra cualquier texto como título. Sirve para armar links de aspecto oficial. No es XSS (usa `textContent`) | Bajo | ✅ Cerrado en 4.2a: el título sale de un mapa id → título armado en el build; `?titulo=` se ignora |
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
-| H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
+| H-06 | 2026-11-06 | ✅ Parte IP cerrada el 2026-11-07: `health` de producción muestra la IP real del visitante detrás de la CDN, así que los límites por IP funcionan. Sigue vigente la purga después de cada deploy (D18). Detalle original: | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
 | H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
 | H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
@@ -161,6 +173,9 @@ Próximo:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (19)** — El dev pasó el token de producción. Producción quedó configurada, sin vender todavía (ver "Próximo", punto 4). La suite ✱ tuvo 2 fallas que eran de las pruebas, no del sistema: el firewall de Hostinger responde 403 a `../`, y antes del lanzamiento el kit se rechaza con 404 antes de mirar el email. Se ajustaron.
+  - El dev propone mostrar un descuento en el cartel, con un precio de $30.000. Va como propuesta visual, que espera su OK, y antes se aclara qué precio se cobra.
 
 - **2026-11-07 (18)** — PR #18 a producción (D13), con los kits en "Próximamente". Ver 6.2. Pendientes de producción: config, ZIP reales, tarea horaria, H-06 (IP detrás de la CDN, se ve en `health` cuando haya config) y la compra real.
 
