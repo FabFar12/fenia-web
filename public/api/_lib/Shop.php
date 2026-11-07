@@ -233,6 +233,12 @@ final class Shop
         try {
             $result = $this->sync($dataId);
         } catch (MpException $e) {
+            if ($e->getCode() === 404) {
+                // Not an order of this account (e.g. MP's "simulate" button):
+                // retrying cannot help (test S-03).
+                $this->log('warning', 'webhook_unknown_mp_order', ['mp_order' => $dataId]);
+                return [200, ['ok' => true, 'ignored' => 'not_found']];
+            }
             $this->log('error', 'webhook_mp_error', ['mp_order' => $dataId, 'http' => $e->getCode()]);
             return [502, ['error' => 'retry']];
         }

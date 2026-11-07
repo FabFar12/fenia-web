@@ -250,6 +250,8 @@ final class ShopTest extends TestCase
         self::assertSame('type', $this->notify($shop, $mpId, self::SECRET, 'payment')[1]['ignored']);
         self::assertSame([], $this->mailer->sent);
 
+        self::assertSame([200, ['ok' => true, 'ignored' => 'not_found']], $this->notify($shop, 'ORD01NOTOURS'), 'S-03: nothing to retry');
+
         $this->mp->failWith = 500;
         self::assertSame(502, $this->notify($shop, $mpId)[0], 'MP must retry later');
     }
