@@ -112,7 +112,7 @@
 Lo que este diseño **reduce pero no elimina**, a sabiendas:
 
 - **Quien pagó puede compartir los archivos.** Protegemos el link, no el contenido. Una marca de agua con el email del comprador en el PDF queda como mejora futura.
-- **Contracargos:** el Programa de Protección al Vendedor de Mercado Pago **no cubre productos digitales**. Con un ticket de AR$ 8.000 y evidencia guardada, se acepta el riesgo.
+- **Contracargos:** el Programa de Protección al Vendedor de Mercado Pago **no cubre productos digitales**. Con un ticket de AR$ 13.000 y evidencia guardada, se acepta el riesgo.
 - **Si Mercado Pago está caído, no se vende.** No hay medio de cobro alternativo.
 
 ## Fuentes

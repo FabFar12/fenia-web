@@ -4,7 +4,7 @@ type: "Caja de herramientas"
 status: "coming-soon"
 accent: "cyan"
 summary: "Para preparar clases con IA sin que parezcan hechas para un grupo que no existe. Un kit para planificar, explicar, adaptar actividades y revisar propuestas sin perder contexto, presencia docente ni criterio pedagógico."
-price: 8000
+price: 13000
 currency: "ARS"
 deliveryMode: "lead-magnet"
 audiences:
@@ -16,7 +16,7 @@ publishedAt: 2026-07-04
 
 > **Estado (2026-07-07)**: producto cargado a partir del zip `Ensenar-con-IA-sin-automatizar-la-pedagogia_Kit-FENIA_v1`, pendiente de revisión final de Fab. Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
+> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
 >
 > **Pendiente antes de pasar a `live`**:
 > - Confirmar viabilidad operativa de la garantía de 7 días sugerida en el copy antes de publicarla.

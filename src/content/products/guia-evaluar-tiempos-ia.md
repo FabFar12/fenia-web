@@ -4,7 +4,7 @@ type: "Caja de herramientas"
 status: "coming-soon"
 accent: "cyan"
 summary: "Un kit para rediseñar consignas, rúbricas y acuerdos de uso de IA, cuidando autoría, proceso y evidencia de aprendizaje sin convertirte en detective digital."
-price: 8000
+price: 13000
 currency: "ARS"
 deliveryMode: "lead-magnet"
 audiences:
@@ -16,7 +16,7 @@ publishedAt: 2026-05-26
 
 > **Estado (2026-07-07)**: el material creció de "guía PDF" a **Kit FENIA completo** (guía + 10 plantillas editables + 2 imprimibles + mini pack de prompts + fuentes). Decisión arquitectónica de cobro: [ADR-025](../../../docs/adr/ADR-025-product-sales-via-mercadopago.md). Flujo operativo para Fab: [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md). Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
+> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
 >
 > **Pendiente antes de pasar a `live`**:
 > - `paymentUrl`: link de cobro de Mercado Pago (ver [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md)). Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.

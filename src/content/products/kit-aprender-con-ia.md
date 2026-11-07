@@ -4,7 +4,7 @@ type: "Caja de herramientas"
 status: "coming-soon"
 accent: "coral"
 summary: "Para estudiar con IA sin que la IA estudie por vos. Un kit para comprender, practicar, producir y verificar ideas con criterio propio, usando la inteligencia artificial como apoyo y no como reemplazo de tu cabeza."
-price: 8000
+price: 13000
 currency: "ARS"
 deliveryMode: "lead-magnet"
 audiences: []
@@ -14,7 +14,7 @@ publishedAt: 2026-07-04
 
 > **Estado (2026-07-07)**: producto cargado a partir del zip `Aprender-con-IA-sin-dejar-de-pensar_Kit-FENIA_v1`, pendiente de revisión final de Fab. Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
 >
-> **Confirmado**: precio AR$ 8.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
+> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"`.
 >
 > **Audiencia**: el público principal es *estudiantil* (secundario avanzado, ingreso universitario, universitarios, tesistas), que no encaja en las 3 audiencias del sitio (`profesionales` / `emprendedores` / `empresas`, pensadas para un site B2B/consultoría). Se deja `audiences: []` a propósito, sin forzar — confirmado con Fab que no corresponde asignarle `profesionales`.
 >

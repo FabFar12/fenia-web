@@ -164,7 +164,7 @@ Decidido: los compradores **ven y responden a `soporte@fenia.com.ar`**.
 
 **Se hace al final**, después de la revisión final del material (decisión D9). Mientras tanto, staging funciona con ZIPs de prueba que armo yo. En esa revisión final confirmamos también:
 - el **nombre** de cada kit (el link viejo dice "Educar con IA" y el sitio dice "Enseñar con IA sin automatizar la pedagogía");
-- el **precio final**. Lo que se cobra sale del sitio: hoy AR$ 8.000 por kit.
+- el **precio final**. Lo que se cobra sale del sitio: hoy AR$ 13.000 por kit.
 
 - [ ] **4.1** Un ZIP por kit con **solo lo que recibe el comprador**: PDF, DOCX, plantillas, imprimibles, prompts, fuentes. **Sacá todo lo interno**: carpetas como `Ventas/` o `Assets/`, borradores, mockups, copys de venta.
 - [ ] **4.2** Nombres exactos:
@@ -181,7 +181,7 @@ Decidido: los compradores **ven y responden a `soporte@fenia.com.ar`**.
 Esto no bloquea el desarrollo, pero sí el lanzamiento. Preguntas concretas para llevar:
 
 **Contador**
-- [ ] ¿Cómo facturamos cada venta de AR$ 8.000 a consumidor final: a mano en ARCA, o con un servicio que se conecta a Mercado Pago y factura solo?
+- [ ] ¿Cómo facturamos cada venta de AR$ 13.000 a consumidor final: a mano en ARCA, o con un servicio que se conecta a Mercado Pago y factura solo?
 - [ ] ¿La categoría de monotributo de Fab aguanta este ingreso extra?
 - [ ] ¿Hace falta mostrar algo en el sitio por vender online (por ejemplo, el QR de Data Fiscal de ARCA)?
 

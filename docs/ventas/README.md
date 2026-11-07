@@ -31,7 +31,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | **1. Prerrequisitos** — [guia-fase-1.md](./guia-fase-1.md) (los pasos internos de cada bloque se numeran en la guía) | Bloque 1 · Hostinger por API (D11). Plan Business, PHP 8.3 con las extensiones necesarias (incluida `nd_pdo_mysql`). Creados: la base de staging, el subdominio `staging.fenia.com.ar` con SSL activo y el cron disponible por API. La carpeta privada la crea PHP (Q5). Los datos de acceso están en `~/fenia-secrets`, **nunca en el repo** | ✅ 2026-11-06 | dev |
 | | Bloque 2 · Mercado Pago: aplicación "FENIA kits" creada (Checkout Pro vía **Orders**, D14). Producción activada. **Token de prueba validado** contra `/users/me` (usuario `test_user`, MLA) y guardado en `~/fenia-secrets`. Pendientes para más adelante: webhooks (cuando exista el endpoint), comprador de prueba (Fase 5), token de producción (lanzamiento) y decidir qué hacer con los Links de Pago viejos | ✅ 2026-11-06 (lo de ahora) | dev |
 | | Bloque 3 · Mail: `kits@` creada por API (D10). `soporte@` creado como **alias de `contacto@`** (OK explícito del dev, 2026-11-06): lo que llega a soporte cae en la bandeja de contacto. Falta el mail de prueba | 🟡 Falta mail de prueba (paso 3.3) | dev |
-| | Bloque 4 · ZIP final de cada kit + nombres y precio confirmados | ⏸️ Al final, antes de la Fase 5 (D9) | Fab |
+| | Bloque 4 · ZIP de cada kit en `C:\Fenia\entregables` (2026-11-06) + precio AR$ 13.000 (D15). Revisión: **Evaluar ✅**. **Aprender ⚠️** incluye `Estandar de diseño FENIA.md`, que parece interno. **Enseñar ❌** no coincide con lo que promete la página (4 archivos, carpeta "…mejorado para final", plantillas en HTML en lugar de DOCX y PDF). Las tres páginas prometen "Markdown fuente", que no viene. Falta confirmar el título de Evaluar (el ZIP dice "Evaluar en tiempos de IA") | 🟡 Esperando correcciones | Fab |
 | | Bloque 5 · Contador · abogado · garantía de 7 días sí/no | 🟡 Guía entregada | Fab |
 | **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`, corrida 42317545237). Primera publicación resuelta sembrando el archivo de estado (aprobado por el dev). Staging solo responde en su host (C20 cerrado), es `noindex`, no tiene CDN y bloquea archivos ocultos, `_lib/` y `default.php` | ✅ 2026-11-06 | dev |
 | | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Verde en GitHub (2026-11-06) | dev |
@@ -43,7 +43,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 3.3 Mail de entrega (SMTP de Hostinger) | ⏳ | dev |
 | | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
 | | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
-| **4. Frontend** | 4.1 Propuesta visual: página del kit, `/gracias`, "No me llegó", links legales | ⏳ | dev → aprobación |
+| **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | 🟡 Escrita, esperando aprobación | dev → aprobación |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
 | **5. Pruebas en staging** | 5.1 Compuerta completa: suite de seguridad, sandbox de MP, E2E, revisión de seguridad del código | ⏳ | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
@@ -77,6 +77,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D15 | 2026-11-06 | **Precio de cada kit: AR$ 13.000** (antes 8.000), cargado en los `.md`. El catálogo y lo cobrado salen de ahí (U-31). Mientras los kits estén en "Próximamente", no se ve en el sitio | ✅ Decisión del dev |
 | D14 | 2026-11-06 | **Corregida el mismo día:** la aplicación de MP es **Checkout Pro vía Orders API**. Al crearla, MP avisa que la API de Preferences "será descontinuada pronto", y su documentación indica Orders para integraciones nuevas. El flujo es: `POST /v1/orders` → `checkout_url`; `external_reference` obligatorio; URLs de regreso en `config.online`; aviso de tipo `order` con `x-signature`; `GET /v1/orders/{id}` como fuente de verdad. Lo ya construido sirve (firma, tokens, validación, montos, catálogo). En 3.1b se adaptan `PaymentRules` y `Validate` (los ids de orden son alfanuméricos) y se revisan ADR-028 y el threat model | ✅ Técnica |
 | D13 | 2026-11-06 | El dev autorizó a la IA a mergear `dev` → `main` cuando lo considere listo. Siempre por PR, con CI en verde y verificación de producción antes y después. **No reemplaza** la compuerta de lanzamiento ([test-plan.md](./test-plan.md#compuerta-de-lanzamiento)) ni la aprobación previa de cambios visuales (AGENTS.md) | ✅ |
 | D9 | 2026-11-06 | Los ZIP finales llegan **al final**, después de la revisión final del material, antes de la Fase 5. Staging se prueba con ZIPs de prueba. En esa revisión se confirman el nombre (el link viejo dice "Educar con IA", el sitio "Enseñar con IA…") y el precio de cada kit | ✅ Confirmada por el dev |
@@ -115,6 +116,12 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (13)** — El dev dejó los ZIP en `C:\Fenia\entregables`. Se revisaron sin extraer (listado + SHA-256):
+  - Evaluar: OK.
+  - Aprender: trae un archivo que parece interno.
+  - Enseñar: no coincide con lo que promete la página.
+
+  Precio a AR$ 13.000 (D15). El dev pidió cambiar "recurso gratis" por "Comprar": queda para el lanzamiento, porque un botón de compra sin circuito sería mentir (regla de AGENTS.md). Propuesta visual escrita ([propuesta-visual.md](./propuesta-visual.md)), con un botón honesto para mientras tanto.
 - **2026-11-06 (12)** — Núcleo adaptado a la API de Orders, con campos verificados en el SDK oficial `mercadopago/sdk-php`:
   - rutas `/v1/orders` y `/v1/orders/{id}`;
   - campos `status`, `status_detail`, `total_amount` y `total_paid_amount` (strings), `currency`, `user_id` y `transactions.chargebacks`;
