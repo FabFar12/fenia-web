@@ -85,6 +85,17 @@ describe('S-24 ✱ encabezados de seguridad', { skip: skipWithoutTarget }, () =>
     assert.ok(headers.get('referrer-policy'), 'falta Referrer-Policy');
   });
 
-  it('/api/* responde con Cache-Control: no-store', { todo: 'paso 3.5 (.htaccess de /api)' });
-  it('la página de descarga trae Referrer-Policy: no-referrer', { todo: 'paso 4.2' });
+  for (const path of ['/api/health.php', '/api/status.php?ref=0', '/api/catalog.json']) {
+    it(`${path} responde con Cache-Control: no-store (C21)`, async () => {
+      const { status, headers } = await request(path);
+      if (status === 404) return; // la API todavía no se publicó en este entorno
+      assert.match(headers.get('cache-control') ?? '', /no-store/);
+    });
+  }
+
+  it('la página de descarga pide no mandar Referer y no indexarse', async () => {
+    const { body } = await request('/descarga/');
+    assert.match(body, /<meta name="referrer" content="no-referrer"/);
+    assert.match(body, /<meta name="robots" content="noindex/);
+  });
 });

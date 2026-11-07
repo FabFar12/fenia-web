@@ -41,6 +41,8 @@ final class Config
         'download_days' => 30,      // D3
         'max_downloads' => 5,       // D3
         'order_ttl_minutes' => 60,  // checkout links expire (threat model B3)
+        'alert_email' => '',        // alerts and daily report; '' = mail_reply_to
+        'daily_report' => true,
     ];
 
     /** @var array<string, mixed> */

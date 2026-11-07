@@ -60,6 +60,17 @@ final class Catalog
     }
 
     /**
+     * Any listed kit, sellable or not: for titles in emails and on the download
+     * page of kits already bought.
+     *
+     * @return array{id: string, title: string, status: string, price_cents: ?int, currency: string}|null
+     */
+    public function find(string $id): ?array
+    {
+        return Validate::kitId($id) ? ($this->products[$id] ?? null) : null;
+    }
+
+    /**
      * A kit can be bought only if it exists, is `live` and has a positive price
      * (threat model C18). Anything else is treated as non-existent.
      *

@@ -73,6 +73,11 @@ const jsonLd = {
 
     <!-- Astro View Transitions — smooth cross-page transitions. See ADR-008. -->
     <ClientRouter />
+
+    <!-- Per-page head tags (e.g. robots noindex on /gracias, referrer policy on
+         /descarga). Before this slot existed, pages' slot="head" was silently
+         dropped. -->
+    <slot name="head" />
   </head>
   <body>
     <!-- Pack 3: scroll progress bar driven by animations.ts -->

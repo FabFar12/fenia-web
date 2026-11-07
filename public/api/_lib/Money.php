@@ -33,4 +33,13 @@ final class Money
         }
         return (int) round($amount * 100);
     }
+
+    /** 1300000 → "13000.00": the decimal string the Orders API expects. */
+    public static function fromCents(int $cents): string
+    {
+        if ($cents < 0) {
+            throw new \InvalidArgumentException('Negative amount');
+        }
+        return intdiv($cents, 100) . '.' . str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
+    }
 }

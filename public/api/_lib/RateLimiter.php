@@ -36,6 +36,14 @@ final class RateLimiter
         return true;
     }
 
+    /** Drops attempts older than every window (hourly job). Returns how many. */
+    public function purge(\DateTimeImmutable $before): int
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM rate_events WHERE created_at < ?');
+        $stmt->execute([Db::now($before)]);
+        return $stmt->rowCount();
+    }
+
     /**
      * Stable bucket key for an IP or an email. Keyed (HMAC with the config's
      * `hash_salt`): a plain SHA-256 of an IPv4 address is reversible by trying

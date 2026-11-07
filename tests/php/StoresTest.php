@@ -26,8 +26,7 @@ final class StoresTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pdo = Db::connect('sqlite::memory:');
-        Db::migrate($this->pdo);
+        $this->pdo = TestDb::fresh();
         $this->orders = new OrderStore($this->pdo);
         $this->tokens = new TokenStore($this->pdo);
     }

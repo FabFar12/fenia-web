@@ -1,0 +1,102 @@
+---
+// no-me-llego.astro — self-service resend (docs/ventas/propuesta-visual.md §4).
+// POST /api/resend.php only ever mails the address stored with a paid order,
+// and answers the same whether or not that email bought (threat model A15).
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { whatsapp, sales } from '../data/site';
+
+const waSupportUrl = whatsapp.url('Hola FENIA, compré un kit y no me llegó el mail.');
+---
+
+<Layout title="¿No te llegó tu kit? — FENIA" description="Reenviá el link de descarga de tu kit FENIA.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, follow" />
+  </Fragment>
+
+  <Nav />
+
+  <main class="resend-main">
+    <section class="resend-section">
+      <h1 class="resend-title">¿No te llegó tu kit?</h1>
+      <p class="resend-lead">Escribí el email que usaste al comprar y te reenviamos el link de descarga.</p>
+
+      <form id="resend-form" class="resend-form" novalidate>
+        <label for="resend-email">Email de la compra</label>
+        <div class="resend-row">
+          <input id="resend-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required />
+          <button id="resend-submit" type="submit">Reenviar</button>
+        </div>
+        <div class="resend-hp" aria-hidden="true">
+          <label for="resend-website">No completar este campo</label>
+          <input id="resend-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <p id="resend-msg" class="resend-msg" role="status" hidden></p>
+      </form>
+
+      <p class="resend-help">
+        ¿Sigue sin llegar? Revisá Spam o Promociones, o escribinos a
+        <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a> o por
+        <a href={waSupportUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a>.
+      </p>
+      <p class="resend-help">{sales.noCardDataNote}</p>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  const form = document.getElementById('resend-form') as HTMLFormElement;
+  const msg = document.getElementById('resend-msg') as HTMLParagraphElement;
+  const submit = document.getElementById('resend-submit') as HTMLButtonElement;
+  const say = (text: string) => {
+    msg.textContent = text;
+    msg.hidden = false;
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const fd = new FormData(form);
+    const email = String(fd.get('email') ?? '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('Revisá tu email: no parece válido.');
+    submit.disabled = true;
+    try {
+      const res = await fetch('/api/resend.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email, website: String(fd.get('website') ?? '') }),
+      });
+      if (res.status === 429) say('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
+      else if (res.ok) say('Si ese email tiene una compra, en unos minutos te llega el link. Revisá también Spam o Promociones.');
+      else say('No pudimos procesar el pedido ahora. Probá más tarde o escribinos.');
+    } catch {
+      say('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+    submit.disabled = false;
+  });
+</script>
+
+<style>
+  .resend-main { background: #0b1a2e; min-height: 80vh; }
+  .resend-section { max-width: 640px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .resend-title { font-size: 40px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 16px 0; }
+  .resend-lead { font-size: 17px; line-height: 1.65; color: rgba(255, 255, 255, 0.75); margin: 0 0 28px 0; }
+  .resend-form label { display: block; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.85); margin-bottom: 6px; }
+  .resend-row { display: flex; gap: 10px; }
+  .resend-row input { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: #fff; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; padding: 12px 14px; }
+  .resend-row input:focus-visible { outline: 2px solid #00b4d8; outline-offset: 2px; }
+  .resend-row button { font: inherit; font-size: 15px; font-weight: 700; padding: 12px 22px; border-radius: 10px; border: none; background: #e8573d; color: #fff; cursor: pointer; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .resend-row button:disabled { opacity: 0.7; cursor: wait; }
+  .resend-row button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .resend-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .resend-msg { margin: 16px 0 0 0; font-size: 15px; line-height: 1.6; color: rgba(255, 255, 255, 0.85); background: rgba(0, 180, 216, 0.08); border: 1px solid rgba(0, 180, 216, 0.25); border-radius: 10px; padding: 12px 14px; }
+  .resend-help { margin: 28px 0 0 0; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, 0.65); }
+  .resend-help a { color: #00b4d8; }
+  @media (max-width: 640px) {
+    .resend-section { padding: 64px 20px 56px; }
+    .resend-title { font-size: 30px; }
+    .resend-row { flex-direction: column; }
+  }
+</style>

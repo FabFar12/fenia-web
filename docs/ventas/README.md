@@ -43,22 +43,48 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 2.3 Suite de seguridad `npm run test:ventas`. Contra staging: **42 OK, 0 fallas**, 22 pendientes hasta que existan los endpoints. Contra producción: 41 OK y 1 falla conocida (H-01) | ✅ | dev |
 | **3. Backend** | 3.1a Núcleo puro con tests: firma, **reglas de orden (`OrderRules`, API de Orders, D14)**, tokens, validación, montos, catálogo generado por el build. Bug corregido: `$` en las regex aceptaba un `\n` final (modificador `D`) | ✅ | dev |
 | | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
-| | **3.2 Próximo:** cliente de MP (Orders) + `bootstrap` + endpoints | ⏳ | dev |
-| | 3.2 Endpoints: checkout (crea la orden en MP), webhook, estado, descarga, reenvío, health | ⏳ | dev |
-| | 3.3 Mail de entrega (SMTP de Hostinger) | ⏳ | dev |
-| | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
-| | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
-| **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | 🟡 Escrita, esperando aprobación | dev → aprobación |
+| | 3.2b Staging configurado (2026-11-07). Config y ZIPs de prueba (D21) subidos por el buzón con la API de archivos de Hostinger (TUS); PHP los movió a la carpeta privada y el buzón quedó vacío. `health`: `{"ok":true,"sales":true,"kits":true}`, con base MySQL migrada. **Checkout real contra el sandbox de MP OK**: $13.000 aunque el pedido decía `price: 1` (S-12), sin efectivo (D4), regreso a `/gracias`, "FENIA" en el resumen. Falta la clave del webhook | 🟡 Dev: webhook en MP | dev |
+| | 3.2 `Shop` (todo el flujo), `Api` (arranque que falla cerrado, logs en la carpeta privada), cliente de MP (Orders), endpoints `checkout` · `webhook` · `status` · `download` · `resend` · `health` y `.htaccess` de `/api` (lista blanca + `no-store`). **139 tests** (flujo completo con MP y mail falsos) y mutación verificada. Suite de seguridad: las pendientes pasaron a tests reales | ✅ Código (2026-11-07). 🟡 Falta la config de staging y el webhook en MP | dev |
+| | 3.3 Mail de entrega (SMTP de Hostinger, PHPMailer 7.1.1 vendorizado). Texto aprobado por el dev (5 descargas, 2026-11-07). Prueba real `kits@` → `kits@`: llegó a la bandeja de entrada en 5 s con **DKIM, SPF y DMARC en pass**. Falta verlo salir desde el PHP de staging, con la compra de prueba | 🟡 | dev |
+| | 3.4 Tarea horaria (`Cron` + `hourly.php`): conciliación, limpieza de límites, avisos por mail con explicación y resumen diario después de las 9. **Creada en staging** por API (a los :07 de cada hora; los avisos van a `kits@`). En producción se crea en el lanzamiento, y falta decidir quién recibe los avisos | ✅ staging | dev |
+| | 3.5 `.htaccess` de `/api` (lista blanca + `no-store`) ✅. Archivos ocultos negados y **`www` → `fenia.com.ar`** (H-08) en el `.htaccess` base. En staging, sin regresiones. Llega a producción con el merge | 🟡 merge | dev |
+| **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | ✅ Aprobada por el dev (2026-11-06) | dev |
+| | 4.2a Implementada en staging (`PUBLIC_SALES_PREVIEW`: ahí los kits están "en venta"; producción no cambia). Revisada con capturas de escritorio y celular. Además: H-03 cerrado y bug del layout corregido (no tenía slot `head`, así que el `noindex` de `/gracias` nunca se publicaba) | ✅ | dev |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
-| **5. Pruebas en staging** | 5.1 Compuerta completa: suite de seguridad, sandbox de MP, E2E, revisión de seguridad del código | ⏳ | dev |
+| **5. Pruebas en staging** | 5.1 **Circuito completo en el sandbox de MP OK** (2026-11-07). Probado:
+  - compra con tarjeta de prueba;
+  - el aviso firmado de MP entrega solo, en ~1 s;
+  - mail en la bandeja de entrada con DKIM/SPF/DMARC en pass;
+  - `/gracias` con link;
+  - descarga en Edge y Firefox, con el archivo idéntico al subido;
+  - límite de 5 y aviso de la última;
+  - "No me llegó" renueva el link agotado y el viejo queda muerto;
+  - reembolso → link anulado en <5 s.
+
+  Dos bugs encontrados y corregidos: H-09 y H-10. Suite de seguridad: 68 OK, 0 fallas | ✅ staging | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
 | | 6.2 PR `dev` → `main` con aprobación | ⏳ | dev + aprobación |
 | | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-- **Dev:** revisión de productos y ZIP (2026-11-07). El resumen de tareas humanas está en [guia-fase-1.md](./guia-fase-1.md).
-- **IA:** 3.2. Cliente de MP para Orders, `bootstrap` (buzón → config → DB, falla cerrada) y endpoints, empezando por checkout y webhook.
+Próximo:
+1. ✅ Webhook de prueba y compra completa en el sandbox (2026-11-07).
+2. Antes de la compra real en producción, ver que la tarea horaria de staging corra sin error con los arreglos.
+3. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
+   - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
+   - ensayo del protocolo de soporte con Fab;
+   - quién recibe los avisos de la tarea horaria.
+   Son decisiones del dev y de Fab.
+4. **Producción** (cuando la compuerta esté OK):
+   - crear la base;
+   - config con el token de producción y el webhook productivo;
+   - subir los ZIP reales (el de Enseñar, el corregido);
+   - crear la tarea horaria;
+   - merge a `main` y purga de la CDN;
+   - verificar `www` (H-08) y la IP detrás de la CDN (H-06);
+   - compra real + reembolso;
+   - kits a `live`.
 
 ## Cómo se corren las pruebas
 
@@ -82,6 +108,12 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D22 | 2026-11-08 | **En producción, los avisos y el resumen diario de la tarea horaria van a `soporte@`** (decisión del dev). En staging van a `kits@`, para no llenar la bandeja de Fab con pruebas | ✅ Decisión del dev |
+| D21 | 2026-11-07 | **Staging entrega ZIPs de prueba, nunca los kits reales** (A17): su sandbox se paga con tarjetas de prueba públicas. Los kits reales (renombrados con el id; Enseñar con la carpeta interna corregida) se suben solo a producción en el lanzamiento | ✅ Técnica |
+| D20 | 2026-11-07 | **`/gracias` muestra el link de descarga solo durante 24 h** después del pago. Después, el link está únicamente en el mail (y en "No me llegó"). Así, si alguien encuentra el código de orden en un historial, no le sirve | ✅ Técnica |
+| D19 | 2026-11-07 | **"No me llegó" con un link vencido o agotado manda uno nuevo** (otros 30 días / 5 descargas), como dice la página de descarga. Máximo 2 renovaciones por compra; después lo resuelve soporte. Si el link todavía funciona, se reenvía el mismo, sin renovar. Solo al email de la compra (A15) y con límite de 3 pedidos por día | ✅ Técnica (dentro de D3) |
+| D18 | 2026-11-06 | **Después de cada deploy a producción se purga la CDN de Hostinger** (`DELETE …/cdn/purge`, lo hace la IA al mergear). Sin eso, algunos visitantes ven la versión vieja durante días (H-06, comprobado: un pedido viejo y otro nuevo en la misma página). Antes del lanzamiento, decidir si se automatiza | ✅ |
+| D17 | 2026-11-06 | Hasta el lanzamiento, los kits "Próximamente" muestran **"Avisame cuando esté disponible"**. `/recursos-gratuitos` ya no promete un recurso gratis que no existe. Aprobado por el dev; en producción con PR #17 | ✅ |
 | D16 | 2026-11-06 | Contenido de los kits (decisiones del dev):
   - "Markdown fuente" sale de las tres descripciones.
   - El kit 1 se llama **"Evaluar en tiempos de IA"**.
@@ -103,7 +135,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
 | Q3 | ¿El firewall de Hostinger deja pasar los avisos de MP? Confirmado que **hay un firewall activo**: responde 403 a `<script>` en la URL | Prueba INT-09 en staging |
-| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Falta decidir el canal de subida a staging (API de archivos de Hostinger, con OK del dev) en el 3.2 |
+| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Canal: API de archivos de Hostinger (TUS) al buzón, usado en staging el 2026-11-07 |
 | Q4 | Ruta exacta de la carpeta privada y carpeta del subdominio de staging. Respondida en parte: Hostinger crea el subdominio en `public_html/staging`, dentro del sitio real, y se protege con C20. La carpeta privada se crea desde la casita (⌂) del Administrador de archivos | Guía, Bloque 1, pasos 1.3–1.4 |
 
 ## Hallazgos
@@ -112,10 +144,13 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 |---|---|---|---|---|
 | H-01 | 2026-11-06 | `https://fenia.com.ar/.ftp-deploy-sync-state.json` es público (HTTP 200): lista los archivos desplegados con sus hashes. La suite lo detecta (S-11 en rojo) | Mínimo: el repo es público, así que la lista ya se ve en GitHub. Se corrige por higiene | La regla ya funciona en staging (403, S-11 verde). Falta llevarla al `.htaccess` de producción en el paso 3.5 |
 | H-02 | 2026-11-06 | DMARC de `fenia.com.ar` en `p=none`: los proveedores no rechazan mails que se hacen pasar por `@fenia.com.ar`. SPF y DKIM están bien | Medio una vez que haya ventas (phishing a compradores, B4) | Paso 6.4, coordinado con Mailerlite: primero reportes (`rua`), después `p=quarantine` |
-| H-03 | 2026-11-06 | `/recursos-gratuitos?titulo=…` muestra cualquier texto como título. Sirve para armar links de aspecto oficial. No es XSS (usa `textContent`) | Bajo | Paso 4.2: el título sale del id del producto, nunca de la URL |
+| H-03 | 2026-11-06 | `/recursos-gratuitos?titulo=…` muestra cualquier texto como título. Sirve para armar links de aspecto oficial. No es XSS (usa `textContent`) | Bajo | ✅ Cerrado en 4.2a: el título sale de un mapa id → título armado en el build; `?titulo=` se ignora |
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
+| H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
+| H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
+| H-08 | 2026-11-07 | `www.fenia.com.ar` servía el sitio entero sin redirigir. Una compra empezada ahí habría fallado: la API exige que el pedido venga de `fenia.com.ar`. Además, Google veía dos copias | **Alto para el lanzamiento** | 3.5: redirección 301 en `public/.htaccess`. Verificar en producción después del merge |
 | H-04 | 2026-11-06 | **El repositorio de GitHub es público** | Ningún archivo pago ni secreto puede entrar. Protegido por `.gitignore` + barrera en CI (OPS-01, OPS-06). La seguridad nunca depende de que el código no se vea | Hecho (2.2) |
 
 ## Lo que hoy está mal y se corrige en este plan
@@ -126,6 +161,35 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-07 (17)** — El dev pasó la clave del webhook de prueba y decidió D22 (avisos a `soporte@`). Compras reales en el sandbox de MP: 3 pagos aprobados con tarjeta de prueba, un reembolso.
+  - Detección de navegador automático en MP: con un navegador normal, la pantalla de pago carga bien.
+  - **H-09** (crítico): la primera compra quedó trabada por un error de collation de MariaDB. Se diagnosticó con la salida de la tarea horaria, que imprime el error, y se corrigió. La orden se destrabó sola.
+  - **H-10:** la descarga por formulario fallaba en Chrome y Firefox. Se corrigió con `fetch`.
+  - El circuito completo funciona (ver 5.1). Mejoras de paso:
+    - el aviso de una orden ajena responde 200, sin reintentos (S-03);
+    - la conciliación sigue aunque una orden falle;
+    - la CI prueba contra MariaDB.
+
+- **2026-11-07 (16)** — El dev aprobó el mail y las 5 descargas, y pidió sacar del PDF de Enseñar la mención al `.md` (hecho, ver (15)). Mañana pasa la clave del webhook. Repaso general:
+  - **H-08:** `www` no redirigía y habría roto las compras empezadas ahí. Corregido en el `.htaccess` (3.5).
+  - **Origin `null`:** el estándar permite que algunos navegadores lo manden en `/descarga`, que tiene `no-referrer`. Chrome, Edge y Firefox 150 mandan el origen bien (verificado con navegadores reales). Igual se cubre con `Sec-Fetch-Site`, para Safari y modos de privacidad.
+  - 3.4: tarea horaria hecha y creada en staging.
+  - 3.3: mail real con DKIM, SPF y DMARC en pass.
+  - Suite contra staging: 68 OK, 0 fallas. PHP: 154 tests.
+
+- **2026-11-07 (15)** — El dev pidió revisar las descripciones de los kits y autorizó subir la config a staging.
+  - Descripciones contra los PDF: Evaluar (29 págs., 8 prompts) y Aprender (30 págs., 25 prompts) OK. **Enseñar decía 25 páginas y tiene 37**; los 25 prompts están dentro del PDF (sección 8). Corregido.
+  - El PDF de Enseñar mencionaba un archivo `Mini_Pack_de_Prompts.md` que no está en el ZIP. **El dev pidió sacar la frase**, porque los prompts ya están en el cuerpo del PDF. Se borró solo esa oración (pág. 27, el resto del PDF idéntico) en una copia: `C:\Fenia\entregables\corregido\`, con la carpeta interna renombrada a "Enseñar con IA". El original no se tocó. Esa copia es la que se sube en el lanzamiento.
+  - 3.2 hecho (código). Decisiones D19 y D20. Comprobado con 139 tests de PHP y mutaciones. Una mutación sobrevivió y es equivalente: el compare-and-set ya impide ese cambio.
+  - Staging configurado (3.2b). Riesgo nuevo A17 → D21 (ZIPs de prueba en staging).
+  - Mejora encontrada en vivo: los pedidos inválidos gastaban el cupo de compras de la IP. Corregido: ahora solo cuentan los intentos que crearían una orden.
+  - Suite contra staging, con los ajustes: sin fallas en lo que corre sin compra.
+  - Pendiente antes del lanzamiento: verificar qué IP ve PHP detrás de la CDN de producción (H-06). Si todos los pedidos llegan con la IP de la CDN, los límites por IP no sirven.
+
+- **2026-11-06 (14)** — El dev aprobó la propuesta visual y pidió verla y probarla.
+  - **PR #17 a producción:** título "Evaluar en tiempos de IA" + botón D17. Hubo capturas antes y después, y se corrigió un rótulo que se partía en dos renglones.
+  - Después del deploy la CDN servía la versión vieja en algunos pedidos. Se purgó por API y 6 de 6 pedidos mostraron la nueva (D18).
+  - Empieza 4.2 en staging, con los kits visibles "en venta" solo ahí.
 - **2026-11-06 (13)** — El dev dejó los ZIP en `C:\Fenia\entregables`. Se revisaron sin extraer (listado + SHA-256):
   - Evaluar: OK.
   - Aprender: trae un archivo que parece interno.

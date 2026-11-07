@@ -23,13 +23,37 @@ final class TokenStore
         $this->pdo = $pdo;
     }
 
-    public function issue(int $orderId, string $tokenHash, string $expiresAt, int $maxDownloads, string $now): int
+    public function issue(int $orderId, string $tokenHash, string $expiresAt, int $maxDownloads, string $now, int $generation = 1): int
     {
         $this->pdo->prepare(
-            'INSERT INTO download_tokens (order_id, token_hash, expires_at, max_downloads, download_count, created_at)
-             VALUES (?, ?, ?, ?, 0, ?)'
-        )->execute([$orderId, $tokenHash, $expiresAt, $maxDownloads, $now]);
+            'INSERT INTO download_tokens (order_id, generation, token_hash, expires_at, max_downloads, download_count, created_at)
+             VALUES (?, ?, ?, ?, ?, 0, ?)'
+        )->execute([$orderId, $generation, $tokenHash, $expiresAt, $maxDownloads, $now]);
         return (int) $this->pdo->lastInsertId();
+    }
+
+    /** @return array<string, mixed>|null the newest token of an order */
+    public function latestForOrder(int $orderId): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM download_tokens WHERE order_id = ? ORDER BY generation DESC LIMIT 1');
+        $stmt->execute([$orderId]);
+        $row = $stmt->fetch();
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Read-only view of a token for the download page (consumes nothing).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findByHash(string $tokenHash): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT t.*, o.kit_id, o.status AS order_status FROM download_tokens t JOIN orders o ON o.id = t.order_id WHERE t.token_hash = ?"
+        );
+        $stmt->execute([$tokenHash]);
+        $row = $stmt->fetch();
+        return $row === false ? null : $row;
     }
 
     /**

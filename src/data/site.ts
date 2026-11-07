@@ -282,3 +282,18 @@ export const legal = {
   termsUrl: null as string | null,
   copyrightYearStart: 2026,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Kit sales copy (docs/ventas, ADR-028). Kept here so the legal wording can be
+// replaced in one place once the lawyer defines it (docs/ventas guía, Bloque 5).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const sales = {
+  supportEmail: 'soporte@fenia.com.ar',
+  /** PROVISIONAL until the lawyer's text (Bloque 5). Launch is gated on it. */
+  termsLabel:
+    'Acepto los términos de compra y entiendo que, por ser contenido digital de descarga inmediata, no admite arrepentimiento una vez descargado.',
+  paymentNote: 'El pago se hace en Mercado Pago. FENIA nunca ve tu tarjeta.',
+  noCardDataNote: 'FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.',
+  downloadPolicy: 'El link dura 30 días y permite 5 descargas.',
+};

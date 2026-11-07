@@ -14,7 +14,7 @@ defined('FENIA_API') || exit;
  */
 final class Db
 {
-    private const SCHEMA_VERSION = 1;
+    public const SCHEMA_VERSION = 1;
 
     public static function connect(string $dsn, string $user = '', string $password = ''): \PDO
     {
@@ -25,6 +25,9 @@ final class Db
         ]);
         if (self::driver($pdo) === 'mysql') {
             $pdo->exec("SET time_zone = '+00:00'");
+            // Same collation as the tables: Hostinger's MariaDB defaults the
+            // connection to utf8mb4_general_ci, and mixing both fails (error 1267).
+            $pdo->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
         }
         return $pdo;
     }
@@ -54,6 +57,8 @@ final class Db
             mp_order_id VARCHAR(64) NULL UNIQUE,
             client_ip_hash CHAR(64) NULL,
             terms_accepted_at DATETIME NOT NULL,
+            paid_at DATETIME NULL,
+            email_sent_at DATETIME NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL" . $index('ix_orders_email', 'email') . "
         )$tail");
@@ -61,12 +66,14 @@ final class Db
         $pdo->exec("CREATE TABLE IF NOT EXISTS download_tokens (
             id $id,
             order_id INT NOT NULL,
+            generation INT NOT NULL DEFAULT 1,
             token_hash CHAR(64) NOT NULL UNIQUE,
             expires_at DATETIME NOT NULL,
             max_downloads INT NOT NULL,
             download_count INT NOT NULL DEFAULT 0,
             revoked_at DATETIME NULL,
-            created_at DATETIME NOT NULL" . $index('ix_tokens_order', 'order_id') . "
+            created_at DATETIME NOT NULL,
+            UNIQUE (order_id, generation)" . $index('ix_tokens_order', 'order_id') . "
         )$tail");
 
         // Evidence for disputes (threat model A13) and link-sharing alerts (A14).
