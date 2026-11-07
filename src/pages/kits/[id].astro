@@ -52,7 +52,7 @@ const productLd = buyable && data.price != null
 <Layout title={`${data.title} — FENIA`} description={data.summary}>
   {productLd && (
     <Fragment slot="head">
-      <script type="application/ld+json" is:inline set:html={JSON.stringify(productLd).replace(/</g, '\u003c')} />
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(productLd).replace(/</g, '\\u003c')} />
     </Fragment>
   )}
   <Nav />
