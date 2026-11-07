@@ -74,6 +74,8 @@ function render(): void {
       const unit = box.dataset.offerUnit as keyof ReturnType<typeof parts>;
       const value = left[unit];
       if (typeof value === 'number') box.textContent = unit === 'days' || unit === 'totalHours' ? String(value) : two(value);
+      // Last day: "0 días" adds nothing next to "¡Último día!"; hide that box.
+      if (unit === 'days' && box.parentElement) box.parentElement.style.display = value === 0 ? 'none' : '';
     }
   }
 }

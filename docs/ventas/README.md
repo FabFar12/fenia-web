@@ -121,7 +121,14 @@ Próximo:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
-| D23 | 2026-11-07 | **Promo de lanzamiento** (decisión del dev):
+| D23 | 2026-11-07 | **Actualización:** el dev pasó el fin al **lunes 16/11 a las 23:59**, así el lunes 9 "quedan 7 días". Es legítimo porque se cambió antes de anunciar y sin ventas. Diseño final, en revisión en staging:
+  - un cartel arriba de los 3 kits con "Termina en" y cajas de días/horas/min/seg;
+  - el último día dice "¡Último día!" y oculta la caja de días;
+  - en las tarjetas, "Ahorrás $17.000" y el botón "Comprar con 56% OFF";
+  - sin "Promo de N días", que se leía como contradicción, ni "Después, $30.000";
+  - SEO: Schema.org Product con `priceValidUntil`.
+
+  Después del 16/11 hay que hacer un deploy, para que los datos de Google dejen de mostrar $13.000. **Original:** promo de lanzamiento (decisión del dev):
   - precio normal **$30.000**;
   - **$13.000** desde el lanzamiento hasta el **sábado 14/11 a las 23:59 (hora argentina)**, 7 días;
   - en las tarjetas y la página del kit: etiqueta "−56% · Lanzamiento" (56,7% redondeado para abajo), precio tachado y cuenta regresiva.
