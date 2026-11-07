@@ -88,7 +88,7 @@ function ctaFor(product: (typeof products)[number]) {
     )}
 
     <!-- Product cards -->
-    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div class="reveal-stagger productos-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       {products.map((product) => {
         const buyable = isPurchasable(product);
         const isComingSoon = product.data.status === 'coming-soon' && !buyable;
@@ -184,4 +184,7 @@ function ctaFor(product: (typeof products)[number]) {
   html:not([data-pv]) .pv:not(.pv-1) { display: none !important; }
   .promo-banner-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
   .promo-banner-row > div[aria-hidden] { display: flex; }
+  /* Longer button labels in variants 2/3 must stay inside the card. */
+  html[data-pv='2'] .tilt-card a.cta-magnetic,
+  html[data-pv='3'] .tilt-card a.cta-magnetic { padding-left: 14px !important; padding-right: 14px !important; }
 </style>
