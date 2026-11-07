@@ -43,14 +43,15 @@ final class Api
         }
 
         try {
-            [$shop, $config, $log] = self::boot();
+            $app = self::boot();
         } catch (\Throwable $e) {
             self::json(503, ['error' => 'unavailable']);
             return;
         }
+        $log = $app['log'];
 
         try {
-            $result = $handler($shop, $config);
+            $result = $handler($app['shop'], $app['config']);
             if ($result !== null) {
                 self::json($result[0], $result[1]);
             }
@@ -62,8 +63,12 @@ final class Api
         }
     }
 
-    /** @return array{0: Shop, 1: Config, 2: callable(string, string, array<string, mixed>): void} */
-    private static function boot(): array
+    /**
+     * Also used by the hourly job (cron.php).
+     *
+     * @return array{shop: Shop, config: Config, log: callable(string, string, array<string, mixed>): void, pdo: \PDO, mailer: MailSender, privateDir: string}
+     */
+    public static function boot(): array
     {
         $env = Env::detect(__DIR__, [
             'FENIA_ENV' => getenv('FENIA_ENV'),
@@ -90,16 +95,17 @@ final class Api
             @touch($marker);
         }
 
+        $mailer = new SmtpMailer($config);
         $shop = new Shop(
             $config,
             Catalog::fromFile($apiDir . '/catalog.json'),
             $pdo,
             new MpClient((string) $config->get('mp_access_token')),
-            new SmtpMailer($config),
+            $mailer,
             $private . '/kits',
             $log
         );
-        return [$shop, $config, $log];
+        return ['shop' => $shop, 'config' => $config, 'log' => $log, 'pdo' => $pdo, 'mailer' => $mailer, 'privateDir' => $private];
     }
 
     /** JSON lines, one file per month. Context never carries tokens, emails or secrets. */
@@ -137,16 +143,21 @@ final class Api
 
     /**
      * CSRF guard for the POST endpoints (threat model D4): a browser always
-     * sends Origin on a cross-site POST, so it must be our own site. Requests
-     * without Origin (curl, very old browsers) still face the rate limits.
+     * sends Origin on a cross-site POST, so it must be our own site.
+     *
+     * Firefox and Safari send `Origin: null` on same-origin POSTs from a page
+     * with `Referrer-Policy: no-referrer` (/descarga), as the Fetch standard
+     * says. Then `Sec-Fetch-Site`, which pages cannot forge, decides. Requests
+     * with neither header (curl, very old browsers) still face the rate limits.
      */
     public static function originOk(Config $config): bool
     {
-        $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
-        if ($origin === null || $origin === '') {
-            return ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? 'same-origin') !== 'cross-site';
+        $origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
+        if ($origin === '' || $origin === 'null') {
+            $site = (string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '');
+            return in_array($site, ['', 'same-origin', 'none'], true);
         }
-        return hash_equals(rtrim((string) $config->get('site_url'), '/'), (string) $origin);
+        return hash_equals(rtrim((string) $config->get('site_url'), '/'), $origin);
     }
 
     /**

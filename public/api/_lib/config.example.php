@@ -32,6 +32,8 @@ return [
 
     // Random secret (≥ 32 chars) for keyed hashes of IPs/emails in the DB
     // (rate limits, download log). Generated per environment, never reused.
+    // NEVER change it after the first sale: download links are derived from
+    // it (Shop::tokenFor), so every link already sent would stop working.
     'hash_salt' => '…',
 
     // Kit id (the .md slug) => ZIP in <privateDir>/kits/ + its SHA-256 (E2E-02)
@@ -40,5 +42,6 @@ return [
     ],
 
     // Optional (defaults in Config.php): download_days 30, max_downloads 5,
-    // order_ttl_minutes 60.
+    // order_ttl_minutes 60, alert_email '' (= mail_reply_to; alerts and the
+    // daily report of the hourly job), daily_report true.
 ];

@@ -16,6 +16,11 @@
   RewriteEngine On
   RewriteCond %{HTTPS} !=on
   RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # www → canonical host. www served the full site without redirecting, so a
+  # purchase started there failed the API's Origin check (docs/ventas, H-08).
+  RewriteCond %{HTTP_HOST} ^www\.fenia\.com\.ar$ [NC]
+  RewriteRule ^(.*)$ https://fenia.com.ar/$1 [R=301,L]
 </IfModule>
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -76,5 +81,18 @@ ErrorDocument 404 /404.html
 # ─────────────────────────────────────────────────────────────────────────────
 # Disable directory listing
 Options -Indexes
+
+# Hidden files (e.g. the FTP deploy state file, finding H-01 in docs/ventas)
+# are never served. Piloted on staging first. `.well-known/` keeps working:
+# the files inside it do not start with a dot.
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
 # Don't reveal Apache/LiteSpeed version
 ServerSignature Off
