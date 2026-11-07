@@ -477,6 +477,22 @@ final class ShopTest extends TestCase
         self::assertSame(['synced' => 0, 'emailed' => 0, 'errors' => 0], $shop->reconcile(), 'nothing left');
     }
 
+    public function testABouncingAddressAlertsOnceAndStopsAfterTwoDays(): void
+    {
+        $this->mailer->fail = true;
+        [$shop, , $mpId] = $this->checkedOut();
+        $this->mp->pay($mpId);
+        $this->notify($shop, $mpId);
+        $levels = fn (): array => array_values(array_map(static fn (array $l): string => $l[0], array_filter($this->logs, static fn (array $l): bool => $l[1] === 'mail_failed')));
+
+        $this->now = $this->now->modify('+1 hour');
+        self::assertSame(1, $shop->reconcile()['errors'], 'retried');
+        self::assertSame(['error', 'warning'], $levels(), 'alerted once, then only logged');
+
+        $this->now = $this->now->modify('+48 hours');
+        self::assertSame(['synced' => 0, 'emailed' => 0, 'errors' => 0], $shop->reconcile(), 'given up after 2 days');
+    }
+
     public function testReconcileDeliversLostWebhooks(): void
     {
         [$shop, $ref, $mpId] = $this->checkedOut();

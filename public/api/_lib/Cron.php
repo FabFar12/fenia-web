@@ -26,7 +26,7 @@ final class Cron
         'kit_file_problem' => 'El ZIP de un kit falta o no coincide con el revisado: las descargas de ese kit están frenadas.',
         'link_sharing' => 'Un link de descarga se usó desde más de 3 conexiones distintas (¿lo compartieron?).',
         'renewals_exhausted' => 'Un comprador pidió otro link y ya usó las 2 renovaciones: atenderlo por soporte.',
-        'mail_failed' => 'Un mail de entrega no salió. Se reintenta cada hora; el comprador igual tiene /gracias y "No me llegó".',
+        'mail_failed' => 'Un mail de entrega no salió (¿email mal escrito?). Se reintenta cada hora durante 2 días; el comprador igual tiene /gracias y "No me llegó".',
         'checkout_mp_error' => 'Mercado Pago no pudo crear un pago (el comprador vio un error y puede reintentar).',
         'checkout_mp_malformed' => 'Mercado Pago respondió algo inesperado al crear un pago.',
         'webhook_mp_error' => 'No se pudo leer una orden en Mercado Pago; MP reintenta el aviso.',

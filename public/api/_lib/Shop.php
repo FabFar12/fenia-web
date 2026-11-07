@@ -28,6 +28,8 @@ final class Shop
     private const SHARING_ALERT_IPS = 3;
     /** First link + 2 renewals through "No me llegó"; after that, support. */
     private const MAX_GENERATIONS = 3;
+    /** Failed delivery mails are retried hourly for this long (typo in the address?). */
+    private const MAIL_RETRY_HOURS = 48;
 
     /** bucket => [limit, window seconds]. Threat model A4, B3, A15; tests U-30, S-08, S-16. */
     private const LIMITS = [
@@ -478,8 +480,8 @@ final class Shop
                 $this->log('error', 'reconcile_failed', ['order' => (int) $order['id'], 'type' => get_class($e), 'message' => mb_substr($e->getMessage(), 0, 300)]);
             }
         }
-        foreach ($this->orders->paidWithoutEmail() as $order) {
-            if ($this->sendDelivery((int) $order['id'])) {
+        foreach ($this->orders->paidWithoutEmail(Db::now($this->now()->modify('-' . self::MAIL_RETRY_HOURS . ' hours'))) as $order) {
+            if ($this->sendDelivery((int) $order['id'], false, true)) {
                 $stats['emailed']++;
             } else {
                 $stats['errors']++;
@@ -495,8 +497,9 @@ final class Shop
      * deliverable through /gracias and "No me llegó".
      *
      * @param bool $renew issue a fresh link if the current one expired or ran out
+     * @param bool $retry hourly retry: a failure was already alerted, so it is only logged
      */
-    private function sendDelivery(int $orderId, bool $renew = false): bool
+    private function sendDelivery(int $orderId, bool $renew = false, bool $retry = false): bool
     {
         $order = $this->orders->findById($orderId);
         if ($order === null || $order['status'] !== 'paid') {
@@ -520,7 +523,7 @@ final class Shop
         try {
             $this->mailer->send((string) $order['email'], $mail['subject'], $mail['text'], $mail['html']);
         } catch (\Throwable $e) {
-            $this->log('error', 'mail_failed', ['order' => $orderId]);
+            $this->log($retry ? 'warning' : 'error', 'mail_failed', ['order' => $orderId]);
             return false;
         }
         $this->orders->markEmailSent($orderId, Db::now($this->now()));
