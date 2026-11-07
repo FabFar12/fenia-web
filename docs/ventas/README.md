@@ -76,6 +76,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D13 | 2026-11-06 | El dev autorizó a la IA a mergear `dev` → `main` cuando lo considere listo. Siempre por PR, con CI en verde y verificación de producción antes y después. **No reemplaza** la compuerta de lanzamiento ([test-plan.md](./test-plan.md#compuerta-de-lanzamiento)) ni la aprobación previa de cambios visuales (AGENTS.md) | ✅ |
 | D9 | 2026-11-06 | Los ZIP finales llegan **al final**, después de la revisión final del material, antes de la Fase 5. Staging se prueba con ZIPs de prueba. En esa revisión se confirman el nombre (el link viejo dice "Educar con IA", el sitio "Enseñar con IA…") y el precio de cada kit | ✅ Confirmada por el dev |
 | D10 | 2026-11-06 | Los compradores ven y responden a `soporte@fenia.com.ar`. Los mails salen desde `kits@` (Reply-To a `soporte@`), así la contraseña de soporte nunca vive en el servidor. `kits@` la crea el dev por la API de mail. Si el plan no tiene cupo de casillas, se usa `soporte@` | ✅ |
 | D11 | 2026-11-06 | **Decisión del dev:** Hostinger se configura por su API, para evitar errores en el panel. El dev sabe que el token no se puede limitar (acceso total a la cuenta, incluidos el dominio y el DNS). Resguardos: vence en 3 meses (elección del dev), y se recomienda revocarlo al terminar staging y crear uno nuevo para el lanzamiento; vive en `~/fenia-secrets`, nunca en el chat; solo se usan endpoints de lectura y de creación de base, subdominio, SSL, casilla y cron (nunca DNS, dominios, facturación ni borrados); se revoca al terminar | ✅ |
@@ -112,6 +113,11 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (10)** — **PR #16 mergeado a `main`** (`ca72899`) con autorización del dev (D13). Deploy a producción OK (corrida 42318156057).
+  - Subieron solo `/api/_lib/*` y `/api/catalog.json` (11 cambios, 17 kB). Ningún archivo existente fue reemplazado.
+  - Antes del merge se comparó el HTML de `dev` con producción: idéntico, salvo dos `uid` aleatorios de Astro.
+  - Verificado después: las páginas responden 200, `/api/_lib` da 403 y el catálogo sirve los 3 kits en `coming-soon`. Suite ✱: 41 OK y 1 falla conocida (H-01).
+  - Observación: Vercel sigue conectado al repo y hace deploys propios (no sirve el dominio). Es el pendiente #2 de [PENDING.md](../../PENDING.md).
 - **2026-11-06 (9)** — **Staging andando:** corrida 42317545237, 41 archivos.
   - Verificado desde afuera: C20 y H-05 cerrados, la regla de H-01 funciona en LiteSpeed y producción quedó intacta.
   - Suite contra staging: 42 OK y 0 fallas. Contra producción: 41 OK y 1 falla conocida (H-01).
