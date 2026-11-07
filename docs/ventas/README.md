@@ -51,16 +51,26 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | **4. Frontend** | 4.1 Propuesta visual: card, página del kit, `/gracias`, "No me llegó", descarga → [propuesta-visual.md](./propuesta-visual.md) | ✅ Aprobada por el dev (2026-11-06) | dev |
 | | 4.2a Implementada en staging (`PUBLIC_SALES_PREVIEW`: ahí los kits están "en venta"; producción no cambia). Revisada con capturas de escritorio y celular. Además: H-03 cerrado y bug del layout corregido (no tenía slot `head`, así que el `noindex` de `/gracias` nunca se publicaba) | ✅ | dev |
 | | 4.2 Implementación + capturas antes/después + migración del schema + H-03 | ⏳ | dev |
-| **5. Pruebas en staging** | 5.1 Compuerta completa: suite de seguridad, sandbox de MP, E2E, revisión de seguridad del código | ⏳ | dev |
+| **5. Pruebas en staging** | 5.1 **Circuito completo en el sandbox de MP OK** (2026-11-07). Probado:
+  - compra con tarjeta de prueba;
+  - el aviso firmado de MP entrega solo, en ~1 s;
+  - mail en la bandeja de entrada con DKIM/SPF/DMARC en pass;
+  - `/gracias` con link;
+  - descarga en Edge y Firefox, con el archivo idéntico al subido;
+  - límite de 5 y aviso de la última;
+  - "No me llegó" renueva el link agotado y el viejo queda muerto;
+  - reembolso → link anulado en <5 s.
+
+  Dos bugs encontrados y corregidos: H-09 y H-10. Suite de seguridad: 68 OK, 0 fallas | ✅ staging | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
 | | 6.2 PR `dev` → `main` con aprobación | ⏳ | dev + aprobación |
 | | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-Plan para el 2026-11-08:
-1. **Dev:** webhook de prueba en MP + clave secreta al portapapeles.
-2. **IA:** actualizar la config de staging y hacer la compra de prueba completa: pago, aviso, mail, descarga y reembolso. Hacerla **antes** de correr la suite de seguridad, que gasta el cupo de descargas de la IP por una hora.
+Próximo:
+1. ✅ Webhook de prueba y compra completa en el sandbox (2026-11-07).
+2. Antes de la compra real en producción, ver que la tarea horaria de staging corra sin error con los arreglos.
 3. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
    - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
    - ensayo del protocolo de soporte con Fab;
@@ -138,6 +148,8 @@ Plan para el 2026-11-08:
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
+| H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
+| H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
 | H-08 | 2026-11-07 | `www.fenia.com.ar` servía el sitio entero sin redirigir. Una compra empezada ahí habría fallado: la API exige que el pedido venga de `fenia.com.ar`. Además, Google veía dos copias | **Alto para el lanzamiento** | 3.5: redirección 301 en `public/.htaccess`. Verificar en producción después del merge |
 | H-04 | 2026-11-06 | **El repositorio de GitHub es público** | Ningún archivo pago ni secreto puede entrar. Protegido por `.gitignore` + barrera en CI (OPS-01, OPS-06). La seguridad nunca depende de que el código no se vea | Hecho (2.2) |
 
@@ -148,6 +160,15 @@ Plan para el 2026-11-08:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (17)** — El dev pasó la clave del webhook de prueba y decidió D22 (avisos a `soporte@`). Compras reales en el sandbox de MP: 3 pagos aprobados con tarjeta de prueba, un reembolso.
+  - Detección de navegador automático en MP: con un navegador normal, la pantalla de pago carga bien.
+  - **H-09** (crítico): la primera compra quedó trabada por un error de collation de MariaDB. Se diagnosticó con la salida de la tarea horaria, que imprime el error, y se corrigió. La orden se destrabó sola.
+  - **H-10:** la descarga por formulario fallaba en Chrome y Firefox. Se corrigió con `fetch`.
+  - El circuito completo funciona (ver 5.1). Mejoras de paso:
+    - el aviso de una orden ajena responde 200, sin reintentos (S-03);
+    - la conciliación sigue aunque una orden falle;
+    - la CI prueba contra MariaDB.
 
 - **2026-11-07 (16)** — El dev aprobó el mail y las 5 descargas, y pidió sacar del PDF de Enseñar la mención al `.md` (hecho, ver (15)). Mañana pasa la clave del webhook. Repaso general:
   - **H-08:** `www` no redirigía y habría roto las compras empezadas ahí. Corregido en el `.htaccess` (3.5).
