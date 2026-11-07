@@ -168,7 +168,7 @@ Decidido: los compradores **ven y responden a `soporte@fenia.com.ar`**.
 
 - [ ] **4.1** Un ZIP por kit con **solo lo que recibe el comprador**: PDF, DOCX, plantillas, imprimibles, prompts, fuentes. **Sacá todo lo interno**: carpetas como `Ventas/` o `Assets/`, borradores, mockups, copys de venta.
 - [ ] **4.2** Nombres exactos:
-  - `guia-evaluar-tiempos-ia.zip` (*Evaluar con IA sin vigilar*);
+  - `guia-evaluar-tiempos-ia.zip` (*Evaluar en tiempos de IA*);
   - `kit-ensenar-con-ia.zip` (*Enseñar con IA sin automatizar la pedagogía*);
   - `kit-aprender-con-ia.zip` (*Aprender con IA sin dejar de pensar*).
 - [ ] **4.3** Guardalos en `C:\Fenia\entregables\`.

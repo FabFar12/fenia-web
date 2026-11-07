@@ -10,7 +10,7 @@
 ┌──────────────────────────────────────────┐
 │▔▔▔▔▔▔▔▔▔▔▔▔ (franja cyan)                 │
 │ CAJA DE HERRAMIENTAS · PRÓXIMAMENTE       │
-│ Evaluar con IA sin vigilar                │
+│ Evaluar en tiempos de IA                │
 │ Un kit para rediseñar consignas…          │
 │──────────────────────────────────────────│
 │ En preparación   [Quiero el recurso gratis →] │  ← botón gris
@@ -22,7 +22,7 @@
 ┌──────────────────────────────────────────┐
 │▔▔▔▔▔▔▔▔▔▔▔▔ (franja cyan)                 │
 │ CAJA DE HERRAMIENTAS                      │
-│ Evaluar con IA sin vigilar                │
+│ Evaluar en tiempos de IA                │
 │ Un kit para rediseñar consignas…          │
 │──────────────────────────────────────────│
 │ AR$ 13.000            [ Comprar → ]       │  ← botón coral (primario)
@@ -39,7 +39,7 @@ Desktop (2 columnas):
 ← Volver a productos
 
 CAJA DE HERRAMIENTAS
-Evaluar con IA sin vigilar                          (H1, 800)
+Evaluar en tiempos de IA                          (H1, 800)
 Un kit para rediseñar consignas, rúbricas…          (summary, white/65)
 
 ┌─ Qué incluye ─────────────────────┐   ┌─ Comprar ────────────────────────┐
@@ -101,7 +101,7 @@ Escribí el email que usaste al comprar y te lo reenviamos.
 ## 5. Página de descarga (desde el mail)
 
 ```
-Tu kit: Evaluar con IA sin vigilar
+Tu kit: Evaluar en tiempos de IA
 [ Descargar ]                     ← coral; la descarga ocurre solo al tocarlo
 Te quedan 4 de 5 descargas · vence el 06/12/2026
 ```

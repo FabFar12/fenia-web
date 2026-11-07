@@ -30,7 +30,7 @@ La IA responde con seguridad incluso cuando comprendiste poco o nada. El riesgo 
 
 ## Qué incluye
 
-- PDF principal del kit + DOCX editable + Markdown fuente.
+- PDF principal del kit + DOCX editable.
 - 8 plantillas editables de estudio con IA.
 - 4 plantillas imprimibles.
 - Mini pack de 25 prompts para aprender, practicar, producir y verificar, cada uno con su advertencia de uso.
@@ -52,4 +52,4 @@ La IA responde con seguridad incluso cuando comprendiste poco o nada. El riesgo 
 
 ## Formato
 
-PDF + DOCX editable + Markdown fuente + 8 plantillas editables + 4 imprimibles. Descarga inmediata. Primera aplicación en 60-90 minutos sobre un tema real.
+PDF + DOCX editable + 8 plantillas editables + 4 imprimibles. Descarga inmediata. Primera aplicación en 60-90 minutos sobre un tema real.
