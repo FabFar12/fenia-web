@@ -64,7 +64,8 @@ const offer = (await getCollection('products'))
   .promo-bar-dot { width: 7px; height: 7px; border-radius: 50%; background: #e8573d; animation: promo-pulse 1.6s ease-in-out infinite; }
   .promo-bar-text { font-size: 15px; font-weight: 600; }
   .promo-bar-text strong { font-weight: 800; }
-  .promo-bar-time { font-variant-numeric: tabular-nums; font-weight: 600; }
+  /* Spaces via gap: HTML compression drops the ones between the spans. */
+  .promo-bar-time { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 0.3em; font-variant-numeric: tabular-nums; font-weight: 600; }
   .promo-bar-time strong { font-weight: 800; }
   .promo-bar-cta {
     font-size: 13px;
@@ -83,5 +84,8 @@ const offer = (await getCollection('products'))
     .promo-bar:not([hidden]) { padding: 10px 14px; gap: 6px 10px; font-size: 13px; }
     .promo-bar-text { font-size: 14px; }
     .promo-bar-time { flex-basis: 100%; }
+    /* Two lines on phones: the whole band is the link, so no separate button. */
+    .promo-bar-cta { display: none; }
+    .promo-bar-time::after { content: '→'; font-weight: 800; }
   }
 </style>
