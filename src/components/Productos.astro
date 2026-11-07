@@ -83,7 +83,7 @@ function ctaFor(product: (typeof products)[number]) {
             <h3 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.title}</h3>
             <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 28px 0;flex:1;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.summary}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
-              <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);font-family:'Plus Jakarta Sans',sans-serif;">{footerLeft}</span>
+              <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;margin-right:12px;">{footerLeft}</span>
               {cta && (
                 <a
                   href={cta.href}
