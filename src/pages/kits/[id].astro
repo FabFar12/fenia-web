@@ -7,7 +7,7 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
-import { sales } from '../../data/site';
+import { sales, siteMeta } from '../../data/site';
 import { formatPrice, isPurchasable, notifyUrl, offerFor } from '../../lib/sales';
 
 export async function getStaticPaths() {
@@ -22,9 +22,39 @@ const buyable = isPurchasable(product);
 // Launch promo (D23): switches live in the browser (src/scripts/offers.ts).
 const offer = buyable ? offerFor(product) : null;
 const accent = data.accent === 'coral' ? 'coral' : 'cyan';
+
+// Schema.org Product for search results (ADR-009): price, currency and, during
+// the launch promo, the date the price is valid until (D23). Rebuilt with
+// every deploy; `priceValidUntil` keeps search engines from showing it later.
+const pageUrl = new URL(`/kits/${product.id}/`, siteMeta.prodUrl).toString();
+const now = new Date();
+const promoNow = data.promo && now >= data.promo.starts && now < data.promo.ends ? data.promo : null;
+const productLd = buyable && data.price != null
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: data.title,
+      description: data.summary,
+      brand: { '@type': 'Brand', name: 'FENIA' },
+      url: pageUrl,
+      offers: {
+        '@type': 'Offer',
+        url: pageUrl,
+        price: String(promoNow ? promoNow.price : data.price),
+        priceCurrency: data.currency,
+        ...(promoNow ? { priceValidUntil: new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(promoNow.ends) } : {}),
+        availability: 'https://schema.org/InStock',
+      },
+    }
+  : null;
 ---
 
 <Layout title={`${data.title} — FENIA`} description={data.summary}>
+  {productLd && (
+    <Fragment slot="head">
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(productLd).replace(/</g, '\\u003c')} />
+    </Fragment>
+  )}
   <Nav />
 
   <main class="kit-main">
@@ -51,9 +81,17 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
                     <s class="kit-price-regular" data-offer-promo hidden={!offer.activeAtBuild}>{offer.regular}</s>
                     <span data-offer-price>{offer.activeAtBuild ? offer.promoPrice : offer.regular}</span>
                   </p>
-                  <p class="kit-countdown" data-offer-countdown aria-hidden="true"></p>
+                  <p class="kit-savings" data-offer-promo hidden={!offer.activeAtBuild}>Ahorrás {offer.savings}</p>
+                  <div class="kit-left" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
+                    <span class="kit-left-label" data-offer-label>Quedan</span>
+                    <span class="kit-left-big" data-offer-big></span>
+                    <span class="kit-left-small" data-offer-small></span>
+                  </div>
+                  <div class="kit-progress" data-offer-promo hidden={!offer.activeAtBuild} aria-hidden="true">
+                    {Array.from({ length: offer.totalDays }, (_, i) => <span data-offer-seg={i + 1}></span>)}
+                  </div>
                   <p class="kit-deadline" data-offer-promo hidden={!offer.activeAtBuild}>
-                    Hasta el {offer.deadline} (hora de Argentina). Después, {offer.regular}.
+                    <strong data-offer-day>Día 1 de {offer.totalDays}</strong> · Oferta de {offer.totalDays} días: {offer.period}, hasta las 23:59 (hora de Argentina).
                   </p>
                 </div>
               ) : (
@@ -192,8 +230,15 @@ const accent = data.accent === 'coral' ? 'coral' : 'cyan';
   .kit-offer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e8573d; margin: 0 0 8px 0; }
   .kit-offer-badge { background: #e8573d; color: #fff; border-radius: 5px; padding: 2px 7px; margin-left: 6px; letter-spacing: 0.02em; }
   .kit-price-regular { font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.5); margin-right: 10px; letter-spacing: 0; }
-  .kit-countdown { font-size: 16px; font-weight: 700; color: #ffb4a6; font-variant-numeric: tabular-nums; margin: 8px 0 0 0; }
-  .kit-countdown:empty { display: none; }
+  .kit-savings { font-size: 14px; font-weight: 700; color: #ffb4a6; margin: 6px 0 0 0; }
+  .kit-left:not([hidden]) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 16px 0 0 0; }
+  .kit-left-label { flex-basis: 100%; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb4a6; }
+  .kit-left-big { font-size: 28px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kit-left-small { font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, 0.8); font-variant-numeric: tabular-nums; }
+  .kit-progress:not([hidden]) { display: flex; gap: 4px; margin: 12px 0 6px 0; }
+  .kit-progress > span { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+  .kit-progress > span[data-state='past'] { background: rgba(232, 87, 61, 0.5); }
+  .kit-progress > span[data-state='today'] { background: #e8573d; }
   .kit-deadline { font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 4px 0 0 0; }
   .kit-soon-title { font-size: 22px; font-weight: 800; margin: 0; }
 

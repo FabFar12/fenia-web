@@ -833,7 +833,8 @@ body {
   #productos > div:last-child > div:first-child h2 {
     font-size: 28px !important;
   }
-  #productos > div:last-child > div:nth-child(2) {
+  /* By class, not position: the launch-promo banner (D23) sits before the grid. */
+  #productos .productos-grid {
     grid-template-columns: 1fr !important;
   }
   #productos > div:last-child > div:last-child {
