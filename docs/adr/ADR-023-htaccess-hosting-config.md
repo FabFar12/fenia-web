@@ -1,7 +1,7 @@
 # ADR-023 — `.htaccess` for hosting configuration on Hostinger
 
 ## Status
-Accepted (2026-05-26). Amended 2026-11-07 (docs/ventas, step 3.5): `www.fenia.com.ar` now redirects 301 to `fenia.com.ar` (it served the whole site, so purchases started there failed the sales API's Origin check: finding H-08), and files whose name starts with a dot are denied (finding H-01; piloted on staging). `/api/` has its own `.htaccess` (allowlist of endpoints + `Cache-Control: no-store`).
+Accepted (2026-05-26). Amended 2026-11-07 (docs/ventas, step 3.5): `www.fenia.com.ar` now redirects 301 to `fenia.com.ar` (it served the whole site, so purchases started there failed the sales API's Origin check: finding H-08), and files whose name starts with a dot are denied (finding H-01; piloted on staging). `/api/` has its own `.htaccess` (allowlist of endpoints + `Cache-Control: no-store`). HTML moved from `max-age=3600` to `no-cache` (always revalidated) on 2026-11-07: during the launch promo, visitors kept an hour-old page.
 
 Originally accepted (2026-05-26). Supersedes [ADR-019](./ADR-019-version-hosting-config.md). Required by [ADR-022](./ADR-022-pivot-to-hostinger-only.md).
 
