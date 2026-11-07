@@ -29,7 +29,7 @@ import { sales } from '../data/site';
         <button type="submit" class="dl-button">Descargar</button>
       </form>
 
-      <p id="dl-error" class="dl-error" role="alert" hidden></p>
+      <p id="dl-error" class="dl-error" role="alert" data-support={sales.supportEmail} hidden></p>
 
       <p class="dl-help">
         {sales.downloadPolicy} ¿Problemas? Pedí un link nuevo en <a href="/no-me-llego/">No me llegó</a>
@@ -50,7 +50,11 @@ import { sales } from '../data/site';
     error.hidden = false;
   };
 
-  async function load(): Promise<void> {
+  const meta = document.getElementById('dl-meta') as HTMLParagraphElement;
+  const button = form.querySelector('button') as HTMLButtonElement;
+  const SPENT = 'Este link venció o ya no tiene descargas disponibles. Pedí uno nuevo en "No me llegó".';
+
+  async function load(afterDownload = false): Promise<void> {
     if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
       return fail('Este link no es válido. Pedí uno nuevo en "No me llegó" con el email de tu compra.');
     }
@@ -63,17 +67,60 @@ import { sales } from '../data/site';
       });
       const body = res.ok ? await res.json() : null;
       if (!body || body.usable !== true) {
-        return fail('Este link venció o ya no tiene descargas disponibles. Pedí uno nuevo en "No me llegó".');
+        form.hidden = true;
+        if (afterDownload) {
+          meta.textContent = 'Listo. Esa era la última descarga de este link.';
+          return;
+        }
+        return fail(SPENT);
       }
       if (typeof body.kit_title === 'string') (document.getElementById('dl-title') as HTMLElement).textContent = body.kit_title;
-      const meta = document.getElementById('dl-meta') as HTMLParagraphElement;
-      meta.textContent = `Te quedan ${Number(body.remaining)} de ${Number(body.max)} descargas · vence el ${String(body.expires_on)}`;
+      meta.textContent = `${afterDownload ? 'Listo, se descargó. ' : ''}Te quedan ${Number(body.remaining)} de ${Number(body.max)} descargas · vence el ${String(body.expires_on)}`;
       meta.hidden = false;
       form.hidden = false;
     } catch {
       fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
     }
   }
+
+  // The file is fetched here and handed to the browser complete. A native form
+  // POST download got re-requested by the browser with GET (refused on purpose,
+  // threat model C6), wasting one of the buyer's downloads. Without JavaScript
+  // the plain form still works.
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    error.hidden = true;
+    button.disabled = true;
+    button.textContent = 'Descargando…';
+    try {
+      const res = await fetch('/api/download.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ token }),
+      });
+      if (res.ok && (res.headers.get('content-type') ?? '').startsWith('application/zip')) {
+        const name = /filename="([a-z0-9-]+\.zip)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? 'kit-fenia.zip';
+        const url = URL.createObjectURL(await res.blob());
+        const link = Object.assign(document.createElement('a'), { href: url, download: name });
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        await load(true);
+      } else if (res.status === 429) {
+        fail('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
+      } else if (res.status === 503) {
+        fail(`La descarga no está disponible en este momento. Probá más tarde o escribinos a ${error.dataset.support}.`);
+      } else {
+        form.hidden = true;
+        fail(SPENT);
+      }
+    } catch {
+      fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+    button.disabled = false;
+    button.textContent = 'Descargar';
+  });
 
   load();
 </script>
