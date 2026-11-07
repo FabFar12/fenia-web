@@ -29,7 +29,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 0.4 [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) (arquitectura) | ✅ Aceptado | dev |
 | | 0.5 Marcar lo obsoleto: ADR-025, guía de MP para Fab, PENDING #10 | ✅ | dev |
 | **1. Prerrequisitos** — [guia-fase-1.md](./guia-fase-1.md) (los pasos internos de cada bloque se numeran en la guía) | Bloque 1 · Hostinger por API (D11). Plan Business, PHP 8.3 con las extensiones necesarias (incluida `nd_pdo_mysql`). Creados: la base de staging, el subdominio `staging.fenia.com.ar` con SSL activo y el cron disponible por API. La carpeta privada la crea PHP (Q5). Los datos de acceso están en `~/fenia-secrets`, **nunca en el repo** | ✅ 2026-11-06 | dev |
-| | Bloque 2 · Mercado Pago: aplicación + token de prueba (P2). Cuentas de prueba y activación de producción, más adelante. Desactivar los Links de Pago viejos | 🟡 Esperando P2 | dev / Fab |
+| | Bloque 2 · Mercado Pago: aplicación "FENIA kits" creada (Checkout Pro vía **Orders**, D14). Producción activada. **Token de prueba validado** contra `/users/me` (usuario `test_user`, MLA) y guardado en `~/fenia-secrets`. Pendientes para más adelante: webhooks (cuando exista el endpoint), comprador de prueba (Fase 5), token de producción (lanzamiento) y decidir qué hacer con los Links de Pago viejos | ✅ 2026-11-06 (lo de ahora) | dev |
 | | Bloque 3 · Mail: `kits@` creada por API (D10). `soporte@` creado como **alias de `contacto@`** (OK explícito del dev, 2026-11-06): lo que llega a soporte cae en la bandeja de contacto. Falta el mail de prueba | 🟡 Falta mail de prueba (paso 3.3) | dev |
 | | Bloque 4 · ZIP final de cada kit + nombres y precio confirmados | ⏸️ Al final, antes de la Fase 5 (D9) | Fab |
 | | Bloque 5 · Contador · abogado · garantía de 7 días sí/no | 🟡 Guía entregada | Fab |
@@ -76,6 +76,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D14 | 2026-11-06 | **Corregida el mismo día:** la aplicación de MP es **Checkout Pro vía Orders API**. Al crearla, MP avisa que la API de Preferences "será descontinuada pronto", y su documentación indica Orders para integraciones nuevas. El flujo es: `POST /v1/orders` → `checkout_url`; `external_reference` obligatorio; URLs de regreso en `config.online`; aviso de tipo `order` con `x-signature`; `GET /v1/orders/{id}` como fuente de verdad. Lo ya construido sirve (firma, tokens, validación, montos, catálogo). En 3.1b se adaptan `PaymentRules` y `Validate` (los ids de orden son alfanuméricos) y se revisan ADR-028 y el threat model | ✅ Técnica |
 | D13 | 2026-11-06 | El dev autorizó a la IA a mergear `dev` → `main` cuando lo considere listo. Siempre por PR, con CI en verde y verificación de producción antes y después. **No reemplaza** la compuerta de lanzamiento ([test-plan.md](./test-plan.md#compuerta-de-lanzamiento)) ni la aprobación previa de cambios visuales (AGENTS.md) | ✅ |
 | D9 | 2026-11-06 | Los ZIP finales llegan **al final**, después de la revisión final del material, antes de la Fase 5. Staging se prueba con ZIPs de prueba. En esa revisión se confirman el nombre (el link viejo dice "Educar con IA", el sitio "Enseñar con IA…") y el precio de cada kit | ✅ Confirmada por el dev |
 | D10 | 2026-11-06 | Los compradores ven y responden a `soporte@fenia.com.ar`. Los mails salen desde `kits@` (Reply-To a `soporte@`), así la contraseña de soporte nunca vive en el servidor. `kits@` la crea el dev por la API de mail. Si el plan no tiene cupo de casillas, se usa `soporte@` | ✅ |
@@ -113,6 +114,10 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (11)** — Aplicación de MP creada (Checkout Pro vía Orders; Preferences avisa que "será descontinuada pronto", D14).
+  - En el panel nuevo, las credenciales no se ven desde el menú de la documentación: se llega con el link directo de la aplicación.
+  - Token de prueba pasado del celular por WhatsApp a sí mismo (aceptable solo por ser de prueba), validado contra MP y guardado. El de producción se pasará de otra forma.
+  - Los productos y los ZIP se revisan el 2026-11-07.
 - **2026-11-06 (10)** — **PR #16 mergeado a `main`** (`ca72899`) con autorización del dev (D13). Deploy a producción OK (corrida 42318156057).
   - Subieron solo `/api/_lib/*` y `/api/catalog.json` (11 cambios, 17 kB). Ningún archivo existente fue reemplazado.
   - Antes del merge se comparó el HTML de `dev` con producción: idéntico, salvo dos `uid` aleatorios de Astro.

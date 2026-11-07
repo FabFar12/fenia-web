@@ -1,7 +1,9 @@
 # ADR-028 — Own sales circuit on Hostinger (Checkout Pro + verified webhook + gated delivery)
 
 ## Status
-Accepted (2026-11-06). The dev confirmed the option (own circuit, "option B") and decisions D2–D4. D2 means launching without a manual bridge; D3 is the download link limits (30 days / 5 downloads); D4 is `binary_mode` (instant approvals only, no cash payments). Partially supersedes [ADR-025](./ADR-025-product-sales-via-mercadopago.md) (delivery and invoicing) and extends [ADR-027](./ADR-027-product-schema-and-lead-capture.md) (product schema). Living plan, status and decision log: [docs/ventas/README.md](../ventas/README.md).
+Accepted (2026-11-06). **Same-day amendment (D14):** Checkout Pro is integrated through MP's **Orders API**, not the Preferences API. MP flags Preferences as "soon to be discontinued" and directs new integrations to Orders. Where this ADR says "preference", read "order": `POST /v1/orders` returns a `checkout_url`, back URLs live in `config.online`, the webhook topic is `order`, and the source of truth is `GET /v1/orders/{id}`. The signature check, tokens, validation and catalogue are unchanged. The payment rules are adapted in step 3.1b.
+
+Originally accepted (2026-11-06). The dev confirmed the option (own circuit, "option B") and decisions D2–D4. D2 means launching without a manual bridge; D3 is the download link limits (30 days / 5 downloads); D4 is `binary_mode` (instant approvals only, no cash payments). Partially supersedes [ADR-025](./ADR-025-product-sales-via-mercadopago.md) (delivery and invoicing) and extends [ADR-027](./ADR-027-product-schema-and-lead-capture.md) (product schema). Living plan, status and decision log: [docs/ventas/README.md](../ventas/README.md).
 
 ## Context
 
