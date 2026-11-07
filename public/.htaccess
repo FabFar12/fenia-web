@@ -54,8 +54,15 @@
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
 
-  # HTML / sitemap / robots — hour-long cache. Keeps content updates visible.
-  <FilesMatch "\.(html|xml|txt)$">
+  # HTML — always revalidated (the ETag makes it a cheap 304). Prices and the
+  # launch promo change; an hour of browser cache showed visitors an old page
+  # without the new promo band (2026-11-07, docs/ventas).
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # Sitemap / robots — hour-long cache.
+  <FilesMatch "\.(xml|txt)$">
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
 </IfModule>

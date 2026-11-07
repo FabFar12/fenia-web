@@ -1,0 +1,91 @@
+---
+// Launch-promo announcement at the very top of the home (D23; the owner asked
+// for something that stands out and does not look like the rest of the site).
+// A coral band above the navigation, the whole band links to the kits. Live
+// countdown and disappearance at the deadline come from src/scripts/offers.ts.
+import { getCollection } from 'astro:content';
+import { isPurchasable, offerFor } from '../lib/sales';
+
+const offer = (await getCollection('products'))
+  .filter(isPurchasable)
+  .map((p) => offerFor(p))
+  .find((o) => o !== null) ?? null;
+---
+
+{offer && (
+  <div class="promo-bar-wrap" data-offer={offer.json}>
+    <a class="promo-bar" href="/#productos" data-offer-promo hidden={!offer.activeAtBuild}>
+      <span class="promo-bar-tag"><span class="promo-bar-dot" aria-hidden="true"></span>Lanzamiento</span>
+      <span class="promo-bar-text"><strong>{offer.percent}% OFF</strong> en los 3 kits</span>
+      <span class="promo-bar-time" aria-hidden="true">
+        <span data-offer-label>Quedan</span> <strong data-offer-big></strong> <span data-offer-small></span>
+      </span>
+      <span class="promo-bar-sr">Hasta el {offer.deadline}, hora de Argentina.</span>
+      <span class="promo-bar-cta">Ver los kits →</span>
+    </a>
+  </div>
+)}
+
+<script>
+  import '../scripts/offers';
+</script>
+
+<style>
+  .promo-bar:not([hidden]) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding: 11px 20px;
+    background: linear-gradient(90deg, #e8573d 0%, #f06a3f 50%, #e8573d 100%);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    text-decoration: none;
+    text-align: center;
+    position: relative;
+    z-index: 51;
+  }
+  .promo-bar:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+  .promo-bar-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #fff;
+    color: #c63f27;
+  }
+  .promo-bar-dot { width: 7px; height: 7px; border-radius: 50%; background: #e8573d; animation: promo-pulse 1.6s ease-in-out infinite; }
+  .promo-bar-text { font-size: 15px; font-weight: 600; }
+  .promo-bar-text strong { font-weight: 800; }
+  /* Spaces via gap: HTML compression drops the ones between the spans. */
+  .promo-bar-time { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 0.3em; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .promo-bar-time strong { font-weight: 800; }
+  .promo-bar-cta {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #0b1a2e;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .promo-bar:hover .promo-bar-cta { background: #13284a; }
+  .promo-bar-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  @keyframes promo-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .promo-bar-dot { animation: none; } }
+  @media (max-width: 640px) {
+    .promo-bar:not([hidden]) { padding: 10px 14px; gap: 6px 10px; font-size: 13px; }
+    .promo-bar-text { font-size: 14px; }
+    .promo-bar-time { flex-basis: 100%; }
+    /* Two lines on phones: the whole band is the link, so no separate button. */
+    .promo-bar-cta { display: none; }
+    .promo-bar-time::after { content: '→'; font-weight: 800; }
+  }
+</style>

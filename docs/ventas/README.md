@@ -187,6 +187,8 @@ Próximo:
 
 ## Bitácora
 
+- **2026-11-07 (21)** — El dev aprobó el cartel final y lo pasó a producción (PR #21). Fabián pidió algo llamativo arriba de todo: franja coral sobre el menú, con 56% OFF, cuenta regresiva y link a los kits; desaparece sola al vencer. El dev no la veía en staging porque su navegador tenía la página guardada (las páginas HTML tenían 1 hora de caché). Ahora el HTML se revalida siempre (`no-cache`, ADR-023).
+
 - **2026-11-07 (20)** — **Lanzamiento.** El dev eligió D23 (la promo arranca con el lanzamiento y dura 7 días) y lanzar hoy, con los términos provisorios.
   - PR #19: los 3 kits a la venta, con la CDN purgada; 6 de 6 pedidos muestran la versión nueva.
   - Resumen diario prendido en producción.
