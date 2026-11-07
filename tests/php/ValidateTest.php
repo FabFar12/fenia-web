@@ -44,23 +44,24 @@ final class ValidateTest extends TestCase
     {
         self::assertTrue(Validate::kitId('kit-ensenar-con-ia'));
         self::assertTrue(Validate::kitId('guia-evaluar-tiempos-ia'));
-        foreach (['', 'Kit', '../config', 'kit--doble', '-kit', 'kit-', 'kit.zip', "kit\0", str_repeat('a', 65)] as $bad) {
+        foreach (['', 'Kit', '../config', 'kit--doble', '-kit', 'kit-', 'kit.zip', "kit\0", "kit\n", str_repeat('a', 65)] as $bad) {
             self::assertFalse(Validate::kitId($bad), var_export($bad, true));
         }
     }
 
-    public function testPaymentIdsAreNumericOnly(): void
+    public function testMpIdsAreAlphanumericOnly(): void
     {
-        self::assertTrue(Validate::paymentId('1234567890'));
-        foreach (['', 'abc', '12/../34', '1 OR 1', '-1', str_repeat('9', 21)] as $bad) {
-            self::assertFalse(Validate::paymentId($bad), var_export($bad, true));
+        self::assertTrue(Validate::mpId('ORD01JQ4S4KY8HWQ6NA5PXB65B3D3'));
+        self::assertTrue(Validate::mpId('1234567890'));
+        foreach (['', 'ORD/../x', '12/../34', '1 OR 1', '-1', 'ORD01?x=1', "ORD\n", str_repeat('A', 65)] as $bad) {
+            self::assertFalse(Validate::mpId($bad), var_export($bad, true));
         }
     }
 
     public function testOrderReferences(): void
     {
         self::assertTrue(Validate::orderReference('0123456789abcdef0123456789abcdef'));
-        foreach (['', '0123456789ABCDEF0123456789ABCDEF', '0123456789abcdef', 'g123456789abcdef0123456789abcdef'] as $bad) {
+        foreach (['', '0123456789ABCDEF0123456789ABCDEF', '0123456789abcdef', 'g123456789abcdef0123456789abcdef', "0123456789abcdef0123456789abcdef\n"] as $bad) {
             self::assertFalse(Validate::orderReference($bad), var_export($bad, true));
         }
     }

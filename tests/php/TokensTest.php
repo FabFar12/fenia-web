@@ -30,7 +30,7 @@ final class TokensTest extends TestCase
 
     public function testU20RejectsMalformedTokensBeforeTheDatabase(): void
     {
-        foreach (['', 'abc', str_repeat('a', 42), str_repeat('a', 44), str_repeat('a', 42) . '/', "' OR 1=1 --", '../../config'] as $bad) {
+        foreach (['', 'abc', str_repeat('a', 42), str_repeat('a', 44), str_repeat('a', 42) . '/', str_repeat('a', 43) . "\n", "' OR 1=1 --", '../../config'] as $bad) {
             self::assertFalse(Tokens::isWellFormed($bad), var_export($bad, true));
         }
     }

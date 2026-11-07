@@ -90,6 +90,8 @@ final class MpSignatureTest extends TestCase
         yield 'short hash' => ['ts=1742505638683,v1=abc'];
         yield 'non-hex hash' => ['ts=1742505638683,v1=' . str_repeat('z', 64)];
         yield 'non-numeric ts' => ['ts=abc,v1=dcc01de923b48b2212e5025e4d299ce4af815503d93af5db3bdaced0bc137dff'];
+        yield 'newline inside the timestamp' => ["ts=1742\n505638683,v1=dcc01de923b48b2212e5025e4d299ce4af815503d93af5db3bdaced0bc137dff"];
+        yield 'newline inside the hash' => ["ts=1742505638683,v1=dcc01de923b48b2212e5025e4d299ce4af8155\n03d93af5db3bdaced0bc137dff"];
         yield 'garbage' => ['<script>alert(1)</script>'];
     }
 

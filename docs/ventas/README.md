@@ -36,9 +36,10 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | **2. Entorno de pruebas** | 2.1 Deploy automático de `dev` a `staging.fenia.com.ar` (job `deploy-staging`, corrida 42317545237). Primera publicación resuelta sembrando el archivo de estado (aprobado por el dev). Staging solo responde en su host (C20 cerrado), es `noindex`, no tiene CDN y bloquea archivos ocultos, `_lib/` y `default.php` | ✅ 2026-11-06 | dev |
 | | 2.2 CI: barrera anti-ZIP/credenciales, lint PHP + PHPUnit (8.1 y 8.3), verificación del catálogo (U-31); el deploy depende de todo eso | ✅ Verde en GitHub (2026-11-06) | dev |
 | | 2.3 Suite de seguridad `npm run test:ventas`. Contra staging: **42 OK, 0 fallas**, 22 pendientes hasta que existan los endpoints. Contra producción: 41 OK y 1 falla conocida (H-01) | ✅ | dev |
-| **3. Backend** | 3.1a Núcleo puro con tests: firma, reglas de pago y estados, tokens, validación, montos, catálogo generado por el build | ✅ 80 tests | dev |
-| | 3.1b Configuración, base de datos con transiciones atómicas, limitador de frecuencia | ⏳ **Próximo** | dev |
-| | 3.2 Endpoints: checkout, webhook, estado, descarga, reenvío, health | ⏳ | dev |
+| **3. Backend** | 3.1a Núcleo puro con tests: firma, **reglas de orden (`OrderRules`, API de Orders, D14)**, tokens, validación, montos, catálogo generado por el build. Bug corregido: `$` en las regex aceptaba un `\n` final (modificador `D`) | ✅ | dev |
+| | 3.1b `Env` (entorno y carpeta privada, nunca dentro de `public_html`), `Config` (falla cerrada, rechaza la config de otro entorno), `Inbox` (Q5), `Db` (migración idempotente MySQL/SQLite), `OrderStore` (compare-and-set), `TokenStore` (consumo atómico), `RateLimiter` (claves HMAC, nunca IPs en claro). **114 tests**, con mutación verificada | ✅ 2026-11-06 | dev |
+| | **3.2 Próximo:** cliente de MP (Orders) + `bootstrap` + endpoints | ⏳ | dev |
+| | 3.2 Endpoints: checkout (crea la orden en MP), webhook, estado, descarga, reenvío, health | ⏳ | dev |
 | | 3.3 Mail de entrega (SMTP de Hostinger) | ⏳ | dev |
 | | 3.4 Conciliación horaria + reporte diario + alertas (incluye pagos huérfanos) | ⏳ | dev |
 | | 3.5 `.htaccess` para `/api` + bloqueo de archivos ocultos (H-01) | ⏳ | dev |
@@ -51,8 +52,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
-- **Dev:** el permiso P2, el token de prueba de Mercado Pago ([guía](./guia-fase-1.md#camino-elegido-lo-configura-el-dev-por-api-d11)).
-- **IA:** 3.1b (configuración + base de datos + limitador), con diseño de Q5 (cómo llegan los secretos a la carpeta privada).
+- **Dev:** revisión de productos y ZIP (2026-11-07). El resumen de tareas humanas está en [guia-fase-1.md](./guia-fase-1.md).
+- **IA:** 3.2. Cliente de MP para Orders, `bootstrap` (buzón → config → DB, falla cerrada) y endpoints, empezando por checkout y webhook.
 
 ## Cómo se corren las pruebas
 
@@ -91,7 +92,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
 | Q3 | ¿El firewall de Hostinger deja pasar los avisos de MP? Confirmado que **hay un firewall activo**: responde 403 a `<script>` en la URL | Prueba INT-09 en staging |
-| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | Diseño en el paso 2.1; pruebas en S-11 |
+| Q5 | Cómo llegan la configuración secreta y los ZIP a la carpeta privada, fuera de `public_html`. La API de archivos solo escribe dentro de `public_html`, y no hay FTP propio de staging. Propuesta: se suben por la API a una carpeta "buzón" bloqueada (`.htaccess` deny) y el propio PHP los mueve a `~/fenia-private/<entorno>/` y borra el original | ✅ Implementado en el 3.1b (`Inbox.php` + `api/_inbox/.htaccess`). Solo acepta `config.php` y ZIPs de kits. S-11 verifica que el buzón no se sirva. Falta decidir el canal de subida a staging (API de archivos de Hostinger, con OK del dev) en el 3.2 |
 | Q4 | Ruta exacta de la carpeta privada y carpeta del subdominio de staging. Respondida en parte: Hostinger crea el subdominio en `public_html/staging`, dentro del sitio real, y se protege con C20. La carpeta privada se crea desde la casita (⌂) del Administrador de archivos | Guía, Bloque 1, pasos 1.3–1.4 |
 
 ## Hallazgos
@@ -114,6 +115,14 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (12)** — Núcleo adaptado a la API de Orders, con campos verificados en el SDK oficial `mercadopago/sdk-php`:
+  - rutas `/v1/orders` y `/v1/orders/{id}`;
+  - campos `status`, `status_detail`, `total_amount` y `total_paid_amount` (strings), `currency`, `user_id` y `transactions.chargebacks`;
+  - **sin `live_mode`**: el control de sandbox lo hace `user_id`.
+
+  `PaymentRules` reemplazado por `OrderRules`. Bug real encontrado por un test nuevo: `$` en las regex aceptaba un `\n` final; corregido con `/D` en todas.
+
+  Paso 3.1b hecho: 114 tests, con mutación verificada sobre el límite de descargas y el compare-and-set.
 - **2026-11-06 (11)** — Aplicación de MP creada (Checkout Pro vía Orders; Preferences avisa que "será descontinuada pronto", D14).
   - En el panel nuevo, las credenciales no se ven desde el menú de la documentación: se llega con el link directo de la aplicación.
   - Token de prueba pasado del celular por WhatsApp a sí mismo (aceptable solo por ser de prueba), validado contra MP y guardado. El de producción se pasará de otra forma.

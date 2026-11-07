@@ -27,7 +27,9 @@ describe('S-11 ✱ secretos, código y logs no son accesibles', { skip: skipWith
     '/.ftp-deploy-sync-state.json', // hallazgo H-01
     '/.git/config', '/.git/HEAD', '/.env', '/.env.production',
     '/composer.json', '/composer.lock', '/package.json', '/phpunit.xml.dist',
-    '/api/_lib/autoload.php', '/api/_lib/MpSignature.php', '/api/_lib/PaymentRules.php', '/api/_lib/.htaccess',
+    '/api/_lib/autoload.php', '/api/_lib/MpSignature.php', '/api/_lib/OrderRules.php', '/api/_lib/.htaccess',
+    '/api/_lib/config.example.php', '/api/_lib/Config.php', '/api/_lib/Db.php',
+    '/api/_inbox/', '/api/_inbox/config.php', '/api/_inbox/guia-evaluar-tiempos-ia.zip', '/api/_inbox/.htaccess',
     '/config.php', '/api/config.php',
     '/error_log', '/api/error_log', '/api/_lib/error_log',
   ];

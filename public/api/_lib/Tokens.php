@@ -33,7 +33,7 @@ final class Tokens
     /** Cheap shape check before touching the database. */
     public static function isWellFormed(string $token): bool
     {
-        return (bool) preg_match('/^[A-Za-z0-9_-]{43}$/', $token);
+        return (bool) preg_match('/^[A-Za-z0-9_-]{43}$/D', $token);
     }
 
     /** New `external_reference` for an order: 128 random bits. */
