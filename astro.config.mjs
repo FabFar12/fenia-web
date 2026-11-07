@@ -7,7 +7,11 @@ import tailwindcss from '@tailwindcss/vite';
 // Override only when copying this site to another domain.
 export default defineConfig({
   site: 'https://fenia.com.ar',
-  integrations: [react(), sitemap()],
+  integrations: [
+    react(),
+    // Purchase-flow pages are noindex; keep them out of the sitemap too (ADR-028).
+    sitemap({ filter: (page) => !/\/(gracias|descarga|no-me-llego)\/?$/.test(page) }),
+  ],
   vite: {
     plugins: [tailwindcss()],
     build: {

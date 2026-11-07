@@ -1,0 +1,202 @@
+---
+// Kit page — /kits/<id>/ (docs/ventas/propuesta-visual.md §2, approved 2026-11-06).
+// The buyer reads what the kit includes and leaves the email the kit is sent
+// to (threat model C8: typed twice). Checkout: POST /api/checkout.php; the
+// server prices the order from the catalogue, never from this page (A8).
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import { sales } from '../../data/site';
+import { formatPrice, isPurchasable, notifyUrl } from '../../lib/sales';
+
+export async function getStaticPaths() {
+  const products = await getCollection('products', (p) => p.data.status !== 'hidden');
+  return products.map((product) => ({ params: { id: product.id }, props: { product } }));
+}
+
+const { product } = Astro.props;
+const { Content } = await render(product);
+const data = product.data;
+const buyable = isPurchasable(product);
+const accent = data.accent === 'coral' ? 'coral' : 'cyan';
+---
+
+<Layout title={`${data.title} — FENIA`} description={data.summary}>
+  <Nav />
+
+  <main class="kit-main">
+    <section class="kit-section">
+      <a href="/#productos" class="kit-back">← Volver a productos</a>
+
+      <span class={`kit-chip kit-chip--${accent}`}>
+        {data.type}{!buyable && data.status === 'coming-soon' ? ' · Próximamente' : ''}
+      </span>
+      <h1 class="kit-title">{data.title}</h1>
+      <p class="kit-summary">{data.summary}</p>
+
+      <div class="kit-grid">
+        <aside class="kit-buy" aria-labelledby="buy-title">
+          {buyable && data.price != null ? (
+            <>
+              <h2 id="buy-title" class="sr-only">Comprar</h2>
+              <p class="kit-price">{formatPrice(data.price, data.currency)}</p>
+              <p class="kit-price-note">Pago único · Descarga inmediata</p>
+
+              <form id="buy-form" class="kit-form" data-kit={product.id} novalidate>
+                <label for="buy-email">Tu email (ahí te llega el kit)</label>
+                <input id="buy-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required />
+
+                <label for="buy-email2">Repetí tu email</label>
+                <input id="buy-email2" name="email_confirm" type="email" autocomplete="email" inputmode="email" maxlength="254" required />
+
+                <div class="kit-hp" aria-hidden="true">
+                  <label for="buy-website">No completar este campo</label>
+                  <input id="buy-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <label class="kit-check">
+                  <input id="buy-terms" name="accept_terms" type="checkbox" required />
+                  <span>{sales.termsLabel}</span>
+                </label>
+
+                <p id="buy-error" class="kit-error" role="alert" hidden></p>
+
+                <button id="buy-submit" type="submit" class="kit-pay">Pagar con Mercado Pago →</button>
+                <p class="kit-safe"><span aria-hidden="true">🔒</span> {sales.paymentNote}</p>
+              </form>
+            </>
+          ) : (
+            <>
+              <h2 id="buy-title" class="kit-soon-title">Próximamente</h2>
+              <p class="kit-price-note">Estamos terminando de prepararlo.</p>
+              <a class="kit-notify" href={notifyUrl(product)}>Avisame cuando esté disponible →</a>
+            </>
+          )}
+        </aside>
+
+        <article class="kit-body">
+          <Content />
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  // Checkout: validate here for a clear message, then let the server decide
+  // (it validates again, prices the order and rate-limits — ADR-028).
+  const form = document.getElementById('buy-form') as HTMLFormElement | null;
+  if (form) {
+    const error = document.getElementById('buy-error') as HTMLParagraphElement;
+    const submit = document.getElementById('buy-submit') as HTMLButtonElement;
+    const show = (message: string) => {
+      error.textContent = message;
+      error.hidden = false;
+    };
+    const isMpCheckout = (url: string) => {
+      try {
+        const u = new URL(url);
+        return u.protocol === 'https:' && /(^|\.)mercadopago\.com(\.ar)?$/.test(u.hostname);
+      } catch {
+        return false;
+      }
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.hidden = true;
+      const fd = new FormData(form);
+      const email = String(fd.get('email') ?? '').trim();
+      const confirm = String(fd.get('email_confirm') ?? '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show('Revisá tu email: no parece válido.');
+      if (email.toLowerCase() !== confirm.toLowerCase()) return show('Los dos emails no coinciden.');
+      if (!fd.get('accept_terms')) return show('Para continuar tenés que aceptar los términos de compra.');
+
+      submit.disabled = true;
+      submit.textContent = 'Preparando tu pago…';
+      try {
+        const res = await fetch('/api/checkout.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            kit: form.dataset.kit,
+            email,
+            email_confirm: confirm,
+            accept_terms: true,
+            website: String(fd.get('website') ?? ''),
+          }),
+        });
+        const body = await res.json().catch(() => null);
+        if (res.ok && body && typeof body.checkout_url === 'string' && isMpCheckout(body.checkout_url)) {
+          window.location.assign(body.checkout_url);
+          return;
+        }
+        if (res.status === 429) show('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
+        else if (res.status === 404 || res.status === 503) show('La compra no está disponible en este momento. Probá más tarde o escribinos.');
+        else show('No pudimos iniciar el pago. Revisá los datos y probá de nuevo.');
+      } catch {
+        show('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+      }
+      submit.disabled = false;
+      submit.textContent = 'Pagar con Mercado Pago →';
+    });
+  }
+</script>
+
+<style>
+  .kit-main { background: #0b1a2e; min-height: 80vh; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .kit-section { max-width: 1100px; margin: 0 auto; padding: 100px 48px 80px; }
+  .kit-back { display: inline-block; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; margin-bottom: 28px; }
+  .kit-back:hover, .kit-back:focus-visible { color: #fff; }
+  .kit-chip { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 5px; margin-bottom: 18px; }
+  .kit-chip--cyan { background: rgba(0, 180, 216, 0.1); color: #00b4d8; }
+  .kit-chip--coral { background: rgba(232, 87, 61, 0.1); color: #e8573d; }
+  .kit-title { font-size: 42px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 16px 0; }
+  .kit-summary { font-size: 17px; line-height: 1.65; color: rgba(255, 255, 255, 0.72); margin: 0 0 40px 0; max-width: 680px; }
+
+  .kit-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  @media (min-width: 900px) {
+    .kit-grid { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+    .kit-buy { grid-column: 2; grid-row: 1; position: sticky; top: 100px; }
+    .kit-body { grid-column: 1; grid-row: 1; }
+  }
+
+  .kit-buy { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 28px; }
+  .kit-price { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+  .kit-price-note { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin: 4px 0 22px 0; }
+  .kit-soon-title { font-size: 22px; font-weight: 800; margin: 0; }
+
+  .kit-form { display: flex; flex-direction: column; }
+  .kit-form label { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.85); margin-bottom: 6px; }
+  .kit-form input[type='email'] { font: inherit; font-size: 15px; color: #fff; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+  .kit-form input[type='email']:focus-visible { outline: 2px solid #00b4d8; outline-offset: 2px; }
+  .kit-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .kit-check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500 !important; font-size: 13px !important; line-height: 1.5; color: rgba(255, 255, 255, 0.75) !important; margin: 4px 0 18px 0 !important; }
+  .kit-check input { margin-top: 3px; accent-color: #e8573d; width: 16px; height: 16px; flex-shrink: 0; }
+  .kit-error { font-size: 14px; color: #ffb4a6; background: rgba(232, 87, 61, 0.1); border: 1px solid rgba(232, 87, 61, 0.35); border-radius: 10px; padding: 10px 12px; margin: 0 0 14px 0; }
+
+  .kit-pay, .kit-notify { display: inline-flex; justify-content: center; align-items: center; font: inherit; font-size: 15px; font-weight: 700; padding: 14px 20px; border-radius: 10px; border: none; background: #e8573d; color: #fff; cursor: pointer; text-decoration: none; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .kit-pay:disabled { opacity: 0.7; cursor: wait; }
+  .kit-pay:focus-visible, .kit-notify:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .kit-safe { font-size: 12.5px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 14px 0 0 0; }
+
+  .kit-body { font-size: 15.5px; line-height: 1.75; color: rgba(255, 255, 255, 0.78); }
+  .kit-body :global(h2) { font-size: 22px; font-weight: 800; color: #fff; margin: 36px 0 12px 0; letter-spacing: -0.01em; }
+  .kit-body :global(h2:first-child) { margin-top: 0; }
+  .kit-body :global(p) { margin: 0 0 14px 0; }
+  .kit-body :global(ul) { padding-left: 20px; margin: 0 0 14px 0; }
+  .kit-body :global(li) { margin-bottom: 6px; }
+  .kit-body :global(strong) { color: #fff; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+  @media (max-width: 640px) {
+    .kit-section { padding: 64px 20px 56px; }
+    .kit-title { font-size: 30px; }
+    .kit-summary { font-size: 16px; margin-bottom: 28px; }
+    .kit-buy { padding: 22px 18px; }
+  }
+</style>

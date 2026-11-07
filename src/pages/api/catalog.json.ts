@@ -2,9 +2,11 @@
 // Single source of truth for price: the product .md files. PHP reads the
 // built dist/api/catalog.json from disk and never trusts a price sent by the
 // browser (docs/ventas/threat-model.md A8, C12). Hidden products are never
-// emitted. Contract checked in CI by scripts/verify-catalog.mjs (test U-31).
+// emitted. Contract checked in CI by scripts/verify-catalog.mjs (test U-31),
+// which runs on the production build (no sales preview).
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { isPurchasable } from '../../lib/sales';
 
 export const GET: APIRoute = async () => {
   const products = (await getCollection('products'))
@@ -13,7 +15,9 @@ export const GET: APIRoute = async () => {
     .map((p) => ({
       id: p.id,
       title: p.data.title,
-      status: p.data.status,
+      // On a staging build (PUBLIC_SALES_PREVIEW) coming-soon kits are sold
+      // in the sandbox, so the backend must see them as live.
+      status: isPurchasable(p) ? 'live' : p.data.status,
       price: p.data.price,
       currency: p.data.currency,
     }));

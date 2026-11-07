@@ -2,9 +2,10 @@
 // Productos.astro — Sección de productos digitales FENIA
 // Reads from src/content/products/ via Astro Content Collections.
 // Status 'hidden' is never rendered. 'coming-soon' shows a "PRÓXIMAMENTE" suffix.
-// CTA behavior per status/paymentUrl: see ADR-027 and docs/ai-context/content-model.md.
+// CTA behavior: see ADR-027, ADR-028 and docs/ventas/propuesta-visual.md.
 import { getCollection } from 'astro:content';
 import { whatsapp } from '../data/site';
+import { formatPrice, isPurchasable, kitUrl, notifyUrl } from '../lib/sales';
 
 const allProducts = await getCollection('products');
 const products = allProducts
@@ -16,28 +17,22 @@ const accentBg = (a: 'cyan' | 'coral') => (a === 'cyan' ? 'rgba(0,180,216,0.1)' 
 
 const customRequestUrl = whatsapp.url('Hola FENIA, necesito un recurso personalizado para mi equipo u organización');
 
-const formatPrice = (price: number, currency: 'ARS') =>
-  new Intl.NumberFormat('es-AR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price);
-
 /**
- * CTA per product, driven by status/paymentUrl (see ADR-027):
- *  - coming-soon           → "Avisame cuando esté disponible" → /recursos-gratuitos
- *                            (lista de lanzamiento; sin promesa de recurso gratis
- *                            hasta que exista uno real — docs/ventas D17)
- *  - live + paymentUrl     → "Comprar ahora" → Mercado Pago (external)
- *  - live sin paymentUrl   → sin botón de compra (card informativa)
+ * CTA per product (ADR-028, docs/ventas/propuesta-visual.md):
+ *  - purchasable (live with a price; also coming-soon on a staging preview
+ *    build) → "Comprar" → the kit page, where the buyer's email is asked
+ *  - coming-soon → "Avisame cuando esté disponible" → /recursos-gratuitos
+ *    (D17: no free-resource promise until one exists; the title comes from
+ *    the product id there, never from the URL — finding H-03)
+ *  - live without a price → informational card, no button
  */
 function ctaFor(product: (typeof products)[number]) {
-  const { status, paymentUrl, ctaLabel } = product.data;
-  if (status === 'coming-soon') {
-    return {
-      label: ctaLabel ?? 'Avisame cuando esté disponible',
-      href: `/recursos-gratuitos?producto=${encodeURIComponent(product.id)}&titulo=${encodeURIComponent(product.data.title)}`,
-      external: false,
-    };
+  const { status, ctaLabel } = product.data;
+  if (isPurchasable(product)) {
+    return { label: ctaLabel ?? 'Comprar', href: kitUrl(product), primary: true };
   }
-  if (status === 'live' && paymentUrl) {
-    return { label: ctaLabel ?? 'Comprar ahora', href: paymentUrl, external: true };
+  if (status === 'coming-soon') {
+    return { label: ctaLabel ?? 'Avisame cuando esté disponible', href: notifyUrl(product), primary: false };
   }
   return null;
 }
@@ -66,7 +61,8 @@ function ctaFor(product: (typeof products)[number]) {
     <!-- Product cards -->
     <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       {products.map((product) => {
-        const isComingSoon = product.data.status === 'coming-soon';
+        const buyable = isPurchasable(product);
+        const isComingSoon = product.data.status === 'coming-soon' && !buyable;
         const chipLabel = isComingSoon
           ? `${product.data.type} · Próximamente`
           : product.data.type;
@@ -83,13 +79,17 @@ function ctaFor(product: (typeof products)[number]) {
             <h3 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 12px 0;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.title}</h3>
             <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 28px 0;flex:1;font-family:'Plus Jakarta Sans',sans-serif;">{product.data.summary}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
-              <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;margin-right:12px;">{footerLeft}</span>
+              <span style="display:flex;flex-direction:column;gap:2px;margin-right:12px;font-family:'Plus Jakarta Sans',sans-serif;">
+                <span style={`font-size:${buyable ? '16px' : '13px'};font-weight:700;color:${buyable ? '#fff' : 'rgba(255,255,255,0.7)'};white-space:nowrap;`}>{footerLeft}</span>
+                {buyable && <span style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.65);white-space:nowrap;">Descarga inmediata</span>}
+              </span>
               {cta && (
                 <a
                   href={cta.href}
-                  target={cta.external ? '_blank' : undefined}
-                  rel={cta.external ? 'noopener noreferrer' : undefined}
-                  style="font-size:12px;font-weight:600;padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;"
+                  class={cta.primary ? 'cta-magnetic' : undefined}
+                  style={cta.primary
+                    ? "font-size:13px;font-weight:700;padding:10px 22px;border-radius:8px;border:none;background:#E8573D;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;box-shadow:0 4px 20px rgba(232,87,61,0.3);white-space:nowrap;"
+                    : "font-size:12px;font-weight:600;padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;"}
                 >
                   {cta.label} →
                 </a>

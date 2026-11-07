@@ -1,28 +1,20 @@
 ---
-// gracias.astro — landing page after a successful Mercado Pago purchase.
+// gracias.astro — where Mercado Pago sends the buyer back after paying
+// (docs/ventas/propuesta-visual.md §3, approved 2026-11-06; ADR-028).
 //
-// Mercado Pago is configured with this URL as "URL de retorno tras pago exitoso".
-// The buyer lands here right after paying; meanwhile MP sends them an email
-// with the PDF download link (auto-delivery configured per ADR-025).
-//
-// This page is marked `noindex` because it has no SEO value and only makes
-// sense as a transient destination after a purchase.
-//
-// See: docs/adr/ADR-025-product-sales-via-mercadopago.md
+// The page never trusts its URL: it asks the server (/api/status.php) with the
+// order code (`ref`, 128 random bits) and only shows the download button when
+// the server confirms a paid order (threat model A3, A16; test S-06).
+// Everything dynamic is set with textContent (threat model D3).
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { whatsapp, siteMeta } from '../data/site';
+import { whatsapp, sales } from '../data/site';
 
-const waSupportUrl = whatsapp.url(
-  'Hola FENIA, acabo de comprar la guía y todavía no me llegó el email. ¿Pueden ayudarme?',
-);
+const waSupportUrl = whatsapp.url('Hola FENIA, compré un kit y necesito ayuda con la descarga.');
 ---
 
-<Layout
-  title={`¡Gracias por tu compra! — ${siteMeta.name}`}
-  description="Tu compra fue procesada. Te enviamos el archivo por email."
->
+<Layout title="Tu compra — FENIA" description="Estado de tu compra en FENIA.">
   <Fragment slot="head">
     <meta name="robots" content="noindex, follow" />
   </Fragment>
@@ -30,50 +22,42 @@ const waSupportUrl = whatsapp.url(
   <Nav />
 
   <main class="thanks-main">
-    <section class="thanks-section">
-      <div class="thanks-inner reveal">
-        <div class="thanks-badge">
-          <div class="thanks-badge-dot" aria-hidden="true"></div>
-          <span class="thanks-badge-text">Compra confirmada</span>
-        </div>
+    <section class="thanks-section" aria-live="polite">
+      <div id="state-checking" class="thanks-state">
+        <div class="thanks-spinner" aria-hidden="true"></div>
+        <h1 class="thanks-title">Verificando tu pago…</h1>
+        <p class="thanks-lead">Esto tarda unos segundos.</p>
+      </div>
 
-        <h1 class="thanks-title">
-          ¡Gracias por confiar en <span class="thanks-title-accent">FENIA</span>!
-        </h1>
-
-        <p class="thanks-lead">
-          Tu compra fue procesada correctamente por Mercado Pago.
+      <div id="state-paid" class="thanks-state" hidden>
+        <div class="thanks-badge"><span class="thanks-badge-dot" aria-hidden="true"></span>Compra confirmada</div>
+        <h1 class="thanks-title">¡Listo! Tu kit está pago.</h1>
+        <p class="thanks-lead">Descargalo ahora desde acá.</p>
+        <a id="download-link" class="thanks-cta-primary" href="/descarga/">Descargar el kit</a>
+        <p class="thanks-note">
+          También te lo mandamos a <strong id="paid-email">tu email</strong> (revisá Spam o Promociones).
+          {sales.downloadPolicy}
         </p>
+      </div>
 
-        <div class="thanks-card">
-          <h2 class="thanks-card-title">¿Qué pasa ahora?</h2>
-          <ol class="thanks-steps">
-            <li>
-              <strong>Revisá tu email</strong> (también la carpeta de Spam o Promociones, por las dudas). Mercado Pago te envía el link de descarga del PDF en los próximos minutos.
-            </li>
-            <li>
-              <strong>Descargá el archivo</strong> desde el link del mail y guardalo en tu computadora o teléfono.
-            </li>
-            <li>
-              <strong>Si en 10 minutos no llegó nada</strong>, escribinos por WhatsApp y te lo enviamos directamente.
-            </li>
-          </ol>
-        </div>
+      <div id="state-pending" class="thanks-state" hidden>
+        <h1 class="thanks-title">Tu pago se está procesando.</h1>
+        <p class="thanks-lead">Te llega el kit por mail apenas Mercado Pago lo acredite. No hace falta que hagas nada más.</p>
+      </div>
 
-        <div class="thanks-actions">
-          <a class="thanks-cta-primary cta-magnetic" href={waSupportUrl} target="_blank" rel="noopener noreferrer">
-            💬 No me llegó el email
-          </a>
-          <a class="thanks-cta-secondary" href="/">
-            Volver al inicio
-          </a>
-        </div>
+      <div id="state-unknown" class="thanks-state" hidden>
+        <h1 class="thanks-title">No encontramos tu compra.</h1>
+        <p class="thanks-lead">
+          Si ya pagaste, entrá a <a href="/no-me-llego/">No me llegó</a> con el email que usaste y te reenviamos el kit.
+        </p>
+      </div>
 
-        <div class="thanks-footer-note">
-          Tu comprobante de pago lo emite Mercado Pago automáticamente y queda
-          disponible en tu cuenta. Cualquier consulta sobre el contenido del
-          material, escribinos cuando quieras.
-        </div>
+      <div class="thanks-footer-note">
+        <p>{sales.noCardDataNote}</p>
+        <p>
+          ¿Necesitás ayuda? Escribinos a <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a>
+          o por <a href={waSupportUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a>.
+        </p>
       </div>
     </section>
   </main>
@@ -81,151 +65,66 @@ const waSupportUrl = whatsapp.url(
   <Footer />
 </Layout>
 
+<script>
+  const states = ['checking', 'paid', 'pending', 'unknown'] as const;
+  const show = (name: (typeof states)[number]) => {
+    for (const s of states) (document.getElementById(`state-${s}`) as HTMLElement).hidden = s !== name;
+  };
+
+  const ref = new URLSearchParams(window.location.search).get('ref') ?? '';
+  const MAX_TRIES = 20; // ~1 minute
+
+  async function check(attempt: number): Promise<void> {
+    if (!/^[a-f0-9]{32}$/.test(ref)) return show('unknown');
+    try {
+      const res = await fetch(`/api/status.php?ref=${encodeURIComponent(ref)}`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      const body = res.ok ? await res.json() : null;
+      if (body?.state === 'paid' && typeof body.download_url === 'string' && body.download_url.startsWith('/descarga/#t=')) {
+        (document.getElementById('download-link') as HTMLAnchorElement).href = body.download_url;
+        if (typeof body.email_masked === 'string') (document.getElementById('paid-email') as HTMLElement).textContent = body.email_masked;
+        return show('paid');
+      }
+      if (body?.state === 'pending' || body?.state === 'review') {
+        if (attempt < MAX_TRIES) {
+          setTimeout(() => check(attempt + 1), 3000);
+          return;
+        }
+        return show('pending');
+      }
+      if (attempt < 3 && (!res.ok || !body)) {
+        setTimeout(() => check(attempt + 1), 3000);
+        return;
+      }
+      show('unknown');
+    } catch {
+      if (attempt < 3) setTimeout(() => check(attempt + 1), 3000);
+      else show('unknown');
+    }
+  }
+
+  check(0);
+</script>
+
 <style>
-  .thanks-main {
-    background: #0b1a2e;
-    min-height: 80vh;
-  }
-  .thanks-section {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 100px 48px 80px;
-    color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-  .thanks-inner {
-    text-align: left;
-  }
-  .thanks-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 14px;
-    border-radius: 100px;
-    border: 1px solid rgba(0, 180, 216, 0.25);
-    background: rgba(0, 180, 216, 0.06);
-    margin-bottom: 28px;
-  }
-  .thanks-badge-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #00b4d8;
-    box-shadow: 0 0 8px #00b4d8;
-  }
-  .thanks-badge-text {
-    font-size: 11px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.7);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .thanks-title {
-    font-size: 42px;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin: 0 0 18px 0;
-  }
-  .thanks-title-accent {
-    background: linear-gradient(135deg, #00b4d8, #00d4aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .thanks-lead {
-    font-size: 17px;
-    line-height: 1.65;
-    color: rgba(255, 255, 255, 0.75);
-    margin: 0 0 36px 0;
-    max-width: 560px;
-  }
-  .thanks-card {
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 28px 32px;
-    margin-bottom: 36px;
-  }
-  .thanks-card-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    margin: 0 0 18px 0;
-  }
-  .thanks-steps {
-    margin: 0;
-    padding-left: 22px;
-    font-size: 15px;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.75);
-  }
-  .thanks-steps li {
-    margin-bottom: 12px;
-  }
-  .thanks-steps li:last-child {
-    margin-bottom: 0;
-  }
-  .thanks-steps strong {
-    color: #fff;
-    font-weight: 700;
-  }
-  .thanks-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-  .thanks-cta-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14.5px;
-    font-weight: 600;
-    padding: 13px 28px;
-    border-radius: 10px;
-    background: #e8573d;
-    color: #fff;
-    box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3);
-    text-decoration: none;
-  }
-  .thanks-cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    font-size: 14.5px;
-    font-weight: 600;
-    padding: 13px 28px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
-    color: #fff;
-    text-decoration: none;
-  }
-  .thanks-footer-note {
-    font-size: 13px;
-    line-height: 1.65;
-    color: rgba(255, 255, 255, 0.5);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding-top: 20px;
-  }
+  .thanks-main { background: #0b1a2e; min-height: 80vh; }
+  .thanks-section { max-width: 720px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .thanks-badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 100px; border: 1px solid rgba(0, 180, 216, 0.25); background: rgba(0, 180, 216, 0.06); margin-bottom: 24px; font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.75); text-transform: uppercase; letter-spacing: 0.1em; }
+  .thanks-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #00b4d8; box-shadow: 0 0 8px #00b4d8; }
+  .thanks-title { font-size: 40px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 16px 0; }
+  .thanks-lead { font-size: 17px; line-height: 1.65; color: rgba(255, 255, 255, 0.75); margin: 0 0 28px 0; max-width: 560px; }
+  .thanks-lead a, .thanks-footer-note a { color: #00b4d8; }
+  .thanks-cta-primary { display: inline-flex; align-items: center; font-size: 16px; font-weight: 700; padding: 15px 30px; border-radius: 10px; background: #e8573d; color: #fff; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); text-decoration: none; }
+  .thanks-cta-primary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .thanks-note { font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, 0.7); margin: 22px 0 0 0; max-width: 560px; }
+  .thanks-note strong { color: #fff; }
+  .thanks-spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.15); border-top-color: #00b4d8; animation: spin 0.9s linear infinite; margin-bottom: 24px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .thanks-spinner { animation: none; } }
+  .thanks-footer-note { margin-top: 56px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; line-height: 1.65; color: rgba(255, 255, 255, 0.6); }
+  .thanks-footer-note p { margin: 0 0 6px 0; }
   @media (max-width: 640px) {
-    .thanks-section {
-      padding: 64px 20px 56px;
-    }
-    .thanks-title {
-      font-size: 32px;
-    }
-    .thanks-card {
-      padding: 22px 20px;
-    }
-    .thanks-actions {
-      flex-direction: column;
-    }
-    .thanks-cta-primary,
-    .thanks-cta-secondary {
-      width: 100%;
-      justify-content: center;
-      text-align: center;
-    }
+    .thanks-section { padding: 64px 20px 56px; }
+    .thanks-title { font-size: 30px; }
+    .thanks-cta-primary { width: 100%; justify-content: center; }
   }
 </style>

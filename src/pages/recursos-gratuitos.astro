@@ -11,7 +11,14 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
 import { whatsapp } from '../data/site';
+
+// Titles come from the product id via this build-time map, never from the
+// URL: `?titulo=` let anyone craft an official-looking page (finding H-03).
+const kitTitles = Object.fromEntries(
+  (await getCollection('products', (p) => p.data.status !== 'hidden')).map((p) => [p.id, p.data.title]),
+);
 
 const mailerliteUrl = import.meta.env.PUBLIC_MAILERLITE_FORM_URL as string | undefined;
 const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próximos recursos');
@@ -20,7 +27,7 @@ const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próx
 <Layout title="Lista de lanzamiento — FENIA">
   <Nav />
 
-  <main style="background:#0B1A2E;min-height:80vh;">
+  <main id="lg-main" data-kit-titles={JSON.stringify(kitTitles)} style="background:#0B1A2E;min-height:80vh;">
     <section style="max-width:760px;margin:0 auto;padding:100px 48px 80px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;">
 
       <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);margin-bottom:24px;">
@@ -77,11 +84,13 @@ const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próx
   <Footer />
 
   <script>
-    // Personaliza la página según ?producto=<id>&titulo=<nombre> — tiene que
-    // correr en el cliente porque el sitio es static output (ver nota arriba).
+    // Personaliza la página según ?producto=<id> — tiene que correr en el
+    // cliente porque el sitio es static output (ver nota arriba). El título sale
+    // del catálogo por id; un `?titulo=` en la URL se ignora (hallazgo H-03).
     const params = new URLSearchParams(window.location.search);
     const producto = params.get('producto');
-    const titulo = params.get('titulo');
+    const titles = JSON.parse(document.getElementById('lg-main')?.dataset.kitTitles ?? '{}') as Record<string, string>;
+    const titulo = producto && Object.hasOwn(titles, producto) ? titles[producto] : null;
 
     if (titulo) {
       const prefix = document.getElementById('lg-title-prefix');

@@ -82,6 +82,8 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D18 | 2026-11-06 | **Después de cada deploy a producción se purga la CDN de Hostinger** (`DELETE …/cdn/purge`, lo hace la IA al mergear). Sin eso, algunos visitantes ven la versión vieja durante días (H-06, comprobado: un pedido viejo y otro nuevo en la misma página). Antes del lanzamiento, decidir si se automatiza | ✅ |
+| D17 | 2026-11-06 | Hasta el lanzamiento, los kits "Próximamente" muestran **"Avisame cuando esté disponible"**. `/recursos-gratuitos` ya no promete un recurso gratis que no existe. Aprobado por el dev; en producción con PR #17 | ✅ |
 | D16 | 2026-11-06 | Contenido de los kits (decisiones del dev):
   - "Markdown fuente" sale de las tres descripciones.
   - El kit 1 se llama **"Evaluar en tiempos de IA"**.
@@ -126,6 +128,10 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
 ## Bitácora
 
+- **2026-11-06 (14)** — El dev aprobó la propuesta visual y pidió verla y probarla.
+  - **PR #17 a producción:** título "Evaluar en tiempos de IA" + botón D17. Hubo capturas antes y después, y se corrigió un rótulo que se partía en dos renglones.
+  - Después del deploy la CDN servía la versión vieja en algunos pedidos. Se purgó por API y 6 de 6 pedidos mostraron la nueva (D18).
+  - Empieza 4.2 en staging, con los kits visibles "en venta" solo ahí.
 - **2026-11-06 (13)** — El dev dejó los ZIP en `C:\Fenia\entregables`. Se revisaron sin extraer (listado + SHA-256):
   - Evaluar: OK.
   - Aprender: trae un archivo que parece interno.

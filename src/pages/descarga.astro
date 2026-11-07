@@ -1,0 +1,97 @@
+---
+// descarga.astro — the page the delivery email links to
+// (docs/ventas/propuesta-visual.md §5). The token travels after `#`, so it
+// never reaches server logs, and opening the page consumes nothing: mail
+// scanners and link previews only GET it. The file is served only on an
+// explicit click (POST /api/download.php) — threat model C6, test S-18.
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { sales } from '../data/site';
+---
+
+<Layout title="Descargá tu kit — FENIA" description="Descarga de tu kit FENIA.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+  </Fragment>
+
+  <Nav />
+
+  <main class="dl-main">
+    <section class="dl-section">
+      <p class="dl-eyebrow">Tu kit</p>
+      <h1 id="dl-title" class="dl-title">Descargá tu kit</h1>
+      <p id="dl-meta" class="dl-meta" hidden></p>
+
+      <form id="dl-form" method="post" action="/api/download.php" hidden>
+        <input id="dl-token" type="hidden" name="token" value="" />
+        <button type="submit" class="dl-button">Descargar</button>
+      </form>
+
+      <p id="dl-error" class="dl-error" role="alert" hidden></p>
+
+      <p class="dl-help">
+        {sales.downloadPolicy} ¿Problemas? Pedí un link nuevo en <a href="/no-me-llego/">No me llegó</a>
+        o escribinos a <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a>.
+      </p>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  const token = new URLSearchParams(window.location.hash.slice(1)).get('t') ?? '';
+  const form = document.getElementById('dl-form') as HTMLFormElement;
+  const error = document.getElementById('dl-error') as HTMLParagraphElement;
+  const fail = (text: string) => {
+    error.textContent = text;
+    error.hidden = false;
+  };
+
+  async function load(): Promise<void> {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+      return fail('Este link no es válido. Pedí uno nuevo en "No me llegó" con el email de tu compra.');
+    }
+    (document.getElementById('dl-token') as HTMLInputElement).value = token;
+    try {
+      const res = await fetch('/api/download.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ token, info: true }),
+      });
+      const body = res.ok ? await res.json() : null;
+      if (!body || body.usable !== true) {
+        return fail('Este link venció o ya no tiene descargas disponibles. Pedí uno nuevo en "No me llegó".');
+      }
+      if (typeof body.kit_title === 'string') (document.getElementById('dl-title') as HTMLElement).textContent = body.kit_title;
+      const meta = document.getElementById('dl-meta') as HTMLParagraphElement;
+      meta.textContent = `Te quedan ${Number(body.remaining)} de ${Number(body.max)} descargas · vence el ${String(body.expires_on)}`;
+      meta.hidden = false;
+      form.hidden = false;
+    } catch {
+      fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+  }
+
+  load();
+</script>
+
+<style>
+  .dl-main { background: #0b1a2e; min-height: 80vh; }
+  .dl-section { max-width: 640px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .dl-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.65); margin: 0 0 12px 0; }
+  .dl-title { font-size: 36px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin: 0 0 12px 0; }
+  .dl-meta { font-size: 15px; color: rgba(255, 255, 255, 0.72); margin: 0 0 26px 0; }
+  .dl-button { font: inherit; font-size: 16px; font-weight: 700; padding: 15px 34px; border-radius: 10px; border: none; background: #e8573d; color: #fff; cursor: pointer; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .dl-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .dl-error { font-size: 15px; line-height: 1.6; color: #ffb4a6; background: rgba(232, 87, 61, 0.1); border: 1px solid rgba(232, 87, 61, 0.35); border-radius: 10px; padding: 12px 14px; margin: 8px 0 0 0; }
+  .dl-help { margin: 32px 0 0 0; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, 0.65); }
+  .dl-help a { color: #00b4d8; }
+  @media (max-width: 640px) {
+    .dl-section { padding: 64px 20px 56px; }
+    .dl-title { font-size: 28px; }
+    .dl-button { width: 100%; }
+  }
+</style>

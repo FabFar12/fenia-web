@@ -143,14 +143,23 @@ jobs:
       STAGING_SERVER_DIR: /staging/
 
     steps:
-      - name: Checkout (for scripts/)
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download dist/ artifact
-        uses: actions/download-artifact@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: dist
-          path: dist/
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Build the staging site (kits on sale in the Mercado Pago sandbox)
+        # PUBLIC_SALES_PREVIEW makes coming-soon kits purchasable on staging
+        # only (src/lib/sales.ts); production's build never sets it.
+        run: |
+          npm ci
+          npm run build
+        env:
+          PUBLIC_SALES_PREVIEW: 'true'
 
       - name: Guard — only ever deploy into /staging/
         run: |

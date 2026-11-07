@@ -14,15 +14,6 @@ order: 1
 publishedAt: 2026-05-26
 ---
 
-> **Estado (2026-07-07)**: el material creció de "guía PDF" a **Kit FENIA completo** (guía + 10 plantillas editables + 2 imprimibles + mini pack de prompts + fuentes). Decisión arquitectónica de cobro: [ADR-025](../../../docs/adr/ADR-025-product-sales-via-mercadopago.md). Flujo operativo para Fab: [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md). Esquema de producto y captura de email: [ADR-027](../../../docs/adr/ADR-027-product-schema-and-lead-capture.md).
->
-> **Confirmado**: precio AR$ 13.000, `type: "Caja de herramientas"`, `status: "coming-soon"`, `deliveryMode: "lead-magnet"` (mientras no tenga `paymentUrl`, el CTA captura email en vez de vender).
->
-> **Pendiente antes de pasar a `live`**:
-> - `paymentUrl`: link de cobro de Mercado Pago (ver [docs/fab-mercadopago-setup.md](../../../docs/fab-mercadopago-setup.md)). Al agregarlo, cambiar también `deliveryMode` a `mercadopago-auto`.
-> - Imagen de portada (el zip trae `Assets/Portada.png` — evaluar si se usa).
-> - Confirmar el recurso gratuito que entrega el formulario de "Quiero el recurso gratis" para este kit (el copy de venta menciona el "Acuerdo de uso de IA" como lead magnet — ver `Ventas/Copy_Landing_FAQ_Titulares.md` del zip original).
-
 ## La situación, sin rodeos
 
 Tus alumnos usan ChatGPT, Claude o Gemini para resolver tareas que vos diseñaste **antes** de que esas herramientas existieran. El ensayo perdió capacidad diagnóstica. El cuestionario domiciliario es un trámite. Y los discursos sobre "ética digital" rebotan sin tocar nada.
