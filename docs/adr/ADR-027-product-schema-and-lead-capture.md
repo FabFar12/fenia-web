@@ -1,7 +1,7 @@
 # ADR-027 — Product schema v2, CTA-by-status, and email lead capture
 
 ## Status
-Accepted (2026-07-07). Extends [ADR-025](./ADR-025-product-sales-via-mercadopago.md) (which stays valid for how Mercado Pago itself works) and closes the "how do we scale past one product" gap it deliberately left open.
+Accepted (2026-07-07). Extends [ADR-025](./ADR-025-product-sales-via-mercadopago.md) (which stays valid for how Mercado Pago itself works) and closes the "how do we scale past one product" gap it deliberately left open. Amended 2026-11-07 (docs/ventas D23): optional `promo` {price, label, starts, ends}. The backend charges `promo.price` inside the window (server clock) and the site switches price, badge and countdown in the browser at the same instants; `price` is the genuine regular price.
 
 ## Context
 

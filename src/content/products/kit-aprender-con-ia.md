@@ -1,7 +1,7 @@
 ---
 title: "Aprender con IA sin dejar de pensar"
 type: "Caja de herramientas"
-status: "coming-soon"
+status: "live"
 accent: "coral"
 summary: "Para estudiar con IA sin que la IA estudie por vos. Un kit para comprender, practicar, producir y verificar ideas con criterio propio, usando la inteligencia artificial como apoyo y no como reemplazo de tu cabeza."
 price: 30000

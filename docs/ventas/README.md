@@ -121,6 +121,12 @@ Próximo:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D23 | 2026-11-07 | **Promo de lanzamiento** (decisión del dev):
+  - precio normal **$30.000**;
+  - **$13.000** desde el lanzamiento hasta el **sábado 14/11 a las 23:59 (hora argentina)**, 7 días;
+  - en las tarjetas y la página del kit: etiqueta "−56% · Lanzamiento" (56,7% redondeado para abajo), precio tachado y cuenta regresiva.
+
+  Todo sale del campo `promo` de cada `.md`. El sitio y Mercado Pago cambian solos al vencer, sin deploy. La cuenta regresiva es igual para todos y nunca se reinicia. El plazo es real: no se extiende en silencio (ley de defensa del consumidor). Se descartó vender un día a $30.000 antes del descuento | ✅ Decisión del dev |
 | D22 | 2026-11-08 | **En producción, los avisos y el resumen diario de la tarea horaria van a `soporte@`** (decisión del dev). En staging van a `kits@`, para no llenar la bandeja de Fab con pruebas | ✅ Decisión del dev |
 | D21 | 2026-11-07 | **Staging entrega ZIPs de prueba, nunca los kits reales** (A17): su sandbox se paga con tarjetas de prueba públicas. Los kits reales (renombrados con el id; Enseñar con la carpeta interna corregida) se suben solo a producción en el lanzamiento | ✅ Técnica |
 | D20 | 2026-11-07 | **`/gracias` muestra el link de descarga solo durante 24 h** después del pago. Después, el link está únicamente en el mail (y en "No me llegó"). Así, si alguien encuentra el código de orden en un historial, no le sirve | ✅ Técnica |

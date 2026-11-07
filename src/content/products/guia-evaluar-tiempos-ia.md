@@ -1,7 +1,7 @@
 ---
 title: "Evaluar en tiempos de IA"
 type: "Caja de herramientas"
-status: "coming-soon"
+status: "live"
 accent: "cyan"
 summary: "Un kit para rediseñar consignas, rúbricas y acuerdos de uso de IA, cuidando autoría, proceso y evidencia de aprendizaje sin convertirte en detective digital."
 price: 30000

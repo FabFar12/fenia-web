@@ -1,7 +1,7 @@
 ---
 title: "Enseñar con IA sin automatizar la pedagogía"
 type: "Caja de herramientas"
-status: "coming-soon"
+status: "live"
 accent: "cyan"
 summary: "Para preparar clases con IA sin que parezcan hechas para un grupo que no existe. Un kit para planificar, explicar, adaptar actividades y revisar propuestas sin perder contexto, presencia docente ni criterio pedagógico."
 price: 30000
