@@ -180,6 +180,13 @@ Próximo:
 
 ## Bitácora
 
+- **2026-11-07 (20)** — **Lanzamiento.** El dev eligió D23 (la promo arranca con el lanzamiento y dura 7 días) y lanzar hoy, con los términos provisorios.
+  - PR #19: los 3 kits a la venta, con la CDN purgada; 6 de 6 pedidos muestran la versión nueva.
+  - Resumen diario prendido en producción.
+  - Orden real de producción inspeccionada sin pagar: $13.000, cuenta real, URLs de `fenia.com.ar`, sin efectivo.
+  - La tarea horaria de staging corre bien. Su aviso destapó que un email que rebota se reintentaba para siempre, con un aviso por hora. Ahora avisa una vez y reintenta durante 48 h.
+  - Falta 6.3: compra real del dev y reembolso.
+
 - **2026-11-07 (19)** — El dev pasó el token de producción. Producción quedó configurada, sin vender todavía (ver "Próximo", punto 4). La suite ✱ tuvo 2 fallas que eran de las pruebas, no del sistema: el firewall de Hostinger responde 403 a `../`, y antes del lanzamiento el kit se rechaza con 404 antes de mirar el email. Se ajustaron.
   - El dev propone mostrar un descuento en el cartel, con un precio de $30.000. Va como propuesta visual, que espera su OK, y antes se aclara qué precio se cobra.
 

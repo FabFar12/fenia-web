@@ -82,13 +82,16 @@ final class OrderStore
 
     /**
      * Paid orders whose delivery email has not gone out yet (reconciliation
-     * retries them; threat model C2).
+     * retries them; threat model C2), paid after `$paidAfter`: an address that
+     * keeps bouncing is not retried forever.
      *
      * @return list<array<string, mixed>>
      */
-    public function paidWithoutEmail(): array
+    public function paidWithoutEmail(string $paidAfter): array
     {
-        return $this->pdo->query("SELECT * FROM orders WHERE status = 'paid' AND email_sent_at IS NULL ORDER BY id")->fetchAll();
+        $stmt = $this->pdo->prepare("SELECT * FROM orders WHERE status = 'paid' AND email_sent_at IS NULL AND paid_at > ? ORDER BY id");
+        $stmt->execute([$paidAfter]);
+        return $stmt->fetchAll();
     }
 
     /** @return list<array<string, mixed>> pending orders already bound to an MP order */
