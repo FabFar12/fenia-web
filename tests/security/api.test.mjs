@@ -125,7 +125,8 @@ describe('Descarga', { skip: skipWithoutTarget }, () => {
     const tokens = ['../../config.php', '..%2F..%2Fconfig.php', '%252e%252e%252fconfig.php', '../_lib/Config.php', 'kit-ensenar-con-ia.zip'];
     for (const token of tokens) {
       const res = await form('/api/download.php', { token });
-      assert.ok([400, 404, 429].includes(res.status), `${token}: ${res.status}`);
+      // 403: Hostinger's firewall stops `../` before PHP sees it.
+      assert.ok([400, 403, 404, 429].includes(res.status), `${token}: ${res.status}`);
       assert.notEqual(res.headers.get('content-type'), 'application/zip');
       assert.equal(findLeak(res.body), null);
     }

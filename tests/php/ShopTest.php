@@ -263,6 +263,16 @@ final class ShopTest extends TestCase
         self::assertSame(429, $shop->checkout(self::form(['email' => 'z@example.com', 'email_confirm' => 'z@example.com']), self::IP)[0], 'eleventh from the IP');
     }
 
+    public function testInvalidRequestsDoNotSpendTheBuyersQuota(): void
+    {
+        $shop = $this->shop();
+        for ($i = 0; $i < 30; $i++) {
+            $shop->checkout(self::form(['kit' => 'kit-inexistente']), self::IP);
+        }
+        self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM rate_events')->fetchColumn());
+        self::assertSame(200, $shop->checkout(self::form(), self::IP)[0]);
+    }
+
     public function testMpFailureOrForeignCheckoutUrlFailsTheOrder(): void
     {
         $this->mp->failWith = 500;

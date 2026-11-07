@@ -91,10 +91,10 @@ final class Shop
         if (!$this->config->salesEnabled()) {
             return [503, ['error' => 'unavailable']];
         }
-        if (!$this->allow('checkout-ip', $ip)) {
-            return [429, ['error' => 'rate_limited']];
-        }
-        // Honeypot: people never see the field, bots fill it (threat model B3).
+        // Invalid requests are refused before the rate limits: they reach
+        // neither MP nor the database. The limits count only attempts that
+        // would create an order (card testing, threat model B3).
+        // Honeypot: people never see the field, bots fill it.
         if (($in['website'] ?? '') !== '') {
             $this->log('warning', 'checkout_honeypot', ['ip' => $this->hashed($ip)]);
             return [400, ['error' => 'invalid']];
@@ -114,7 +114,7 @@ final class Shop
         if (($in['accept_terms'] ?? null) !== true) {
             return [400, ['error' => 'terms']];
         }
-        if (!$this->allow('checkout-email', $email)) {
+        if (!$this->allow('checkout-ip', $ip) || !$this->allow('checkout-email', $email)) {
             return [429, ['error' => 'rate_limited']];
         }
 
