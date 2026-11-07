@@ -21,7 +21,9 @@ const formatPrice = (price: number, currency: 'ARS') =>
 
 /**
  * CTA per product, driven by status/paymentUrl (see ADR-027):
- *  - coming-soon           → captura de email (lead magnet), enlaza a /recursos-gratuitos
+ *  - coming-soon           → "Avisame cuando esté disponible" → /recursos-gratuitos
+ *                            (lista de lanzamiento; sin promesa de recurso gratis
+ *                            hasta que exista uno real — docs/ventas D17)
  *  - live + paymentUrl     → "Comprar ahora" → Mercado Pago (external)
  *  - live sin paymentUrl   → sin botón de compra (card informativa)
  */
@@ -29,7 +31,7 @@ function ctaFor(product: (typeof products)[number]) {
   const { status, paymentUrl, ctaLabel } = product.data;
   if (status === 'coming-soon') {
     return {
-      label: ctaLabel ?? 'Quiero el recurso gratis',
+      label: ctaLabel ?? 'Avisame cuando esté disponible',
       href: `/recursos-gratuitos?producto=${encodeURIComponent(product.id)}&titulo=${encodeURIComponent(product.data.title)}`,
       external: false,
     };

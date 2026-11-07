@@ -17,7 +17,7 @@ const mailerliteUrl = import.meta.env.PUBLIC_MAILERLITE_FORM_URL as string | und
 const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próximos recursos');
 ---
 
-<Layout title="Recursos gratuitos — FENIA">
+<Layout title="Lista de lanzamiento — FENIA">
   <Nav />
 
   <main style="background:#0B1A2E;min-height:80vh;">
@@ -25,7 +25,7 @@ const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próx
 
       <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);margin-bottom:24px;">
         <div style="width:5px;height:5px;border-radius:50%;background:#00B4D8;box-shadow:0 0 8px #00B4D8;"></div>
-        <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;">Recursos gratuitos</span>
+        <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;">Lista de lanzamiento</span>
       </div>
 
       <h1 style="font-size:40px;font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin:0 0 16px 0;">
@@ -34,7 +34,7 @@ const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próx
       </h1>
 
       <p style="font-size:17px;line-height:1.65;color:rgba(255,255,255,0.65);margin:0 0 32px 0;max-width:560px;">
-        Dejanos tu email y te avisamos apenas esté disponible. También te mandamos un recurso gratuito para arrancar mientras tanto.
+        Dejanos tu contacto y te avisamos apenas esté disponible.
       </p>
 
       {mailerliteUrl ? (
