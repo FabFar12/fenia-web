@@ -25,6 +25,9 @@ final class Db
         ]);
         if (self::driver($pdo) === 'mysql') {
             $pdo->exec("SET time_zone = '+00:00'");
+            // Same collation as the tables: Hostinger's MariaDB defaults the
+            // connection to utf8mb4_general_ci, and mixing both fails (error 1267).
+            $pdo->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
         }
         return $pdo;
     }

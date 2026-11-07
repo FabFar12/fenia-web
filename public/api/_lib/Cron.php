@@ -31,6 +31,7 @@ final class Cron
         'checkout_mp_malformed' => 'Mercado Pago respondió algo inesperado al crear un pago.',
         'webhook_mp_error' => 'No se pudo leer una orden en Mercado Pago; MP reintenta el aviso.',
         'unhandled' => 'Error interno inesperado en la API.',
+        'reconcile_failed' => 'La conciliación no pudo procesar una orden; se reintenta en una hora.',
     ];
 
     private Shop $shop;

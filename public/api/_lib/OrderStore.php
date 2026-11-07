@@ -65,12 +65,13 @@ final class OrderStore
     /** Compare-and-set. True only for the one caller that made the change. */
     public function transition(int $id, string $from, string $to, ?string $reason, string $now): bool
     {
+        // Decided in PHP: comparing a parameter with a literal in SQL failed on
+        // Hostinger's MariaDB with "Illegal mix of collations" (2026-11-07).
         $stmt = $this->pdo->prepare(
-            "UPDATE orders SET status = ?, status_reason = ?, updated_at = ?,
-                    paid_at = COALESCE(paid_at, CASE WHEN ? = 'paid' THEN ? ELSE NULL END)
-             WHERE id = ? AND status = ?"
+            'UPDATE orders SET status = ?, status_reason = ?, updated_at = ?, paid_at = COALESCE(paid_at, ?)
+             WHERE id = ? AND status = ?'
         );
-        $stmt->execute([$to, $reason, $now, $to, $now, $id, $from]);
+        $stmt->execute([$to, $reason, $now, $to === 'paid' ? $now : null, $id, $from]);
         return $stmt->rowCount() === 1;
     }
 

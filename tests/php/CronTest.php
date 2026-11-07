@@ -24,8 +24,7 @@ final class CronTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pdo = Db::connect('sqlite::memory:');
-        Db::migrate($this->pdo);
+        $this->pdo = TestDb::fresh();
         $this->mp = new FakeMp();
         $this->mailer = new FakeMailer();
         $this->dir = sys_get_temp_dir() . '/fenia-cron-' . bin2hex(random_bytes(4));

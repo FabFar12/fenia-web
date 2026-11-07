@@ -472,8 +472,10 @@ final class Shop
             try {
                 $this->sync((string) $order['mp_order_id']);
                 $stats['synced']++;
-            } catch (MpException $e) {
+            } catch (\Throwable $e) {
+                // One broken order must not stop the others (nor hide the cause).
                 $stats['errors']++;
+                $this->log('error', 'reconcile_failed', ['order' => (int) $order['id'], 'type' => get_class($e), 'message' => mb_substr($e->getMessage(), 0, 300)]);
             }
         }
         foreach ($this->orders->paidWithoutEmail() as $order) {

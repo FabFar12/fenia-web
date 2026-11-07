@@ -85,3 +85,26 @@ final class FakeMailer implements MailSender
         }
     }
 }
+
+/**
+ * A clean database for each test: MariaDB in CI (FENIA_TEST_DSN, same engine
+ * as Hostinger), SQLite in memory otherwise. SQLite alone missed a MariaDB-only
+ * collation error (2026-11-07), hence the real engine in CI.
+ */
+final class TestDb
+{
+    public static function fresh(): \PDO
+    {
+        $dsn = (string) getenv('FENIA_TEST_DSN');
+        if ($dsn === '') {
+            $pdo = \Fenia\Api\Db::connect('sqlite::memory:');
+        } else {
+            $pdo = \Fenia\Api\Db::connect($dsn, (string) getenv('FENIA_TEST_DB_USER'), (string) getenv('FENIA_TEST_DB_PASSWORD'));
+            foreach (['orders', 'download_tokens', 'download_log', 'rate_events', 'schema_version'] as $table) {
+                $pdo->exec("DROP TABLE IF EXISTS $table");
+            }
+        }
+        \Fenia\Api\Db::migrate($pdo);
+        return $pdo;
+    }
+}

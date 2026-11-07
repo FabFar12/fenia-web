@@ -35,8 +35,7 @@ final class ShopTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pdo = Db::connect('sqlite::memory:');
-        Db::migrate($this->pdo);
+        $this->pdo = TestDb::fresh();
         $this->mp = new FakeMp();
         $this->mailer = new FakeMailer();
         $this->now = new \DateTimeImmutable('2026-11-07 12:00:00', new \DateTimeZone('UTC'));
