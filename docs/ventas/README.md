@@ -63,15 +63,16 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 
   Dos bugs encontrados y corregidos: H-09 y H-10. Suite de seguridad: 68 OK, 0 fallas | ✅ staging | dev |
 | **6. Lanzamiento** | 6.1 Docs finales: guía para Fab, protocolo de soporte anti-estafa, deployment.md, AGENTS.md | ⏳ | dev |
-| | 6.2 PR `dev` → `main` con aprobación | ⏳ | dev + aprobación |
+| | 6.2 PR #18 `dev` → `main` (D13), 2026-11-07. **Infraestructura en producción, sin ventas habilitadas**: los kits siguen "Próximamente" y la API responde 503 hasta tener config. Capturas antes/después: la home queda idéntica; `/gracias` y `/recursos-gratuitos`, como se aprobaron. CDN purgada (D18). Verificado en vivo: `www` → 301 (H-08 ✅), archivo de estado → 403 (H-01 ✅). Suite ✱ contra producción: 54 OK, 0 fallas | ✅ infraestructura | dev |
 | | 6.3 Compra real + reembolso en producción | ⏳ | Fab + dev |
 | | 6.4 Kits a `live` + 72 h de monitoreo + anuncio a la lista de Mailerlite + DMARC (H-02) | ⏳ | Fab + dev |
 
 **Próximo paso:**
 Próximo:
 1. ✅ Webhook de prueba y compra completa en el sandbox (2026-11-07).
-2. Antes de la compra real en producción, ver que la tarea horaria de staging corra sin error con los arreglos.
-3. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
+2. ✅ Infraestructura en producción (PR #18).
+3. **Dev/Fab:** desactivar los 3 Links de Pago viejos (D6, guía 2.7). Ahora volverían a una `/gracias` que dice "No encontramos tu compra".
+4. **Compuerta de lanzamiento** (test-plan). Antes de vender al público:
    - legales y facturación (Bloque 5: términos, privacidad, cómo se factura cada venta);
    - ensayo del protocolo de soporte con Fab;
    - quién recibe los avisos de la tarea horaria.
@@ -160,6 +161,8 @@ Próximo:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-07 (18)** — PR #18 a producción (D13), con los kits en "Próximamente". Ver 6.2. Pendientes de producción: config, ZIP reales, tarea horaria, H-06 (IP detrás de la CDN, se ve en `health` cuando haya config) y la compra real.
 
 - **2026-11-07 (17)** — El dev pasó la clave del webhook de prueba y decidió D22 (avisos a `soporte@`). Compras reales en el sandbox de MP: 3 pagos aprobados con tarjeta de prueba, un reembolso.
   - Detección de navegador automático en MP: con un navegador normal, la pantalla de pago carga bien.
