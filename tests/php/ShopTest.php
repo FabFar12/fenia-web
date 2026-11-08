@@ -354,7 +354,7 @@ final class ShopTest extends TestCase
     {
         [$shop, , , $token] = $this->delivered();
         $info = $shop->downloadInfo($token, self::IP);
-        self::assertSame([200, ['usable' => true, 'kit_title' => 'Kit <A> & más', 'remaining' => 5, 'max' => 5, 'expires_on' => '07/12/2026']], $info);
+        self::assertSame([200, ['usable' => true, 'kit_title' => 'Kit <A> & más', 'remaining' => 5, 'max' => 5, 'expires_on' => '07/12/2026', 'guide' => false]], $info);
         self::assertSame(5, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'looking counts nothing (C6)');
 
         for ($i = 1; $i <= 5; $i++) {
@@ -365,6 +365,29 @@ final class ShopTest extends TestCase
         }
         self::assertSame(['status' => 410], $shop->download($token, self::IP, null));
         self::assertSame([410, ['usable' => false]], $shop->downloadInfo($token, self::IP));
+    }
+
+    public function testTheGuidePdfDownloadsOnItsOwnAndCountsTowardTheLimit(): void
+    {
+        file_put_contents($this->kitsDir . '/kit-a-guia.pdf', '%PDF-1.7 guía');
+        $guide = ['file' => 'kit-a-guia.pdf', 'sha256' => hash_file('sha256', $this->kitsDir . '/kit-a-guia.pdf')];
+        $kits = ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => hash_file('sha256', $this->kitsDir . '/kit-a.zip'), 'guide' => $guide]];
+        [, , , $token] = $this->delivered();
+        $shop = $this->shop(['kits' => $kits]);
+
+        self::assertTrue($shop->downloadInfo($token, self::IP)[1]['guide']);
+        $got = $shop->download($token, self::IP, null, 'guide');
+        self::assertSame(200, $got['status']);
+        self::assertSame('kit-a-guia.pdf', $got['filename']);
+        self::assertSame('%PDF-1.7 guía', file_get_contents($got['path']));
+        self::assertSame('kit-a.zip', $shop->download($token, self::IP, null)['filename']);
+        self::assertSame(3, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'guide + zip = 2 of 5');
+        self::assertTrue($shop->kitsReady());
+
+        file_put_contents($this->kitsDir . '/kit-a-guia.pdf', '%PDF tampered');
+        self::assertSame(503, $shop->download($token, self::IP, null, 'guide')['status'], 'a changed guide is never served');
+        self::assertSame(3, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'nor counted');
+        self::assertSame(404, $this->shop()->download($token, self::IP, null, 'guide')['status'], 'kit without a guide');
     }
 
     public function testExpiredLinkIsRefused(): void
@@ -515,6 +538,8 @@ final class ShopTest extends TestCase
         self::assertStringNotContainsString('<b>Kit</b>', $mail['html']);
         self::assertStringNotContainsString('"onmouseover="', $mail['html']);
         self::assertStringContainsString('30 días y permite 5 descargas', $mail['text']);
+        self::assertStringContainsString('El kit viene en un ZIP', $mail['text'], 'without a guide');
+        self::assertStringContainsString('kit completo en un ZIP', DeliveryMail::build('Kit', 'https://x.example/descarga/#t=a', 'https://x.example', 's@x.example', 30, 5, true)['html']);
         self::assertTrue($this->shop()->kitsReady());
         self::assertFalse($this->shop(['kits' => ['kit-a' => ['file' => 'kit-missing.zip', 'sha256' => str_repeat('a', 64)]]])->kitsReady());
     }
