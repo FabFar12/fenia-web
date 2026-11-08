@@ -39,3 +39,7 @@ tmp/
 *.zip
 *.7z
 *.rar
+
+# Playwright E2E (tests/e2e): reports and run artifacts, never committed.
+/tests/e2e/report/
+/tests/e2e/results/

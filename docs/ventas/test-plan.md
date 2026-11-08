@@ -37,6 +37,13 @@
   - "No me llegó" (D19);
   - el mail caído y la conciliación.
 - U-31: [`scripts/verify-catalog.mjs`](../../scripts/verify-catalog.mjs).
+- E2E con Playwright, en [`tests/e2e/`](../../tests/e2e). Comandos en el tracker, sección "Cómo se corren las pruebas". Cubre:
+  - E2E-01: compra completa en el sandbox → entrega → descarga → reembolso → link anulado (`npm run e2e:compra`);
+  - la promo en todos sus momentos, con reloj simulado;
+  - la grilla y los botones en celular y escritorio;
+  - las páginas de soporte;
+  - las capturas de referencia;
+  - accesibilidad WCAG AA con axe, con los problemas conocidos listados.
 - Suite de seguridad en [`tests/security/`](../../tests/security):
   - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25 son ✱, seguras en producción; se saltean si `/api/health.php` no responde OK;
   - S-13, S-16 y S-18 son solo para staging y necesitan variables opcionales (ver el encabezado de `api.test.mjs`);

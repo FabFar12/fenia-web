@@ -12,7 +12,11 @@
     "check": "astro check",
     "sync": "astro sync",
     "test:ventas": "node --test \"tests/security/*.test.mjs\"",
-    "astro": "astro"
+    "astro": "astro",
+    "e2e": "playwright test -c tests/e2e/playwright.config.ts",
+    "e2e:prod": "playwright test -c tests/e2e/playwright.prod.config.ts",
+    "e2e:compra": "playwright test -c tests/e2e/playwright.compra.config.ts",
+    "e2e:update": "playwright test -c tests/e2e/playwright.config.ts visual --update-snapshots=all"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.2",
@@ -32,6 +36,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.60.0",
     "@types/three": "^0.184.1",
     "playwright": "^1.60.0",
     "typescript": "^5.9.3"

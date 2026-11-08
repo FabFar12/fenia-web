@@ -87,6 +87,10 @@ De la IA:
 | Unitarias PHP (U) | `vendor/bin/phpunit`, después de `composer install` | CI, en cada push. En local hace falta PHP ≥ 8.1, que no es obligatorio |
 | Catálogo = `.md` (U-31) | `npm run build` y después `node scripts/verify-catalog.mjs` | CI, en cada push |
 | Suite de seguridad (S) | PowerShell: `$env:BASE_URL="https://fenia.com.ar"; npm run test:ventas` | Contra producción, solo las pruebas ✱. Con `MODE=staging` contra staging, todas |
+| Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), capturas de referencia y accesibilidad (axe). 60 pruebas, unos 2 minutos |
+| E2E en producción | `npm run e2e:prod` | Lo mismo pero sin comprar nada y sin capturas de referencia. 54 pruebas |
+| Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, descarga, reembolso y link anulado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP |
+| Capturas de referencia | `npm run e2e:update` | Solo después de un cambio visual aprobado. Las capturas nuevas quedan en `tests/e2e/fotos/` y hay que hacerles commit |
 
 `npm run dev` no cambia: ninguna de estas pruebas se encadena ahí ([ADR-006](../adr/ADR-006-dx-single-command-dev.md)).
 
@@ -167,6 +171,13 @@ De la IA:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-08 (23)** — Batería E2E con Playwright en `tests/e2e/`, a pedido del dev, para trabajar sobre ella en los próximos cambios. Resultados: staging 60/60, producción 54/54 y compra completa en el sandbox OK. Encontró 3 problemas de accesibilidad que ya existían. Quedan como "conocidos" en `accesibilidad.spec.ts` porque arreglarlos cambia la estética y necesita OK:
+  - contraste del texto blanco sobre el coral de los botones;
+  - links sin subrayado en `/gracias` y `/descarga`;
+  - etiqueta gris de sección.
+
+  También mostró que MP rechaza el reembolso unos segundos después del pago (422); la prueba reintenta.
 
 - **2026-11-07 (22)** — Cierre del lanzamiento. La franja de la home queda con mejor contraste (WCAG AA), jerarquía y un brillo suave. Guía de ventas para Fabián. Tracker al día. Todo en producción y verificado (ver "Próximo paso").
 
