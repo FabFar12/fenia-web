@@ -94,6 +94,9 @@ final class EnvConfigInboxTest extends TestCase
         yield 'kit path traversal' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => '../config.php', 'sha256' => str_repeat('a', 64)]]])];
         yield 'kit bad checksum' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => 'abc']]])];
         yield 'kit bad id' => [self::validConfig(['db_user' => 'u', 'kits' => ['../x' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64)]]])];
+        yield 'guide path traversal' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => '../config.php', 'sha256' => str_repeat('a', 64)]]]])];
+        yield 'guide not a pdf' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => 'kit-a.php', 'sha256' => str_repeat('a', 64)]]]])];
+        yield 'guide without checksum' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => 'kit-a.pdf']]]])];
     }
 
     /** @dataProvider brokenConfigs */
@@ -117,13 +120,17 @@ final class EnvConfigInboxTest extends TestCase
         mkdir($inbox, 0700, true);
         file_put_contents($inbox . '/config.php', '<?php return [];');
         file_put_contents($inbox . '/kit-ensenar-con-ia.zip', 'zip');
+        file_put_contents($inbox . '/kit-ensenar-con-ia-guia.pdf', 'pdf');
+        file_put_contents($inbox . '/guia.PDF.php', '<?php echo 1;');
         file_put_contents($inbox . '/evil.php', '<?php echo 1;');
         file_put_contents($inbox . '/../x.zip', 'outside');
 
         $moved = Inbox::promote($inbox, $private);
         sort($moved);
 
-        self::assertSame(['config.php', 'kit-ensenar-con-ia.zip'], $moved);
+        self::assertSame(['config.php', 'kit-ensenar-con-ia-guia.pdf', 'kit-ensenar-con-ia.zip'], $moved);
+        self::assertFileExists($private . '/kits/kit-ensenar-con-ia-guia.pdf');
+        self::assertFileExists($inbox . '/guia.PDF.php', 'only real .pdf names');
         self::assertFileExists($private . '/config.php');
         self::assertFileExists($private . '/kits/kit-ensenar-con-ia.zip');
         self::assertFileDoesNotExist($inbox . '/config.php');

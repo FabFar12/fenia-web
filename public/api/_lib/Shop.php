@@ -371,26 +371,36 @@ final class Shop
             'remaining' => (int) $row['max_downloads'] - (int) $row['download_count'],
             'max' => (int) $row['max_downloads'],
             'expires_on' => $expires === false ? '' : $expires->setTimezone(new \DateTimeZone('America/Argentina/Buenos_Aires'))->format('d/m/Y'),
+            'guide' => $this->config->guide((string) $row['kit_id']) !== null,
         ]];
     }
 
     /**
      * Counts one download (only on an explicit POST; threat model C6) and says
-     * which file to stream.
+     * which file to stream: the whole kit (ZIP) or its guide PDF on its own,
+     * which opens on a phone without unzipping. Both count toward the limit.
      *
      * @return array{status: int, path?: string, filename?: string}
      */
-    public function download(string $token, string $ip, ?string $userAgent): array
+    public function download(string $token, string $ip, ?string $userAgent, string $which = 'zip'): array
     {
         $row = $this->lookupToken($token, $ip);
         if (is_int($row)) {
             return ['status' => $row];
         }
-        $kit = $this->config->kit((string) $row['kit_id']);
+        $kitId = (string) $row['kit_id'];
+        if ($which === 'guide') {
+            $kit = $this->config->guide($kitId);
+            if ($kit === null) {
+                return ['status' => 404];
+            }
+        } else {
+            $kit = $this->config->kit($kitId);
+        }
         $path = $kit === null ? '' : $this->kitsDir . '/' . $kit['file'];
-        // The ZIP must be exactly the reviewed one (test E2E-02); check before counting.
+        // The file must be exactly the reviewed one (test E2E-02); check before counting.
         if ($kit === null || !is_file($path) || !hash_equals($kit['sha256'], (string) hash_file('sha256', $path))) {
-            $this->log('alert', 'kit_file_problem', ['kit' => (string) $row['kit_id']]);
+            $this->log('alert', 'kit_file_problem', ['kit' => $kitId, 'file' => $which]);
             return ['status' => 503];
         }
 
@@ -517,7 +527,8 @@ final class Shop
             $site,
             (string) $this->config->get('mail_reply_to'),
             (int) $this->config->get('download_days'),
-            (int) $token['max_downloads']
+            (int) $token['max_downloads'],
+            $this->config->guide((string) $order['kit_id']) !== null
         );
 
         try {
@@ -596,7 +607,8 @@ final class Shop
         $kits = (array) $this->config->get('kits');
         foreach (array_keys($kits) as $kitId) {
             $kit = $this->config->kit((string) $kitId);
-            if ($kit === null || !is_file($this->kitsDir . '/' . $kit['file'])) {
+            $guide = $this->config->guide((string) $kitId);
+            if ($kit === null || !is_file($this->kitsDir . '/' . $kit['file']) || ($guide !== null && !is_file($this->kitsDir . '/' . $guide['file']))) {
                 return false;
             }
         }

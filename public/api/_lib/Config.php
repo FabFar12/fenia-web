@@ -92,6 +92,14 @@ final class Config
             ) {
                 throw new \RuntimeException('Config kit entry malformed');
             }
+            // Optional guide PDF served on its own (opens on a phone without unzipping).
+            if (isset($kit['guide']) && (
+                !is_array($kit['guide']) || !isset($kit['guide']['file'], $kit['guide']['sha256'])
+                || !is_string($kit['guide']['file']) || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*\.pdf$/D', $kit['guide']['file'])
+                || !is_string($kit['guide']['sha256']) || !preg_match('/^[a-f0-9]{64}$/D', $kit['guide']['sha256'])
+            )) {
+                throw new \RuntimeException('Config kit guide malformed');
+            }
         }
         return new self($values + self::DEFAULTS);
     }
@@ -116,5 +124,12 @@ final class Config
     {
         $kit = $this->values['kits'][$kitId] ?? null;
         return is_array($kit) ? ['file' => $kit['file'], 'sha256' => $kit['sha256']] : null;
+    }
+
+    /** The kit's guide PDF, served on its own, if configured. @return array{file: string, sha256: string}|null */
+    public function guide(string $kitId): ?array
+    {
+        $guide = $this->values['kits'][$kitId]['guide'] ?? null;
+        return is_array($guide) ? ['file' => $guide['file'], 'sha256' => $guide['sha256']] : null;
     }
 }

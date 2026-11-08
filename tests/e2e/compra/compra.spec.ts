@@ -78,13 +78,20 @@ test('compra completa en el sandbox: pago → entrega → descarga → reembolso
   expect(href).toMatch(/^\/descarga\/#t=[A-Za-z0-9_-]{43}$/);
   const dlToken = href!.split('#t=')[1];
 
-  // 4. Download: one click, a real ZIP, one download counted.
+  // 4. Download: the guide PDF on its own (when the kit has one), then the
+  //    whole ZIP. Real files, one download counted each.
   await page.goto(href!);
-  await expect(page.locator('#dl-meta')).toContainText('Te quedan 5 de 5');
-  const [download] = await Promise.all([page.waitForEvent('download'), page.click('#dl-form button')]);
-  const file = await download.path();
-  expect(readFileSync(file!).subarray(0, 2).toString()).toBe('PK');
-  await expect(page.locator('#dl-meta')).toContainText('Te quedan 4 de 5');
+  const meta = page.locator('#dl-meta');
+  await expect(meta).toContainText('Te quedan 5 de 5');
+  let left = 5;
+  if (await page.locator('#dl-guide').isVisible()) {
+    const [guide] = await Promise.all([page.waitForEvent('download'), page.click('#dl-guide')]);
+    expect(readFileSync((await guide.path())!).subarray(0, 4).toString()).toBe('%PDF');
+    await expect(meta).toContainText(`Te quedan ${--left} de 5`);
+  }
+  const [download] = await Promise.all([page.waitForEvent('download'), page.click('#dl-zip')]);
+  expect(readFileSync((await download.path())!).subarray(0, 2).toString()).toBe('PK');
+  await expect(meta).toContainText(`Te quedan ${--left} de 5`);
 
   // 5. Refund through MP's API → the webhook revokes the link on its own.
   // Right after paying, MP can still answer 422 while the payment settles:

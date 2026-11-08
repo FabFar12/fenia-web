@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 // POST /api/download.php — the /descarga page.
 //   JSON {token, info: true} → what is left on the link (counts nothing).
-//   Form POST token=…        → streams the ZIP and counts one download.
+//   Form POST token=… file=zip|guide → streams the ZIP or the guide PDF and
+//                                       counts one download.
 // GET and HEAD never count (threat model C6: mail scanners, link previews).
 define('FENIA_API', true);
 require __DIR__ . '/_lib/autoload.php';
@@ -26,7 +27,8 @@ Api::run(['POST'], static function (Shop $shop, Config $config): ?array {
 
     $token = is_string($_POST['token'] ?? null) ? $_POST['token'] : '';
     $agent = isset($_SERVER['HTTP_USER_AGENT']) && is_string($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-    $file = $shop->download($token, Api::clientIp(), $agent);
+    $which = ($_POST['file'] ?? 'zip') === 'guide' ? 'guide' : 'zip';
+    $file = $shop->download($token, Api::clientIp(), $agent, $which);
 
     if ($file['status'] !== 200 || !isset($file['path'], $file['filename'])) {
         $support = htmlspecialchars((string) $config->get('mail_reply_to'), ENT_QUOTES, 'UTF-8');
@@ -49,7 +51,7 @@ Api::run(['POST'], static function (Shop $shop, Config $config): ?array {
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
-    header('Content-Type: application/zip');
+    header('Content-Type: ' . (str_ends_with($file['filename'], '.pdf') ? 'application/pdf' : 'application/zip'));
     header('Content-Disposition: attachment; filename="' . $file['filename'] . '"');
     header('Content-Length: ' . (string) filesize($file['path']));
     readfile($file['path']);
