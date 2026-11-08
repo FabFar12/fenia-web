@@ -1,0 +1,6 @@
+/* Applied only while taking reference screenshots (visual.spec.ts): hides
+   what depends on the scroll position, not on the design under test. */
+.main-nav,
+#scroll-progress {
+  visibility: hidden !important;
+}

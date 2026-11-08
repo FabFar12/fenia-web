@@ -5,7 +5,9 @@
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "tests/e2e/report",
+    "tests/e2e/results"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",
