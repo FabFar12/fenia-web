@@ -10,8 +10,13 @@ import { catalog } from './helpers';
 const KNOWN: { rule: string; target: RegExp; why: string }[] = [
   {
     rule: 'color-contrast',
-    target: /#buy-submit|#resend-submit|\.kit-offer-badge|\.promo-chip/,
-    why: 'texto blanco sobre el coral de la marca (#E8573D): 3,6:1, AA pide 4,5:1. Es el color de todos los botones del sitio',
+    target: /#buy-submit|#resend-submit|\.kit-offer-badge|\.promo-chip|^a\[href\$="[a-z0-9-]+\/"\]|\.cta-glow/,
+    why: 'texto blanco sobre el coral de la marca (#E8573D): 3,6:1, AA pide 4,5:1. Es el color de todos los botones del sitio (Comprar, Pagar, Reenviar, Hablemos)',
+  },
+  {
+    rule: 'color-contrast',
+    target: /^\.tilt-card.*> div:nth-child\(2\) > span$/,
+    why: 'texto coral de la etiqueta de las tarjetas con acento coral ("CAJA DE HERRAMIENTAS") sobre fondo oscuro teñido',
   },
   {
     rule: 'color-contrast',

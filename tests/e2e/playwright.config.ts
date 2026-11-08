@@ -25,7 +25,7 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/fotos/{testFilePath}/{arg}-{projectName}{ext}',
   use: {
     baseURL: process.env.E2E_BASE_URL ?? STAGING,
-    reducedMotion: 'reduce',
+    contextOptions: { reducedMotion: 'reduce' },
     locale: 'es-AR',
     timezoneId: 'America/Argentina/Buenos_Aires',
     trace: 'retain-on-failure',
