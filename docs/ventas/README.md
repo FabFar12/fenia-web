@@ -79,7 +79,7 @@ Del dev o de Fab:
 De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
-8. **Entorno FENIA (D25):** propuesta visual de "Tu kit" → OK del dev y Fab → fase 1 con Enseñar en staging → producción. Mientras, el dev reformatea Evaluar y Aprender con Claude Design.
+8. **Entorno FENIA (D25):** propuesta visual de "Tu kit" (propuesta-visual.md §6) **aprobada por el dev el 2026-11-12**, con el tope de 10 descargas. Sigue: fase 1 con Enseñar en staging, cuando el dev dé la orden de avanzar → producción. Mientras, el dev reformatea Evaluar y Aprender con Claude Design (`reformateo\LEEME.txt`).
 9. **Después del entorno:** sección interna de métricas del sitio y de ventas, solo para el dev y Fab (pedido del dev, 2026-11-12).
 
 ## Cómo se corren las pruebas
@@ -113,7 +113,8 @@ De la IA:
   - **Fase 2, "Mis kits"**: entrar con el email, sin contraseña (link mágico). Todas las compras de ese email, **de por vida**; se limitan solo las descargas de archivos (reemplaza D3). La identidad y una marca al pie de los PDF reemplazan al contador como freno a compartir.
   - **Fase 3, entorno**: las fichas guardan las respuestas en la cuenta (hoy ya las guardan en el navegador). Implica datos personales: política de privacidad con el abogado antes.
 
-  Prerrequisito de las fases 1-3 para Evaluar y Aprender: estandarizarlos al formato de Enseñar con Claude Design (carpeta `C:\Fenia\entregableseformateo`, un prompt por kit). Restricción conocida: el mail de Hostinger permite 100 envíos por día por casilla; los links mágicos salen de ahí | ✅ Decisión del dev |
+  Prerrequisito de las fases 1-3 para Evaluar y Aprender: estandarizarlos al formato de Enseñar con Claude Design (carpeta `C:\Fenia\entregables
+eformateo`, un prompt por kit). Restricción conocida: el mail de Hostinger permite 100 envíos por día por casilla; los links mágicos salen de ahí | ✅ Decisión del dev |
 | D24 | 2026-11-09 | **Descarga más simple en el celular (A+B), en producción** (decisión del dev).
   - La página de descarga ofrece la **guía en PDF suelta** ("se abre directo, también en el celular") como botón principal y el ZIP completo como secundario. Cada descarga cuenta una de las 5.
   - Hay una ayuda "¿Cómo abro el ZIP en el celular?" y el mail lo explica.
