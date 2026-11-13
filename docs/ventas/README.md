@@ -79,6 +79,8 @@ Del dev o de Fab:
 De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
+8. **Entorno FENIA (D25):** propuesta visual de "Tu kit" → OK del dev y Fab → fase 1 con Enseñar en staging → producción. Mientras, el dev reformatea Evaluar y Aprender con Claude Design.
+9. **Después del entorno:** sección interna de métricas del sitio y de ventas, solo para el dev y Fab (pedido del dev, 2026-11-12).
 
 ## Cómo se corren las pruebas
 
@@ -106,13 +108,20 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D25 | 2026-11-12 | **Entorno FENIA ("Tu kit" / "Mis kits")**, acordado con el dev tras la idea de Fab. En vez de bajar un archivo, la compradora llega a una página con su kit montado. En fases:
+  - **Fase 1, "Tu kit"**: la página de descarga pasa a mostrar la guía (leer o bajar), las fichas interactivas montadas, los imprimibles y el ZIP. Ver no gasta descargas. Arranca con Enseñar, el único con fichas HTML. Los links ya mandados siguen funcionando.
+  - **Fase 2, "Mis kits"**: entrar con el email, sin contraseña (link mágico). Todas las compras de ese email, **de por vida**; se limitan solo las descargas de archivos (reemplaza D3). La identidad y una marca al pie de los PDF reemplazan al contador como freno a compartir.
+  - **Fase 3, entorno**: las fichas guardan las respuestas en la cuenta (hoy ya las guardan en el navegador). Implica datos personales: política de privacidad con el abogado antes.
+
+  Prerrequisito de las fases 1-3 para Evaluar y Aprender: estandarizarlos al formato de Enseñar con Claude Design (carpeta `C:\Fenia\entregableseformateo`, un prompt por kit). Restricción conocida: el mail de Hostinger permite 100 envíos por día por casilla; los links mágicos salen de ahí | ✅ Decisión del dev |
 | D24 | 2026-11-09 | **Descarga más simple en el celular (A+B), en producción** (decisión del dev).
   - La página de descarga ofrece la **guía en PDF suelta** ("se abre directo, también en el celular") como botón principal y el ZIP completo como secundario. Cada descarga cuenta una de las 5.
   - Hay una ayuda "¿Cómo abro el ZIP en el celular?" y el mail lo explica.
   - Las guías son las de cada ZIP (la de Enseñar, la corregida).
 
   **Para la semana:**
-  - estandarizar Evaluar y Aprender al formato de Enseñar con Claude Design: guía con los prompts como capítulo final, fichas HTML y los Word de plantillas en una carpeta aparte. La guía de cada sesión está en `C:\Fenia\entregableseformateo`;
+  - estandarizar Evaluar y Aprender al formato de Enseñar con Claude Design: guía con los prompts como capítulo final, fichas HTML y los Word de plantillas en una carpeta aparte. La guía de cada sesión está en `C:\Fenia\entregables
+eformateo`;
   - evaluar la página "Tu kit" con los datos de descargas desde el celular | ✅ Decisión del dev |
 | D23 | 2026-11-07 | **Actualización:** el dev pasó el fin al **lunes 16/11 a las 23:59**, así el lunes 9 "quedan 7 días". Es legítimo porque se cambió antes de anunciar y sin ventas. Diseño final, **aprobado por el dev** el 2026-11-07:
   - un cartel arriba de los 3 kits: "Oferta de 10 días: del sábado 7/11 al lunes 16/11" (días de calendario en hora argentina, así total, transcurrido y restante cierran), barra de avance "Día N de 10" y "Quedan 9 días y 10 h 05 min 30 s";
@@ -179,6 +188,8 @@ De la IA:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-12 (25)** — Diálogo con el dev sobre el "entorno FENIA" (idea de Fab): acordado D25 (identidad por link mágico, ver de por vida, guardar respuestas, arrancar con Enseñar). Inspección de las fichas de Enseñar: app en un solo archivo, sin recursos externos, guarda en `localStorage` bajo `fenia_plantillas_editable_v1`, fichas `t1…tN`. Por eso el prompt de reformateo pide una clave por kit e ids estables. Carpeta `reformateo` simplificada: un prompt por kit, el ZIP se adjunta directo. Pendiente nuevo: métricas internas (punto 9).
 
 - **2026-11-09 (24)** — A+B en producción (D24, PR #25): las 3 guías reales se subieron por el buzón, `health` las ve y la batería contra producción dio 54/54. Primera venta real registrada el 7/11, entregada bien (Aprender, $13.000); falta que el dev confirme si fue su compra de prueba para reembolsarla. Otro cobro de $13.000 ("Varios") no pasó por el sitio: probablemente un Link de Pago viejo (D6).
 

@@ -111,3 +111,37 @@ Te quedan 4 de 5 descargas · vence el 06/12/2026
 
 1. ¿Aprobás la card, la página del kit, `/gracias`, "No me llegó" y la página de descarga tal como están? (Se pueden pedir cambios.)
 2. ¿Cambiamos **ya** el botón de los kits "Próximamente" a "Avisame cuando esté disponible"?
+
+## 6. "Tu kit" (D25, fase 1) — reemplaza la página de descarga
+
+Misma dirección que hoy (`/descarga/#t=…`, así los mails ya enviados siguen funcionando); cambia lo que muestra. Pensada para el celular primero.
+
+```
+TU KIT                                                   compra del 7/11 · a***@gmail.com
+Enseñar con IA sin automatizar la pedagogía
+
+┌───────────────────────────────────────────────────────────────┐
+│ 📖  La guía · 37 páginas                                      │
+│     [ Leer ahora ]            [ Descargar PDF ]               │
+├───────────────────────────────────────────────────────────────┤
+│ ✍️  Fichas para completar · 8                                 │
+│     Se completan acá mismo, en el celular o la compu.         │
+│     Lo que escribís queda guardado en este dispositivo.       │
+│     [ Abrir las fichas ]                                      │
+├───────────────────────────────────────────────────────────────┤
+│ 🖨️  Imprimibles · 8                [ Abrir para imprimir ]    │
+├───────────────────────────────────────────────────────────────┤
+│ 📦  Todo el kit en un ZIP (para la compu)   [ Descargar ]     │
+│     Te quedan 10 descargas de archivos · vence el 07/12       │
+└───────────────────────────────────────────────────────────────┘
+FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.
+¿Perdiste este link? En "No me llegó" te lo reenviamos.
+```
+
+- **Leer, abrir y usar las fichas no gasta nada.** Solo cuentan las descargas de archivos (ZIP, PDF). El tope pasa de 5 a **10**, porque ahora hay más archivos sueltos.
+- **Las fichas se abren como una página del sitio**, con el mismo guardado automático que ya tienen: lo completado queda en ese dispositivo (fase 3: en la cuenta).
+- **El link sigue viajando después de `#`**: nunca queda en registros del servidor. Al abrir la página se crea un pase de lectura en ese dispositivo; los archivos y las fichas se sirven solo con ese pase.
+- **Duración en fase 1: igual que hoy (30 días)**, porque todavía no hay identidad. Con la fase 2 (entrar con el email) el acceso pasa a ser de por vida.
+- **Evaluar y Aprender, hasta que se reformateen:** la misma página, sin la fila de fichas (guía, imprimibles en PDF dentro del ZIP, y ZIP).
+- **Sin cambios** en el resto del sitio: tarjetas, página del kit, `/gracias` y "No me llegó" siguen igual.
+
