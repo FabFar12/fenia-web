@@ -560,6 +560,15 @@ final class ShopTest extends TestCase
         self::assertSame(410, $shop->openKit($token, self::IP, null)[0]);
     }
 
+    /** Second barrier: even with a live link, a kit opens only while its order is paid (like consume()). */
+    public function testOnlyPaidOrdersOpenTheKit(): void
+    {
+        [$shop, $ref, , $token, $pass] = $this->openedKit();
+        $this->pdo->prepare("UPDATE orders SET status = 'review' WHERE reference = ?")->execute([$ref]);
+        self::assertSame(410, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status']);
+        self::assertSame(410, $shop->openKit($token, self::IP, null)[0]);
+    }
+
     public function testTuKitServesOnlyTheReviewedFiles(): void
     {
         [$shop, , , , $pass] = $this->openedKit();
