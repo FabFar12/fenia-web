@@ -77,6 +77,7 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | U-32 | Validación de email | Rechaza saltos de línea y direcciones inválidas |
 | U-40 | "Tu kit" (ShopTest): abrir el kit, el pase de lectura, la guía, las fichas y los imprimibles | Leer y usar no gasta descargas; un link sin descargas sigue abriendo; el pase no sirve para otro kit, otro link ni más tiempo; los pases inventados se limitan por IP; un reembolso cierra el kit; un archivo cambiado no se sirve; abrir desde muchas IPs no dispara la alerta de link compartido; el mail de un kit con fichas invita a abrirlo |
 | U-41 | Migración del esquema 1 al 2 (StoresTest) | Agrega `download_log.kind` y sube los links ya enviados de 5 a 10 descargas, sin perder las ya hechas; correrla dos veces no cambia nada |
+| U-43 | "No me llegó" con acceso para siempre (D27, ShopTest) | Un link vencido se renueva sin límite y el nuevo arrastra las descargas que quedaban; un link sin descargas se reenvía igual y sigue abriendo el kit; nunca hay más de 10 descargas por compra |
 | U-42 | Config de "Tu kit" (EnvConfigInboxTest) | Lee guía, fichas e imprimibles con su tamaño; rechaza extensiones, rutas y tamaños inválidos; el buzón acepta solo `.html` de nombre válido |
 
 ### S — Suite de seguridad (✱ = segura para correr contra producción)

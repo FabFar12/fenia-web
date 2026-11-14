@@ -10,8 +10,8 @@ import { catalog, openTuKit } from './helpers';
 const KNOWN: { rule: string; target: RegExp; why: string }[] = [
   {
     rule: 'color-contrast',
-    target: /#buy-submit|#resend-submit|#read-guide|#open-fichas|\.kit-offer-badge|\.promo-chip|^a\[href\$="[a-z0-9-]+\/"\]|\.cta-glow/,
-    why: 'texto blanco sobre el coral de la marca (#E8573D): 3,6:1, AA pide 4,5:1. Es el color de todos los botones del sitio (Comprar, Pagar, Reenviar, Hablemos, y en Tu kit Leer ahora y Abrir las fichas)',
+    target: /#buy-submit|#resend-submit|#read-guide|#open-fichas|#open-imprimibles|\.kit-offer-badge|\.promo-chip|^a\[href\$="[a-z0-9-]+\/"\]|\.cta-glow/,
+    why: 'texto blanco sobre el coral de la marca (#E8573D): 3,6:1, AA pide 4,5:1. Es el color de todos los botones del sitio (Comprar, Pagar, Reenviar, Hablemos, y en Tu kit los botones de abrir)',
   },
   {
     rule: 'color-contrast',

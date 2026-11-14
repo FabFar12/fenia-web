@@ -41,8 +41,8 @@ import { sales } from '../data/site';
             <div class="dl-body">
               <h2 class="dl-name">La guía<span id="guide-size" class="dl-size"></span></h2>
               <div class="dl-actions">
-                <a id="read-guide" class="dl-button" href="/no-me-llego/" target="_blank" rel="noopener">Leer ahora</a>
-                <button id="dl-guide" type="button" class="dl-button dl-button--secondary" data-file="guide">Descargar PDF</button>
+                <a id="read-guide" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Leer ahora</span></a>
+                <button id="dl-guide" type="button" class="dl-button dl-button--download" data-file="guide"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg><span class="dl-label">Descargar PDF</span></button>
               </div>
             </div>
           </li>
@@ -55,7 +55,7 @@ import { sales } from '../data/site';
               <h2 class="dl-name">Fichas para completar<span id="fichas-size" class="dl-size"></span></h2>
               <p class="dl-note">Se completan acá mismo, en el celular o la compu. Lo que escribís queda guardado en este dispositivo.</p>
               <div class="dl-actions">
-                <a id="open-fichas" class="dl-button" href="/no-me-llego/" target="_blank" rel="noopener">Abrir las fichas</a>
+                <a id="open-fichas" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Abrir las fichas</span></a>
               </div>
             </div>
           </li>
@@ -67,7 +67,7 @@ import { sales } from '../data/site';
             <div class="dl-body">
               <h2 class="dl-name">Imprimibles<span id="imprimibles-size" class="dl-size"></span></h2>
               <div class="dl-actions">
-                <a id="open-imprimibles" class="dl-button dl-button--secondary" href="/no-me-llego/" target="_blank" rel="noopener">Abrir para imprimir</a>
+                <a id="open-imprimibles" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Abrir para imprimir</span></a>
               </div>
             </div>
           </li>
@@ -79,7 +79,7 @@ import { sales } from '../data/site';
             <div class="dl-body">
               <h2 class="dl-name">Todo el kit en un ZIP <span class="dl-size">(para la compu)</span></h2>
               <div class="dl-actions">
-                <button id="dl-zip" type="button" class="dl-button dl-button--secondary" data-file="zip">Descargar</button>
+                <button id="dl-zip" type="button" class="dl-button dl-button--download" data-file="zip"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg><span class="dl-label">Descargar</span></button>
               </div>
               <details class="dl-howto">
                 <summary>¿Cómo abro el ZIP en el celular?</summary>
@@ -92,13 +92,17 @@ import { sales } from '../data/site';
           </li>
         </ul>
         <p id="dl-meta" class="dl-meta" aria-live="polite"></p>
+        <p class="dl-legend">
+          <span><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>Abrir: se ve en otra pestaña y no gasta</span>
+          <span class="dl-legend-download"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg>Descargar: baja el archivo y cuenta 1 de las 10</span>
+        </p>
       </article>
 
       <p id="dl-error" class="dl-error" role="alert" data-support={sales.supportEmail} hidden></p>
 
       <p class="dl-help">
-        {sales.noCardDataNote} ¿Perdiste este link? En
-        <a href="/no-me-llego/">No me llegó</a> te lo reenviamos. ¿Algún problema? Escribinos a
+        {sales.noCardDataNote} ¿Se te venció o lo perdiste? En
+        <a href="/no-me-llego/">No me llegó</a> te mandamos uno nuevo, siempre al email de tu compra. ¿Algún problema? Escribinos a
         <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a>.
       </p>
     </section>
@@ -127,7 +131,9 @@ import { sales } from '../data/site';
   const meta = byId('dl-meta');
   const error = byId('dl-error');
   const buttons = { guide: byId<HTMLButtonElement>('dl-guide'), zip: byId<HTMLButtonElement>('dl-zip') };
-  const labels = { guide: buttons.guide.textContent ?? '', zip: buttons.zip.textContent ?? '' };
+  // Only the text changes while downloading; the icon stays.
+  const label = (which: 'guide' | 'zip') => buttons[which].querySelector('.dl-label') as HTMLSpanElement;
+  const labels = { guide: label('guide').textContent ?? '', zip: label('zip').textContent ?? '' };
   const AGAIN = 'Pedí uno nuevo en "No me llegó" con el email de tu compra.';
   let left = 0;
 
@@ -166,9 +172,10 @@ import { sales } from '../data/site';
     left = Math.max(0, Number(info.remaining));
     const until = String(info.expires_on).slice(0, 5); // dd/mm: links last 30 days
     if (left > 0) {
-      meta.textContent = `${note}Te ${left === 1 ? 'queda 1 descarga' : `quedan ${left} descargas`} de archivos · vence el ${until}`;
+      meta.textContent = `${note}Te ${left === 1 ? 'queda 1 descarga' : `quedan ${left} descargas`} de archivos · este link vence el ${until}`;
     } else {
-      meta.textContent = `${note}Ya usaste las ${Number(info.max)} descargas de archivos. Podés seguir leyendo y usando las fichas hasta el ${until}. Para bajar los archivos de nuevo, pedí un link nuevo en "No me llegó".`;
+      // D27: 10 downloads per purchase, for good; reading and the fichas stay free.
+      meta.textContent = `${note}Ya usaste las ${Number(info.max)} descargas de archivos de tu compra. Podés seguir leyendo y usando las fichas. Si necesitás bajar algo de nuevo, escribinos a ${error.dataset.support}.`;
     }
     enableDownloads();
     kitBox.hidden = false;
@@ -204,7 +211,7 @@ import { sales } from '../data/site';
   async function download(which: 'guide' | 'zip'): Promise<void> {
     error.hidden = true;
     buttons.guide.disabled = buttons.zip.disabled = true;
-    buttons[which].textContent = 'Descargando…';
+    label(which).textContent = 'Descargando…';
     try {
       const res = await fetch('/api/download.php', {
         method: 'POST',
@@ -221,7 +228,7 @@ import { sales } from '../data/site';
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
-        buttons[which].textContent = labels[which];
+        label(which).textContent = labels[which];
         await load(true, 'Listo, se descargó. ');
         return;
       }
@@ -231,7 +238,7 @@ import { sales } from '../data/site';
     } catch {
       fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
     }
-    buttons[which].textContent = labels[which];
+    label(which).textContent = labels[which];
     enableDownloads();
   }
 
@@ -259,10 +266,18 @@ import { sales } from '../data/site';
   .dl-note { font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin: 6px 0 0 0; }
   .dl-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 
-  .dl-button { font: inherit; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; border-radius: 10px; border: 1px solid transparent; background: #e8573d; color: #fff; text-decoration: none; cursor: pointer; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  /* Option B (propuesta-visual.md §7): open = coral, free; download = cyan outline, counts one. */
+  .dl-button { font: inherit; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-width: 210px; padding: 12px 24px; border-radius: 10px; border: 1px solid transparent; text-decoration: none; cursor: pointer; }
   .dl-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-  .dl-button--secondary { background: transparent; border-color: rgba(255, 255, 255, 0.35); box-shadow: none; }
+  .dl-button--open { background: #e8573d; color: #fff; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .dl-button--download { background: transparent; border-color: rgba(0, 180, 216, 0.65); color: #5fd6ec; }
   .dl-button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dl-btn-icon, .dl-legend svg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .dl-btn-icon { width: 18px; height: 18px; }
+  .dl-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 10px 4px 0 4px; }
+  .dl-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dl-legend svg { width: 15px; height: 15px; }
+  .dl-legend-download { color: #5fd6ec; }
 
   .dl-howto { margin-top: 14px; font-size: 14px; line-height: 1.6; color: rgba(255, 255, 255, 0.75); }
   .dl-howto summary { cursor: pointer; color: #00b4d8; font-weight: 600; }
@@ -282,6 +297,6 @@ import { sales } from '../data/site';
     .dl-icon svg { width: 20px; height: 20px; }
     .dl-name { margin-top: 7px; font-size: 16px; }
     .dl-actions { flex-direction: column; }
-    .dl-button { width: 100%; }
+    .dl-button { width: 100%; min-width: 0; }
   }
 </style>

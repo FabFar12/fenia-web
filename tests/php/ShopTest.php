@@ -622,23 +622,41 @@ final class ShopTest extends TestCase
         self::assertCount(2, $this->mailer->sent);
     }
 
-    public function testResendRenewsASpentLinkAtMostTwice(): void
+    /** D27: access for good through "No me llegó"; 10 downloads per purchase, never reset. */
+    public function testResendRenewsAnExpiredLinkForeverKeepingTheDownloadsLeft(): void
     {
         [$shop, , , $first] = $this->delivered();
-        $tokens = [$first];
-        for ($round = 1; $round <= 3; $round++) {
-            for ($i = 0; $i < 10; $i++) {
-                $shop->download(end($tokens), '3.3.3.' . $round, null);
-            }
-            $this->now = $this->now->modify('+1 day'); // resend allows 3 per email per day
-            $shop->resend(['email' => 'ana@example.com'], '4.4.4.' . $round);
-            $tokens[] = $this->mailer->lastToken();
+        for ($i = 0; $i < 3; $i++) {
+            self::assertSame(200, $shop->download($first, self::IP, null)['status']);
         }
-        self::assertCount(3, array_unique($tokens), 'first link + 2 renewals, then support');
-        self::assertSame(410, $shop->download($tokens[1], '6.6.6.6', null)['status']);
-        self::assertSame(410, $shop->download($tokens[2], '6.6.6.6', null)['status'], 'third link spent too');
-        self::assertContains('renewals_exhausted', $this->events());
-        self::assertSame(410, $shop->download($first, '6.6.6.6', null)['status'], 'old link stays dead');
+
+        $this->now = $this->now->modify('+31 days');
+        $shop->resend(['email' => 'ana@example.com'], '4.4.4.1');
+        $second = $this->mailer->lastToken();
+        self::assertNotSame($first, $second, 'an expired link is replaced');
+        self::assertSame(410, $shop->openKit($first, self::IP, null)[0], 'the old one stays closed');
+        self::assertSame([7, 10], array_values(array_intersect_key($shop->openKit($second, self::IP, null)[1], ['remaining' => 0, 'max' => 0])), 'the 7 left carry over');
+
+        for ($i = 0; $i < 7; $i++) {
+            self::assertSame(200, $shop->download($second, '5.5.5.5', null)['status']);
+        }
+        self::assertSame(410, $shop->download($second, '5.5.5.5', null)['status'], 'ten per purchase');
+        $this->now = $this->now->modify('+1 day');
+        $shop->resend(['email' => 'ana@example.com'], '4.4.4.2');
+        self::assertSame($second, $this->mailer->lastToken(), 'out of downloads: the same link, it still opens the kit');
+        self::assertSame(200, $shop->openKit($second, self::IP, null)[0]);
+
+        $links = [];
+        for ($round = 3; $round <= 6; $round++) {
+            $this->now = $this->now->modify('+31 days');
+            $shop->resend(['email' => 'ana@example.com'], '4.4.4.' . $round);
+            $links[] = $link = $this->mailer->lastToken();
+            [$status, $body] = $shop->openKit($link, self::IP, null);
+            self::assertSame([200, 0], [$status, $body['remaining']], "renewal $round: it opens, with no new downloads");
+        }
+        self::assertCount(4, array_unique($links), 'no limit of renewals');
+        self::assertSame(410, $shop->download(end($links), '5.5.5.5', null)['status']);
+        self::assertNotContains('link_missing', $this->events());
     }
 
     public function testResendIsRateLimitedSilentlyPerEmail(): void

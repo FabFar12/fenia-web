@@ -26,8 +26,6 @@ final class Shop
     private const STATUS_LINK_HOURS = 24;
     /** Distinct IPs on one link before an alert (threat model A14). */
     private const SHARING_ALERT_IPS = 3;
-    /** First link + 2 renewals through "No me llegó"; after that, support. */
-    private const MAX_GENERATIONS = 3;
     /** Failed delivery mails are retried hourly for this long (typo in the address?). */
     private const MAIL_RETRY_HOURS = 48;
 
@@ -463,7 +461,7 @@ final class Shop
             'kit' => $kitId,
             'kit_title' => $this->catalog->find($kitId)['title'] ?? 'Tu kit FENIA',
             'remaining' => max(0, (int) $row['max_downloads'] - (int) $row['download_count']),
-            'max' => (int) $row['max_downloads'],
+            'max' => (int) $this->config->get('max_downloads'), // per purchase (D27); a renewed link carries fewer
             'expires_on' => $expires === null ? '' : $expires->setTimezone($art)->format('d/m/Y'),
             'bought_on' => $paid === null ? '' : $paid->setTimezone($art)->format('j/n'),
             'email_masked' => self::maskEmail((string) $row['order_email']),
@@ -555,8 +553,8 @@ final class Shop
     /**
      * Resends the links, only to the email stored with the purchase, with the
      * same answer whether or not there was one (threat model A15). A link that
-     * still works is resent as is (no reset of its 30 days / 5 downloads); one
-     * that expired or ran out is renewed, up to MAX_GENERATIONS.
+     * still opens the kit is resent as is, even with no downloads left; an
+     * expired one is renewed, as many times as needed (D27: access for good).
      *
      * @param array<string, mixed> $in {email, website}
      * @return array{0: int, 1: array<string, mixed>}
@@ -632,7 +630,7 @@ final class Shop
         }
         $token = $this->currentToken($order, $renew);
         if ($token === null) {
-            $this->log('alert', 'renewals_exhausted', ['order' => $orderId]);
+            $this->log('alert', 'link_missing', ['order' => $orderId]);
             return false;
         }
         $site = rtrim((string) $this->config->get('site_url'), '/');
@@ -643,7 +641,7 @@ final class Shop
             $site,
             (string) $this->config->get('mail_reply_to'),
             (int) $this->config->get('download_days'),
-            (int) $token['max_downloads'],
+            (int) $this->config->get('max_downloads'), // per purchase (D27)
             $this->config->guide($kitId) !== null,
             $this->config->resource($kitId, 'fichas') !== null
         );
@@ -660,9 +658,12 @@ final class Shop
     }
 
     /**
-     * The order's newest link; issued if missing. With $renew, an expired or
-     * exhausted link is replaced by a new one (fresh 30 days / 5 downloads),
-     * at most MAX_GENERATIONS times; after that, support handles it.
+     * The order's newest link; issued if missing. With $renew, an expired link
+     * is replaced by a new one (another 30 days), as many times as needed: the
+     * buyer can always get back into the kit with the purchase email (D27).
+     * Downloads are per purchase, for good: the new link carries over the
+     * downloads left, it never adds more. A link with no downloads left still
+     * opens the kit, so it is not renewed.
      *
      * @param array<string, mixed> $order
      * @return array<string, mixed>|null
@@ -672,29 +673,27 @@ final class Shop
         $id = (int) $order['id'];
         $token = $this->tokens->latestForOrder($id);
         if ($token === null) {
-            $this->issueToken($id, (string) $order['reference'], 1);
+            $this->issueToken($id, (string) $order['reference'], 1, (int) $this->config->get('max_downloads'));
             return $this->tokens->latestForOrder($id);
         }
-        if (!$renew || Tokens::unusableReason($token, $this->now()) === null) {
+        if (!$renew || Tokens::unusableReason($token, $this->now()) !== 'expired') {
             return $token;
         }
         $next = (int) $token['generation'] + 1;
-        if ($next > self::MAX_GENERATIONS) {
-            return null;
-        }
-        $this->issueToken($id, (string) $order['reference'], $next);
-        $this->log('info', 'link_renewed', ['order' => $id, 'generation' => $next]);
+        $left = max(0, (int) $token['max_downloads'] - (int) $token['download_count']);
+        $this->issueToken($id, (string) $order['reference'], $next, $left);
+        $this->log('info', 'link_renewed', ['order' => $id, 'generation' => $next, 'downloads_left' => $left]);
         return $this->tokens->latestForOrder($id);
     }
 
-    private function issueToken(int $orderId, string $reference, int $generation): void
+    private function issueToken(int $orderId, string $reference, int $generation, int $maxDownloads): void
     {
         try {
             $this->tokens->issue(
                 $orderId,
                 Tokens::hash($this->tokenFor($reference, $generation)),
                 Tokens::expiresAt($this->now(), (int) $this->config->get('download_days')),
-                (int) $this->config->get('max_downloads'),
+                $maxDownloads,
                 Db::now($this->now()),
                 $generation
             );
