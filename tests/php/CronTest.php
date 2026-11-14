@@ -23,6 +23,8 @@ final class CronTest extends TestCase
     private \DateTimeImmutable $now;
     /** @var list<string> pages the speed check asked Google about (never the real network) */
     private array $speedAsked = [];
+    /** HTTP status the fake PageSpeed answers. */
+    private int $speedStatus = 200;
 
     protected function setUp(): void
     {
@@ -73,7 +75,7 @@ final class CronTest extends TestCase
             function (string $url): array {
                 parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
                 $this->speedAsked[] = (string) $query['url'];
-                return ['status' => 200, 'body' => '{"lighthouseResult":{"categories":{"performance":{"score":0.9}}}}'];
+                return ['status' => $this->speedStatus, 'body' => '{"lighthouseResult":{"categories":{"performance":{"score":0.9}}}}'];
             });
     }
 
@@ -149,7 +151,7 @@ final class CronTest extends TestCase
         $this->now = new \DateTimeImmutable('2026-11-07 07:30:00', new \DateTimeZone('UTC')); // 04:30 ART
         self::assertSame('skip', $this->cron()->run()['speed'], 'before 05:00');
         $this->now = $this->now->modify('+1 hour');
-        self::assertSame('2 páginas', $this->cron()->run()['speed']);
+        self::assertSame('2 páginas, 0 sin medir', $this->cron()->run()['speed']);
         self::assertSame(['https://staging.fenia.com.ar/', 'https://staging.fenia.com.ar/kits/kit-a/'], $this->speedAsked, 'the home and the first kit');
         self::assertSame('skip', $this->cron()->run()['speed'], 'once a day');
 
@@ -158,6 +160,27 @@ final class CronTest extends TestCase
         $summary = $this->cron()->run();
         self::assertSame([1, 1], [$summary['visits_purged'], $summary['sessions_purged']]);
         self::assertSame(0, $summary['fees'], 'the commission sync runs every hour (D29)');
+    }
+
+    public function testSpeedCheckRetriesWhenGoogleDoesNotAnswer(): void
+    {
+        $this->now = new \DateTimeImmutable('2026-11-07 09:30:00', new \DateTimeZone('UTC')); // 06:30 ART
+        $this->speedStatus = 429;
+        self::assertSame('2 páginas, 2 sin medir', $this->cron()->run()['speed']);
+        for ($hour = 1; $hour <= 3; $hour++) {
+            $this->now = $this->now->modify('+1 hour');
+            self::assertSame('2 páginas, 2 sin medir', $this->cron()->run()['speed'], "try " . ($hour + 1));
+        }
+        $this->now = $this->now->modify('+1 hour');
+        self::assertSame('skip', $this->cron()->run()['speed'], 'four tries a day, then tomorrow');
+
+        $this->now = $this->now->modify('+1 day');
+        $this->speedStatus = 200;
+        self::assertSame('2 páginas, 0 sin medir', $this->cron()->run()['speed']);
+        self::assertSame(['0', '0'], array_map('strval', $this->pdo->query("SELECT COUNT(error) FROM speed_checks WHERE day = '2026-11-08' GROUP BY url")->fetchAll(\PDO::FETCH_COLUMN)), 'one row per page, without error');
+        $this->now = $this->now->modify('+1 hour');
+        self::assertSame('skip', $this->cron()->run()['speed'], 'measured: done for the day');
+        self::assertSame(2, (int) $this->pdo->query("SELECT COUNT(*) FROM speed_checks WHERE day = '2026-11-07'")->fetchColumn(), 'the failed day kept one row per page');
     }
 
     public function testPurgesOldRateLimitEvents(): void

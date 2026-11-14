@@ -23,6 +23,8 @@ final class Cron
     private const LOCAL_TZ = 'America/Argentina/Buenos_Aires';
     private const REPORT_HOUR = 9;
     private const SPEED_HOUR = 5;
+    /** Attempts a day when Google does not answer (without an API key it often answers 429). */
+    private const SPEED_TRIES = 4;
     private const VISITS_DAYS = 400;
 
     /** Plain-language meaning of each event, for the person reading the alert. */
@@ -91,10 +93,19 @@ final class Cron
         }
 
         $summary['speed'] = 'skip';
-        if ((int) $local->format('G') >= self::SPEED_HOUR && ($state['speed'] ?? '') !== $today) {
-            $state['speed'] = $today; // once a day, even if Google fails: tomorrow it tries again
-            $this->saveState($state);
-            $summary['speed'] = SpeedCheck::run($this->pdo, $this->speedUrls(), (string) $this->config->get('psi_api_key'), $this->httpGet, $now) . ' páginas';
+        // Once a day; if Google does not answer, again the next hours (SPEED_TRIES).
+        // An older state is just the day's date: treated as not done, so it retries.
+        $speed = is_array($state['speed'] ?? null)
+            ? $state['speed']
+            : ['day' => (string) ($state['speed'] ?? ''), 'done' => false, 'tries' => 1];
+        $due = ($speed['day'] ?? '') !== $today || (($speed['done'] ?? false) === false && (int) ($speed['tries'] ?? 0) < self::SPEED_TRIES);
+        if ((int) $local->format('G') >= self::SPEED_HOUR && $due) {
+            $tries = ($speed['day'] ?? '') === $today ? (int) ($speed['tries'] ?? 0) + 1 : 1;
+            $state['speed'] = ['day' => $today, 'done' => false, 'tries' => $tries];
+            $this->saveState($state); // a crash mid-check must not repeat it every hour
+            $result = SpeedCheck::run($this->pdo, $this->speedUrls(), (string) $this->config->get('psi_api_key'), $this->httpGet, $now);
+            $state['speed']['done'] = $result['failed'] === 0;
+            $summary['speed'] = $result['checked'] . ' páginas, ' . $result['failed'] . ' sin medir';
         }
         $summary['sessions_purged'] = (new Owners($this->pdo, $this->config, $this->clock))->purge();
         $old = $this->pdo->prepare('DELETE FROM site_events WHERE day < ?');

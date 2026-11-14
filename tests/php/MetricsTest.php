@@ -242,7 +242,7 @@ final class MetricsTest extends TestCase
             $asked[] = $url;
             return str_contains($url, 'kits') ? ['status' => 429, 'body' => ''] : ['status' => 200, 'body' => $answer];
         };
-        self::assertSame(2, SpeedCheck::run($this->pdo, ['https://fenia.com.ar/', 'https://fenia.com.ar/kits/kit-a/'], '', $get, $this->now));
+        self::assertSame(['checked' => 2, 'failed' => 1], SpeedCheck::run($this->pdo, ['https://fenia.com.ar/', 'https://fenia.com.ar/kits/kit-a/'], '', $get, $this->now));
         self::assertStringContainsString('strategy=mobile', $asked[0]);
         self::assertStringNotContainsString('key=', $asked[0]);
         $rows = $this->pdo->query('SELECT * FROM speed_checks ORDER BY id')->fetchAll();

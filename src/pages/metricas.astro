@@ -246,7 +246,10 @@ import Nav from '../components/Nav.astro';
         const box = el('div', 'mt-block');
         box.append(el('h3', '', `${new URL(c.url).pathname} · ${c.day.split('-').reverse().slice(0, 2).join('/')}`));
         if (c.error) {
-          box.append(el('p', 'mt-warn', `No se pudo medir: ${c.error}`));
+          const why = /429/.test(c.error)
+            ? 'Google no dio el resultado esta vez: recibe demasiadas consultas sin clave propia.'
+            : 'No se pudo medir esta vez.';
+          box.append(el('p', 'mt-warn', `${why} Se vuelve a intentar sola en las próximas horas.`));
         } else {
           const score = c.score ?? 0;
           box.append(el('p', `mt-score ${score >= 90 ? 'good' : score >= 50 ? 'mid' : 'bad'}`, `Puntaje ${c.score ?? '—'} de 100`));
