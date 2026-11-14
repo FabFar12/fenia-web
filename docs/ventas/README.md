@@ -165,6 +165,10 @@ eformateo`;
 
 | # | Pregunta | Cómo se responde |
 |---|---|---|
+| Q7 | **Acceso de por vida ya en la fase 1** (pedido del dev, 2026-11-14: "si lo compró, le queda para siempre, pero hasta 10 descargas"). Propuesta: (a) "No me llegó" siempre manda un link nuevo al email de la compra, sin el tope de 2 renovaciones de D19 (sigue el límite de 3 pedidos por día); (b) **10 descargas en total por compra**, para siempre: renovar el link no las repone (si alguien necesita más, las suma soporte) | Decisión del dev. La fase 2 ("Mis kits", entrar con el email) mantiene las mismas reglas |
+| Q8 | Botones de "Tu kit": A (todos iguales) o B (según su función, recomendada). Ver [propuesta-visual.md §7](./propuesta-visual.md) | Decisión del dev, con las imágenes |
+| Q9 | "Mis kits" y categorías de producto (Educación, Organizaciones, Emprendimiento, General). Ver [propuesta-visual.md §8](./propuesta-visual.md) | Decisión del dev con Fab |
+| Q10 | Métricas: qué medir, cómo contar las visitas (contador propio recomendado) y cómo se entra (link por mail recomendado). Ver [propuesta-metricas.md](./propuesta-metricas.md) | Charla con el dev |
 | Q1 | ✅ Respondida 2026-11-06 por API: plan **Business**, PHP **8.3.36** (disponibles de 7.3 a 8.5), `nd_pdo_mysql`, `curl`, `openssl`, `mbstring`, `zip`, `fileinfo` y `posix` activos. Cierra también [PENDING #3](../../PENDING.md) | — |
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
@@ -196,6 +200,7 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-14 (27)** — El dev probó "Tu kit" en staging. Pidió: botones según su función (Q8), "Mis kits" con categorías (Q9), acceso de por vida con 10 descargas (Q7) e investigar métricas (Q10, con visitas). Reportó "4 descargas por bajar el ZIP y el PDF": no es un error. El link de prueba ya tenía 2 descargas de la prueba automática, y cada archivo cuenta una sola vez (el ZIP cuenta como uno, también en E2E-01). Propuestas escritas, con imágenes en `C:\Fenia\entregables\propuestas\2026-11-14\`.
 - **2026-11-14 (26)** — **"Tu kit" fase 1** (D26).
   - Reformateo verificado contra los originales: Evaluar (guía, mini pack 26/26, 10 fichas, 2 imprimibles) y Aprender (29 secciones, los 25 prompts en tarjetas con su advertencia, 8 fichas, 4 imprimibles). Fichas probadas en Edge, en compu y celular, desde el disco y servidas con la CSP del sitio: guardan, copian y no piden nada a internet.
   - Hallazgo H-11 en las fichas de Enseñar, con su corrección probada.

@@ -151,3 +151,46 @@ FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.
 - Si se terminan las 10 descargas, la página lo dice y sigue dejando leer y usar las fichas hasta que vence.
 - Para kits con fichas, el mail cambia a "Abrir mi kit" y explica que leer y completar no gasta. Ese texto espera el OK del dev.
 
+
+## 7. Botones de "Tu kit" según lo que hacen (pedido del dev, 2026-11-14)
+
+El dev pidió estandarizar los botones o diferenciarlos por función. Hoy "Abrir para imprimir" se ve igual que una descarga, aunque no gasta nada. Dos opciones, renderizadas sobre la página real en `C:\Fenia\entregables\propuestas\2026-11-14\` (fuera del repo):
+
+- **A. Todos iguales** (`botones-A-todos-iguales-*.png`): todos con borde y el mismo ancho; solo el ícono dice qué hace cada uno.
+- **B. Según su función, recomendada** (`botones-B-segun-funcion-*.png`): "Abrir" (ícono ↗, se ve en otra pestaña y no gasta) en coral; "Descargar" (ícono ↓, cuenta 1 de las 10) con borde celeste. Todos del mismo ancho, y una línea al pie explica la diferencia.
+
+```
+La guía · 31 páginas        [↗ Leer ahora]  [↓ Descargar PDF]
+Fichas para completar · 10  [↗ Abrir las fichas]
+Imprimibles · 2             [↗ Abrir para imprimir]
+Todo el kit en un ZIP       [↓ Descargar]
+↗ Abrir: se ve en otra pestaña y no gasta   ↓ Descargar: baja el archivo y cuenta 1 de las 10
+```
+
+## 8. "Mis kits": todos los kits de un email, por categoría (fase 2 de D25)
+
+Paso previo a "Tu kit": la persona entra con su email y ve todos los kits que compró, agrupados por categoría. Cada tarjeta abre la página "Tu kit" de ese kit. Imagen: `mis-kits-*.png` en la misma carpeta.
+
+```
+MIS KITS                                        k***@fenia.com.ar · Salir
+Tus kits FENIA
+[Todos] [Educación] [Organizaciones]        ← los filtros aparecen con 2 o más categorías
+
+EDUCACIÓN
+┌ EDUCACIÓN · PARA DOCENTES ─────────┐  ┌ EDUCACIÓN · PARA DOCENTES ─────────┐
+│ Evaluar en tiempos de IA           │  │ Enseñar con IA sin automatizar…    │
+│ Guía · 10 fichas · 2 imprimibles   │  │ Guía · 8 fichas · 8 imprimibles    │
+│ Comprado el 14/11                  │  │ Comprado el 9/11                   │
+│ [ Abrir mi kit → ]                 │  │ [ Abrir mi kit → ]                 │
+└────────────────────────────────────┘  └────────────────────────────────────┘
+
+TAMBIÉN TE PUEDE SERVIR
+┌ EDUCACIÓN · PARA ESTUDIANTES ──────┐
+│ Aprender con IA sin dejar de pensar│
+│ $ 13.000            [ Ver el kit ] │
+└────────────────────────────────────┘
+```
+
+- **Categoría:** campo nuevo en cada producto (`src/content/products/*.md`), con una lista cerrada. Propuesta a partir de los productos que ya existen: *Educación* (los tres kits), *Organizaciones* (Neuro-Liderazgo, Bienestar Organizacional), *Emprendimiento* (Toolkit de IA) y *General*. La define el dev con Fab.
+- **"Para quién":** una línea corta por producto (*Para docentes*, *Para estudiantes*, *Para equipos*).
+- La categoría también puede ordenar la sección de productos de la home cuando haya más kits.
