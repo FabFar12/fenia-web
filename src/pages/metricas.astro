@@ -112,11 +112,14 @@ import Nav from '../components/Nav.astro';
     if (text !== undefined) node.textContent = text;
     return node;
   }
-  function stats(items: [string, string][]): HTMLElement {
+  /** Big numbers; an optional third text goes in a small line under the value. */
+  function stats(items: ([string, string] | [string, string, string])[]): HTMLElement {
     const box = el('dl', 'mt-stats');
-    for (const [label, value] of items) {
+    for (const [label, value, sub] of items) {
       const item = el('div', 'mt-stat');
-      item.append(el('dt', '', label), el('dd', '', value));
+      const dd = el('dd', '', value);
+      if (sub) dd.append(el('span', 'mt-sub', sub));
+      item.append(el('dt', '', label), dd);
       box.append(item);
     }
     return box;
@@ -190,7 +193,7 @@ import Nav from '../components/Nav.astro';
     const sales = [stats([
       ['Ventas', int(s.count)],
       ['Ingresos brutos', money(s.revenue)],
-      ['Comisión de Mercado Pago', s.fees === null ? '—' : `${cents(s.fees)}${s.fee_pct === null ? '' : ` (${pct(s.fee_pct)})`}`],
+      ['Comisión de Mercado Pago', s.fees === null ? '—' : cents(s.fees), s.fee_pct === null ? '' : `${pct(s.fee_pct)} de lo cobrado`],
       ['Neto que queda', s.net === null ? '—' : cents(s.net)],
       ['Neto promedio por venta', s.net_avg === null ? '—' : cents(s.net_avg)],
       ['Reembolsos', int(s.refunds)],
@@ -366,9 +369,11 @@ import Nav from '../components/Nav.astro';
   .mt-block { margin-top: 18px; }
   .mt-block h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px 0; color: rgba(255, 255, 255, 0.9); }
 
-  .mt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0; }
+  .mt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 12px; margin: 0; }
+  .mt-stat { min-width: 0; }
   .mt-stat dt { font-size: 12px; color: rgba(255, 255, 255, 0.65); }
-  .mt-stat dd { margin: 2px 0 0 0; font-size: 22px; font-weight: 800; }
+  .mt-stat dd { margin: 2px 0 0 0; font-size: 21px; font-weight: 800; overflow-wrap: anywhere; }
+  .mt-sub { display: block; font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.7); margin-top: 2px; }
 
   .mt-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   .mt-bars li { display: grid; grid-template-columns: minmax(80px, 38%) 1fr auto; align-items: center; gap: 10px; font-size: 13px; }
