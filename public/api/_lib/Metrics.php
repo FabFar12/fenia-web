@@ -130,20 +130,21 @@ final class Metrics
     /** @return array<string, mixed> */
     private function sales(string $fromUtc, \DateTimeImmutable $today): array
     {
-        $paid = $this->rows('SELECT paid_at, expected_cents FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ?', [$fromUtc]);
+        // Sales that stand: a refunded one counts only under refunds.
+        $paid = $this->rows("SELECT paid_at, expected_cents FROM orders WHERE status = 'paid' AND paid_at >= ?", [$fromUtc]);
         $cents = array_sum(array_map(static fn (array $r): int => (int) $r['expected_cents'], $paid));
         $perDay = [];
         $chartFrom = $today->modify('-29 days')->format('Y-m-d');
-        foreach ($this->rows('SELECT paid_at FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ?', [Db::now($today->modify('-29 days'))]) as $row) {
+        foreach ($this->rows("SELECT paid_at FROM orders WHERE status = 'paid' AND paid_at >= ?", [Db::now($today->modify('-29 days'))]) as $row) {
             $day = $this->localDay((string) $row['paid_at']);
             $perDay[$day] = ($perDay[$day] ?? 0) + 1;
         }
         $perKit = [];
-        foreach ($this->rows('SELECT kit_id, COUNT(*) AS n FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ? GROUP BY kit_id ORDER BY n DESC', [$fromUtc]) as $row) {
+        foreach ($this->rows("SELECT kit_id, COUNT(*) AS n FROM orders WHERE status = 'paid' AND paid_at >= ? GROUP BY kit_id ORDER BY n DESC", [$fromUtc]) as $row) {
             $perKit[] = ['name' => (string) ($this->catalog->find((string) $row['kit_id'])['title'] ?? $row['kit_id']), 'n' => (int) $row['n']];
         }
         // D29: what Mercado Pago kept, as it reports it on each sale (filled by the hourly job).
-        $known = $this->rows('SELECT expected_cents, net_cents, fee_cents, pay_type FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ? AND fees_at IS NOT NULL', [$fromUtc]);
+        $known = $this->rows("SELECT expected_cents, net_cents, fee_cents, pay_type FROM orders WHERE status = 'paid' AND paid_at >= ? AND fees_at IS NOT NULL", [$fromUtc]);
         $knownGross = array_sum(array_map(static fn (array $r): int => (int) $r['expected_cents'], $known));
         $net = array_sum(array_map(static fn (array $r): int => (int) $r['net_cents'], $known));
         $fees = array_sum(array_map(static fn (array $r): int => (int) $r['fee_cents'], $known));

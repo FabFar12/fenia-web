@@ -210,6 +210,11 @@ final class MetricsTest extends TestCase
         self::assertSame([11961.73, 1038.27, 7.99, 11961.73, 1], [$report['sales']['net'], $report['sales']['fees'], $report['sales']['fee_pct'], $report['sales']['net_avg'], $report['sales']['fees_pending']]);
         self::assertSame([['name' => 'Dinero en cuenta', 'n' => 1, 'fee_pct' => 7.99]], $report['sales']['by_pay_type']);
         self::assertSame(11961.73, $report['recent'][0]['net']);
+
+        // A refunded sale leaves sales, income and commission; it counts under refunds.
+        $orders->transition($old, 'paid', 'revoked', 'refunded', '2026-11-14 13:30:00');
+        $report = (new Metrics($this->pdo, $catalog, $this->now))->report('7d');
+        self::assertSame([1, 13000, 1, 0], [$report['sales']['count'], $report['sales']['revenue'], $report['sales']['refunds'], $report['sales']['fees_pending']]);
         self::assertSame('7d', (new Metrics($this->pdo, $catalog, $this->now))->report('cualquiera')['range']);
     }
 
