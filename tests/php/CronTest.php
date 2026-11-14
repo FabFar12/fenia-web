@@ -157,6 +157,7 @@ final class CronTest extends TestCase
         $this->pdo->exec("INSERT INTO sessions (token_hash, subject, created_at, expires_at, last_seen_at) VALUES ('" . str_repeat('a', 64) . "', 'owner:fab', '2026-09-01 00:00:00', '2026-10-01 00:00:00', '2026-09-01 00:00:00')");
         $summary = $this->cron()->run();
         self::assertSame([1, 1], [$summary['visits_purged'], $summary['sessions_purged']]);
+        self::assertSame(0, $summary['fees'], 'the commission sync runs every hour (D29)');
     }
 
     public function testPurgesOldRateLimitEvents(): void

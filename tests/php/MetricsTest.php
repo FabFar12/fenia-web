@@ -202,6 +202,14 @@ final class MetricsTest extends TestCase
         self::assertSame(['buyers' => 2, 'opened' => 1, 'fichas' => 1, 'zip' => 0], array_intersect_key($report['kit_use'], ['buyers' => 0, 'opened' => 0, 'fichas' => 0, 'zip' => 0]));
         self::assertSame(['kit' => 'Kit A', 'email' => 'a***@gmail.com', 'amount' => 13000, 'opened' => true], array_intersect_key($report['recent'][0], ['kit' => 0, 'email' => 0, 'amount' => 0, 'opened' => 0]));
         self::assertStringNotContainsString('ana@gmail.com', (string) json_encode($report), 'emails always masked');
+        self::assertSame([null, null, null, 2], [$report['sales']['net'], $report['sales']['fees'], $report['sales']['fee_pct'], $report['sales']['fees_pending']], 'commission not known yet');
+
+        // D29: once the hourly job knows what Mercado Pago kept.
+        $orders->setFees($paid, 1196173, 103827, 'account_money', 1, '2026-11-14 13:00:00');
+        $report = (new Metrics($this->pdo, $catalog, $this->now))->report('7d');
+        self::assertSame([11961.73, 1038.27, 7.99, 11961.73, 1], [$report['sales']['net'], $report['sales']['fees'], $report['sales']['fee_pct'], $report['sales']['net_avg'], $report['sales']['fees_pending']]);
+        self::assertSame([['name' => 'Dinero en cuenta', 'n' => 1, 'fee_pct' => 7.99]], $report['sales']['by_pay_type']);
+        self::assertSame(11961.73, $report['recent'][0]['net']);
         self::assertSame('7d', (new Metrics($this->pdo, $catalog, $this->now))->report('cualquiera')['range']);
     }
 

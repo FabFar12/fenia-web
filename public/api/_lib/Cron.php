@@ -10,6 +10,7 @@ defined('FENIA_API') || exit;
  * Hourly job (step 3.4, run by hourly.php). It does three things:
  *  - reconciliation: re-syncs pending orders whose webhook got lost and
  *    retries delivery mails that did not go out (threat model C2, C22);
+ *  - commissions: what Mercado Pago kept on each new sale (D29);
  *  - alerts: mails every new `alert`/`error` log event to `alert_email`;
  *  - daily report: one summary mail a day, after 09:00 Argentina time;
  *  - metrics upkeep (ADR-029): one speed check of the site a day, after
@@ -67,6 +68,11 @@ final class Cron
         $state = $this->loadState();
 
         $summary = $this->shop->reconcile();
+        try {
+            $summary['fees'] = $this->shop->syncFees()['updated']; // D29: what Mercado Pago kept, for the metrics
+        } catch (\Throwable $e) {
+            $summary['fees'] = 'error';
+        }
         $summary['purged'] = (new RateLimiter($this->pdo))->purge($now->modify('-2 days'));
 
         [$alerts, $state['offsets']] = $this->newAlerts((array) ($state['offsets'] ?? []));

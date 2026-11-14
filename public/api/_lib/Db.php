@@ -17,8 +17,9 @@ final class Db
     /**
      * 2 (D25, "Tu kit"): download_log.kind, and links raised from 5 to 10 downloads.
      * 3 (ADR-029, metrics): site_events, sessions, speed_checks.
+     * 4 (D29): what Mercado Pago kept on each sale (orders.net_cents, fee_cents, pay_type, installments, fees_at).
      */
-    public const SCHEMA_VERSION = 3;
+    public const SCHEMA_VERSION = 4;
 
     public static function connect(string $dsn, string $user = '', string $password = ''): \PDO
     {
@@ -64,7 +65,12 @@ final class Db
             paid_at DATETIME NULL,
             email_sent_at DATETIME NULL,
             created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL" . $index('ix_orders_email', 'email') . "
+            updated_at DATETIME NOT NULL,
+            net_cents INT NULL,
+            fee_cents INT NULL,
+            pay_type VARCHAR(24) NULL,
+            installments SMALLINT NULL,
+            fees_at DATETIME NULL" . $index('ix_orders_email', 'email') . "
         )$tail");
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS download_tokens (
@@ -158,6 +164,9 @@ final class Db
         if ($current >= 1 && $current < 2) {
             self::upgradeTo2($pdo);
         }
+        if ($current >= 1 && $current < 4) {
+            self::upgradeTo4($pdo);
+        }
         if ($current < self::SCHEMA_VERSION) {
             $pdo->prepare('INSERT INTO schema_version (version) VALUES (?)')->execute([self::SCHEMA_VERSION]);
         }
@@ -180,6 +189,23 @@ final class Db
         }
         // D25: the cap goes from 5 to 10 file downloads, also for links already sent.
         $pdo->exec('UPDATE download_tokens SET max_downloads = 10 WHERE max_downloads < 10');
+    }
+
+    /** Schema 3 → 4 (D29): the commission columns of orders. Safe to run twice at the same time. */
+    private static function upgradeTo4(\PDO $pdo): void
+    {
+        foreach (['net_cents' => 'INT NULL', 'fee_cents' => 'INT NULL', 'pay_type' => 'VARCHAR(24) NULL', 'installments' => 'SMALLINT NULL', 'fees_at' => 'DATETIME NULL'] as $column => $type) {
+            if (self::hasColumn($pdo, 'orders', $column)) {
+                continue;
+            }
+            try {
+                $pdo->exec('ALTER TABLE orders ADD COLUMN ' . $column . ' ' . $type);
+            } catch (\PDOException $e) {
+                if (!self::hasColumn($pdo, 'orders', $column)) {
+                    throw $e;
+                }
+            }
+        }
     }
 
     private static function hasColumn(\PDO $pdo, string $table, string $column): bool

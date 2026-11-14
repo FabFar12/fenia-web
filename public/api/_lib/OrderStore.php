@@ -94,6 +94,26 @@ final class OrderStore
         return $stmt->fetchAll();
     }
 
+    /**
+     * Paid orders whose Mercado Pago commission is not known yet (D29), oldest first.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function paidWithoutFees(string $paidBefore, int $limit): array
+    {
+        $limit = max(1, min(100, $limit));
+        $stmt = $this->pdo->prepare("SELECT id, reference FROM orders WHERE status = 'paid' AND fees_at IS NULL AND paid_at IS NOT NULL AND paid_at <= ? ORDER BY paid_at LIMIT $limit");
+        $stmt->execute([$paidBefore]);
+        return $stmt->fetchAll();
+    }
+
+    /** What Mercado Pago kept on a sale (D29): net received, the difference with the price, how it was paid. */
+    public function setFees(int $id, int $netCents, int $feeCents, ?string $payType, ?int $installments, string $now): void
+    {
+        $this->pdo->prepare('UPDATE orders SET net_cents = ?, fee_cents = ?, pay_type = ?, installments = ?, fees_at = ? WHERE id = ?')
+            ->execute([$netCents, $feeCents, $payType, $installments, $now, $id]);
+    }
+
     /** @return list<array<string, mixed>> pending orders already bound to an MP order */
     public function pendingWithMpOrder(string $createdAfter): array
     {

@@ -15,6 +15,17 @@ defined('FENIA_API') || exit;
 final class Metrics
 {
     public const RANGES = ['hoy' => 0, '7d' => 6, '30d' => 29, 'todo' => null];
+
+    /** Mercado Pago's payment_type_id, in plain words. */
+    private const PAY_TYPES = [
+        'account_money' => 'Dinero en cuenta',
+        'credit_card' => 'Tarjeta de crédito',
+        'debit_card' => 'Tarjeta de débito',
+        'prepaid_card' => 'Tarjeta prepaga',
+        'bank_transfer' => 'Transferencia',
+        'ticket' => 'Efectivo',
+        'digital_currency' => 'Crédito de Mercado Pago',
+    ];
     private const TZ = 'America/Argentina/Buenos_Aires';
 
     private \PDO $pdo;
@@ -131,9 +142,33 @@ final class Metrics
         foreach ($this->rows('SELECT kit_id, COUNT(*) AS n FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ? GROUP BY kit_id ORDER BY n DESC', [$fromUtc]) as $row) {
             $perKit[] = ['name' => (string) ($this->catalog->find((string) $row['kit_id'])['title'] ?? $row['kit_id']), 'n' => (int) $row['n']];
         }
+        // D29: what Mercado Pago kept, as it reports it on each sale (filled by the hourly job).
+        $known = $this->rows('SELECT expected_cents, net_cents, fee_cents, pay_type FROM orders WHERE paid_at IS NOT NULL AND paid_at >= ? AND fees_at IS NOT NULL', [$fromUtc]);
+        $knownGross = array_sum(array_map(static fn (array $r): int => (int) $r['expected_cents'], $known));
+        $net = array_sum(array_map(static fn (array $r): int => (int) $r['net_cents'], $known));
+        $fees = array_sum(array_map(static fn (array $r): int => (int) $r['fee_cents'], $known));
+        $byType = [];
+        foreach ($known as $row) {
+            $type = (string) ($row['pay_type'] ?? '');
+            $byType[$type] ??= ['n' => 0, 'gross' => 0, 'fee' => 0];
+            $byType[$type]['n']++;
+            $byType[$type]['gross'] += (int) $row['expected_cents'];
+            $byType[$type]['fee'] += (int) $row['fee_cents'];
+        }
+        uasort($byType, static fn (array $a, array $b): int => $b['n'] <=> $a['n']);
+        $payTypes = [];
+        foreach ($byType as $type => $t) {
+            $payTypes[] = ['name' => self::PAY_TYPES[$type] ?? ($type === '' ? 'Sin dato' : $type), 'n' => $t['n'], 'fee_pct' => $t['gross'] > 0 ? round(100 * $t['fee'] / $t['gross'], 2) : null];
+        }
         return [
             'count' => count($paid),
             'revenue' => intdiv($cents, 100),
+            'net' => $known === [] ? null : $net / 100,
+            'fees' => $known === [] ? null : $fees / 100,
+            'fee_pct' => $knownGross > 0 ? round(100 * $fees / $knownGross, 2) : null,
+            'net_avg' => $known === [] ? null : round($net / 100 / count($known), 2),
+            'fees_pending' => count($paid) - count($known),
+            'by_pay_type' => $payTypes,
             'per_kit' => $perKit,
             'refunds' => $this->count("SELECT COUNT(*) FROM orders WHERE status = 'revoked' AND updated_at >= ?", [$fromUtc]),
             'failed' => $this->count("SELECT COUNT(*) FROM orders WHERE status = 'failed' AND created_at >= ?", [$fromUtc]),
@@ -169,7 +204,7 @@ final class Metrics
     {
         $out = [];
         $rows = $this->rows(
-            "SELECT o.id, o.kit_id, o.email, o.expected_cents, o.paid_at, o.status,
+            "SELECT o.id, o.kit_id, o.email, o.expected_cents, o.net_cents, o.fees_at, o.paid_at, o.status,
                     (SELECT COUNT(*) FROM download_log l JOIN download_tokens t ON t.id = l.token_id WHERE t.order_id = o.id AND l.kind = 'open') AS opens
              FROM orders o WHERE o.paid_at IS NOT NULL ORDER BY o.paid_at DESC LIMIT 10"
         );
@@ -180,6 +215,7 @@ final class Metrics
                 'kit' => (string) ($this->catalog->find((string) $row['kit_id'])['title'] ?? $row['kit_id']),
                 'email' => Shop::maskEmail((string) $row['email']),
                 'amount' => intdiv((int) $row['expected_cents'], 100),
+                'net' => $row['fees_at'] === null ? null : ((int) $row['net_cents']) / 100,
                 'refunded' => $row['status'] === 'revoked',
                 'opened' => (int) $row['opens'] > 0,
             ];

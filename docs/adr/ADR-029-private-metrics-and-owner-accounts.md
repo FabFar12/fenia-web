@@ -28,6 +28,8 @@ The research ([propuesta-metricas.md](../ventas/propuesta-metricas.md)) found th
    - **Uptime:** UptimeRobot (free, commercial use allowed since June 2026), from the dev's account.
    - **Google searches:** Google Search Console, from the dev's account.
 
+**Amendment 2026-11-14 (D29): Mercado Pago's real commission.** The hourly job asks Mercado Pago, by our order code only (`/v1/payments/search?external_reference=`), what it kept on each new sale (`transaction_details.net_received_amount`) and stores net, commission (price minus net), payment type and installments (schema 4). The screen shows gross, commission in pesos and percent, net, average net per sale and commission by payment type. It never runs on the delivery path.
+
 ## Consequences
 
 - One private place where visits and sales meet: the funnel "saw a kit → went to pay → paid" by kit, at no monthly cost.

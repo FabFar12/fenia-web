@@ -44,6 +44,24 @@ final class MpClient
     }
 
     /**
+     * The payments of one of our orders (its external_reference), with what
+     * Mercado Pago kept: transaction_details.net_received_amount and
+     * fee_details. Only our own order codes can be asked: the account has
+     * other movements that are none of our business.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function paymentsOf(string $reference): array
+    {
+        if (!Validate::orderReference($reference)) {
+            throw new MpException('Invalid order reference', 400);
+        }
+        $found = $this->call('GET', '/v1/payments/search?' . http_build_query(['external_reference' => $reference, 'limit' => 20]));
+        $results = $found['results'] ?? [];
+        return is_array($results) ? array_values(array_filter($results, static fn ($p): bool => is_array($p) && ($p['external_reference'] ?? null) === $reference)) : [];
+    }
+
+    /**
      * @param array<string, mixed>|null $body
      * @param array<string, string> $extraHeaders
      * @return array<string, mixed>

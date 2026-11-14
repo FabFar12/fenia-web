@@ -88,14 +88,20 @@ import Nav from '../components/Nav.astro';
     updated: string;
     visits: { visitors: number; visits: number; views: number; whatsapp: number; sources: Share[]; devices: Share[]; pages: { name: string; n: number }[]; per_day: Day[] };
     funnel: { total: { seen: number; checkout: number; paid: number; rate: number | null }; kits: { id: string; title: string; seen: number; checkout: number; paid: number }[]; since: string | null };
-    sales: { count: number; revenue: number; refunds: number; failed: number; review: number; mail_pending: number; per_kit: { name: string; n: number }[]; per_day: Day[] };
+    sales: {
+      count: number; revenue: number; net: number | null; fees: number | null; fee_pct: number | null; net_avg: number | null; fees_pending: number;
+      by_pay_type: { name: string; n: number; fee_pct: number | null }[];
+      refunds: number; failed: number; review: number; mail_pending: number; per_kit: { name: string; n: number }[]; per_day: Day[];
+    };
     kit_use: Record<'buyers' | 'opened' | 'read' | 'fichas' | 'imprimibles' | 'zip' | 'guide' | 'renewed', number>;
-    recent: { when: string; kit: string; email: string; amount: number; refunded: boolean; opened: boolean }[];
+    recent: { when: string; kit: string; email: string; amount: number; net: number | null; refunded: boolean; opened: boolean }[];
     speed: { url: string; day: string; score: number | null; lcp_ms: number | null; cls: number | null; tbt_ms: number | null; field_lcp_ms: number | null; field_inp_ms: number | null; field_cls: number | null; error: string | null }[];
   };
 
   const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const money = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+  const cents = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  const pct = (n: number) => `${n.toLocaleString('es-AR', { maximumFractionDigits: 2 })} %`;
   const int = (n: number) => new Intl.NumberFormat('es-AR').format(n);
   const DEVICES: Record<string, string> = { celular: 'Celular', compu: 'Compu', tablet: 'Tablet', otro: 'Otro' };
 
@@ -115,7 +121,7 @@ import Nav from '../components/Nav.astro';
     }
     return box;
   }
-  function bars(title: string, rows: { name: string; n: number; pct?: number }[], empty: string): HTMLElement {
+  function bars(title: string, rows: { name: string; n: number; pct?: number; text?: string }[], empty: string): HTMLElement {
     const box = el('div', 'mt-block');
     box.append(el('h3', '', title));
     if (rows.length === 0) {
@@ -131,7 +137,7 @@ import Nav from '../components/Nav.astro';
       const fill = el('span', 'mt-bar-fill');
       fill.style.width = `${Math.max(2, Math.round((100 * row.n) / max))}%`;
       track.append(fill);
-      li.append(label, track, el('span', 'mt-bar-value', row.pct !== undefined ? `${row.pct} %` : int(row.n)));
+      li.append(label, track, el('span', 'mt-bar-value', row.text ?? (row.pct !== undefined ? `${row.pct} %` : int(row.n))));
       list.append(li);
     }
     box.append(list);
@@ -181,7 +187,21 @@ import Nav from '../components/Nav.astro';
       bars('Por kit: vieron la página', f.kits.map((k) => ({ name: k.title, n: k.seen })), 'Sin kits a la venta.'));
 
     const s = r.sales;
-    const sales = [stats([['Ventas', int(s.count)], ['Ingresos', money(s.revenue)], ['Reembolsos', int(s.refunds)], ['Pagos que fallaron', int(s.failed)]])];
+    const sales = [stats([
+      ['Ventas', int(s.count)],
+      ['Ingresos brutos', money(s.revenue)],
+      ['Comisión de Mercado Pago', s.fees === null ? '—' : `${cents(s.fees)}${s.fee_pct === null ? '' : ` (${pct(s.fee_pct)})`}`],
+      ['Neto que queda', s.net === null ? '—' : cents(s.net)],
+      ['Neto promedio por venta', s.net_avg === null ? '—' : cents(s.net_avg)],
+      ['Reembolsos', int(s.refunds)],
+      ['Pagos que fallaron', int(s.failed)],
+    ])];
+    if (s.fees_pending > 0) {
+      sales.push(el('p', 'mt-note', `La comisión de ${s.fees_pending} venta(s) todavía no está: Mercado Pago la informa y se completa sola dentro de la hora.`));
+    }
+    if (s.by_pay_type.length > 0) {
+      sales.push(bars('Por medio de pago (comisión)', s.by_pay_type.map((t) => ({ name: t.name, n: t.n, text: `${int(t.n)} · ${t.fee_pct === null ? '—' : pct(t.fee_pct)}` })), ''));
+    }
     if (s.review > 0 || s.mail_pending > 0) {
       sales.push(el('p', 'mt-warn', `Para mirar: ${s.review} orden(es) para revisar a mano y ${s.mail_pending} mail(s) de entrega sin enviar.`));
     }
@@ -198,11 +218,11 @@ import Nav from '../components/Nav.astro';
     } else {
       const table = el('table', 'mt-table');
       const head = el('tr');
-      for (const h of ['Fecha', 'Kit', 'Comprador', 'Monto', '¿Abrió su kit?']) head.append(el('th', '', h));
+      for (const h of ['Fecha', 'Kit', 'Comprador', 'Monto', 'Neto', '¿Abrió su kit?']) head.append(el('th', '', h));
       table.append(head);
       for (const sale of r.recent) {
         const row = el('tr');
-        row.append(el('td', '', sale.when), el('td', '', sale.kit), el('td', '', sale.email), el('td', '', money(sale.amount)),
+        row.append(el('td', '', sale.when), el('td', '', sale.kit), el('td', '', sale.email), el('td', '', money(sale.amount)), el('td', '', sale.net === null ? '—' : cents(sale.net)),
           el('td', sale.opened ? 'mt-yes' : 'mt-no', sale.refunded ? 'Reembolsada' : sale.opened ? 'Sí' : 'Todavía no'));
         table.append(row);
       }
