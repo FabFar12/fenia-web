@@ -89,9 +89,9 @@ export const METRICAS = {
     kits: [{ id: 'kit-ensenar-con-ia', title: 'Enseñar con IA sin automatizar la pedagogía', seen: 200, checkout: 20, paid: 6 }],
     since: '08/11',
   },
-  sales: { count: 12, revenue: 156000, refunds: 0, failed: 1, review: 0, mail_pending: 0, per_kit: [{ name: 'Evaluar en tiempos de IA', n: 5 }, { name: 'Aprender con IA sin dejar de pensar', n: 4 }], per_day: Array.from({ length: 30 }, (_, i) => ({ day: `${(i % 30) + 1}/11`, n: i % 4 })) },
+  sales: { count: 12, revenue: 156000, net: 143540.76, fees: 12459.24, fee_pct: 7.99, net_avg: 11961.73, fees_pending: 0, by_pay_type: [{ name: 'Dinero en cuenta', n: 9, fee_pct: 7.99 }, { name: 'Tarjeta de crédito', n: 3, fee_pct: 7.99 }], refunds: 0, failed: 1, review: 0, mail_pending: 0, per_kit: [{ name: 'Evaluar en tiempos de IA', n: 5 }, { name: 'Aprender con IA sin dejar de pensar', n: 4 }], per_day: Array.from({ length: 30 }, (_, i) => ({ day: `${(i % 30) + 1}/11`, n: i % 4 })) },
   kit_use: { buyers: 12, opened: 11, read: 9, fichas: 7, imprimibles: 3, zip: 6, guide: 4, renewed: 1 },
-  recent: [{ when: '14/11 09:12', kit: 'Enseñar con IA sin automatizar la pedagogía', email: 'a***@gmail.com', amount: 13000, refunded: false, opened: true }],
+  recent: [{ when: '14/11 09:12', kit: 'Enseñar con IA sin automatizar la pedagogía', email: 'a***@gmail.com', amount: 13000, net: 11961.73, refunded: false, opened: true }],
   speed: [{ url: 'https://fenia.com.ar/', day: '2026-11-14', score: 88, lcp_ms: 2300, cls: 0.04, tbt_ms: 120, field_lcp_ms: null, field_inp_ms: null, field_cls: null, error: null }],
 };
 

@@ -70,6 +70,25 @@ final class StoresTest extends TestCase
         self::assertSame('fichas', $this->pdo->query('SELECT kind FROM download_log')->fetchColumn());
     }
 
+    /** D29: a database of schema 3 gets the commission columns of orders. */
+    public function testMigrationFromSchema3AddsTheCommissionColumns(): void
+    {
+        foreach (['net_cents', 'fee_cents', 'pay_type', 'installments', 'fees_at'] as $column) {
+            $this->pdo->exec('ALTER TABLE orders DROP COLUMN ' . $column);
+        }
+        $this->pdo->exec('DELETE FROM schema_version');
+        $this->pdo->exec('INSERT INTO schema_version (version) VALUES (3)');
+        $id = $this->newOrder();
+
+        Db::migrate($this->pdo);
+        Db::migrate($this->pdo);
+
+        $this->orders->setFees($id, 1196173, 103827, 'account_money', 1, self::NOW);
+        $row = $this->pdo->query("SELECT net_cents, fee_cents, pay_type FROM orders WHERE id = $id")->fetch();
+        self::assertSame([1196173, 103827, 'account_money'], [(int) $row['net_cents'], (int) $row['fee_cents'], $row['pay_type']]);
+        self::assertSame(Db::SCHEMA_VERSION, (int) $this->pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn());
+    }
+
     public function testCreatesAndFindsOrders(): void
     {
         $id = $this->newOrder();

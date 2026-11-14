@@ -613,6 +613,55 @@ final class Shop
         return $stats;
     }
 
+    /**
+     * What Mercado Pago kept on each sale (D29), for the internal metrics: the
+     * net received and its difference with the price (commission plus any tax
+     * or withholding). Asked by our order code, so no other movement of the
+     * account is ever read. Runs from the hourly job, never on the delivery
+     * path: a failure here can only leave a number empty for an hour.
+     *
+     * @return array{checked: int, updated: int, errors: int}
+     */
+    public function syncFees(int $limit = 20): array
+    {
+        $stats = ['checked' => 0, 'updated' => 0, 'errors' => 0];
+        // A few minutes after the payment, so Mercado Pago has the final figures.
+        foreach ($this->orders->paidWithoutFees(Db::now($this->now()->modify('-10 minutes')), $limit) as $order) {
+            $stats['checked']++;
+            try {
+                $payments = array_values(array_filter(
+                    $this->mp->paymentsOf((string) $order['reference']),
+                    static fn (array $p): bool => ($p['status'] ?? '') === 'approved'
+                ));
+            } catch (MpException $e) {
+                $stats['errors']++;
+                $this->log('warning', 'fees_mp_error', ['order' => (int) $order['id'], 'http' => $e->getCode()]);
+                continue;
+            }
+            if ($payments === []) {
+                continue; // not listed yet: the next run asks again
+            }
+            $gross = 0;
+            $net = 0;
+            foreach ($payments as $payment) {
+                $gross += Money::toCents($payment['transaction_amount'] ?? null) ?? 0;
+                $net += Money::toCents($payment['transaction_details']['net_received_amount'] ?? null) ?? 0;
+            }
+            $type = $payments[0]['payment_type_id'] ?? null;
+            $installments = $payments[0]['installments'] ?? null;
+            $this->orders->setFees(
+                (int) $order['id'],
+                $net,
+                max(0, $gross - $net),
+                is_string($type) && preg_match('/^[a-z_]{1,24}$/D', $type) ? $type : null,
+                is_int($installments) ? $installments : null,
+                Db::now($this->now())
+            );
+            $stats['updated']++;
+        }
+        return $stats;
+    }
+
     // ── Delivery ────────────────────────────────────────────────────────────
 
     /**

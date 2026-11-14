@@ -168,7 +168,8 @@ The PHP sales API ships inside `dist/api/` with every deploy, but what makes it 
   "Tu kit" use. Accounts are the config's `owners` (user => `password_hash`); the plaintext passwords live only in
   `~/fenia-secrets/<env>/cuentas-metricas.txt`. Visits are counted by `/api/hit.php` without cookies. The hourly
   job checks the site's speed once a day (PageSpeed Insights; optional `psi_api_key`) and deletes visits older than
-  400 days and expired sessions. Uptime: UptimeRobot; searches: Google Search Console (the dev's accounts).
+  400 days and expired sessions. Every hour it also stores what Mercado Pago kept on each new sale (D29), asked by
+  our order code only. Uptime: UptimeRobot; searches: Google Search Console (the dev's accounts).
 - **Database schema** migrates itself on the first request after a deploy (a marker file per version in the
   private folder). Schema 2 (D25) adds `download_log.kind` and raises links already sent to 10 downloads.
 - **Health check:** `GET /api/health.php` → `{"ok":true,"sales":true,"kits":true,…}`. A `503` means the API is

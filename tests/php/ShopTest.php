@@ -605,6 +605,40 @@ final class ShopTest extends TestCase
         self::assertStringNotContainsString('te conviene la compu', $mail['text']);
     }
 
+    // ── Mercado Pago's commission (D29) ─────────────────────────────────────
+
+    public function testSyncFeesKeepsWhatMercadoPagoKept(): void
+    {
+        [$shop, $ref] = $this->delivered();
+        self::assertSame(['checked' => 0, 'updated' => 0, 'errors' => 0], $shop->syncFees(), 'waits a few minutes after the payment');
+
+        $this->now = $this->now->modify('+15 minutes');
+        self::assertSame(['checked' => 1, 'updated' => 0, 'errors' => 0], $shop->syncFees(), 'not listed by MP yet: asked again later');
+
+        $this->mp->payments[$ref] = [
+            ['status' => 'refunded', 'transaction_amount' => 13000, 'transaction_details' => ['net_received_amount' => 0], 'external_reference' => $ref],
+            ['status' => 'approved', 'transaction_amount' => 13000, 'transaction_details' => ['net_received_amount' => 11961.73],
+             'fee_details' => [['type' => 'mercadopago_fee', 'amount' => 1038.27, 'fee_payer' => 'collector']],
+             'payment_type_id' => 'account_money', 'installments' => 1, 'external_reference' => $ref],
+        ];
+        self::assertSame(['checked' => 1, 'updated' => 1, 'errors' => 0], $shop->syncFees());
+        $order = $this->order($ref);
+        self::assertSame([1196173, 103827, 'account_money', 1], [(int) $order['net_cents'], (int) $order['fee_cents'], $order['pay_type'], (int) $order['installments']]);
+        self::assertSame(['checked' => 0, 'updated' => 0, 'errors' => 0], $shop->syncFees(), 'done once');
+        $search = array_values(array_filter($this->mp->requests, static fn (array $r): bool => str_contains($r['url'], 'payments/search')));
+        self::assertStringContainsString('external_reference=' . $ref, $search[0]['url'], 'only our own order is asked');
+    }
+
+    public function testSyncFeesNeverBreaksOnMercadoPagoErrors(): void
+    {
+        [$shop, $ref] = $this->delivered();
+        $this->now = $this->now->modify('+1 hour');
+        $this->mp->failWith = 500;
+        self::assertSame(['checked' => 1, 'updated' => 0, 'errors' => 1], $shop->syncFees());
+        self::assertContains('fees_mp_error', $this->events());
+        self::assertNull($this->order($ref)['fees_at'], 'asked again next hour');
+    }
+
     // ── "No me llegó" ───────────────────────────────────────────────────────
 
     public function testResendAnswersTheSameAndOnlyMailsTheBuyer(): void

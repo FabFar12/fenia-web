@@ -19,6 +19,8 @@ final class FakeMp
     public array $requests = [];
     public ?int $failWith = null;
     public string $checkoutHost = 'www.mercadopago.com';
+    /** @var array<string, list<array<string, mixed>>> external_reference => payments (search API, D29) */
+    public array $payments = [];
 
     /** @param array<string, string> $headers */
     public function __invoke(string $method, string $url, array $headers, ?string $body): array
@@ -40,6 +42,10 @@ final class FakeMp
                 'checkout_url' => 'https://' . $this->checkoutHost . '/checkout/v1/redirect?order_id=' . $id,
             ];
             return ['status' => 201, 'body' => (string) json_encode($this->orders[$id])];
+        }
+        if (str_contains($url, '/v1/payments/search')) {
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+            return ['status' => 200, 'body' => (string) json_encode(['results' => $this->payments[(string) ($query['external_reference'] ?? '')] ?? []])];
         }
         $id = substr($url, strrpos($url, '/') + 1);
         return isset($this->orders[$id])

@@ -22,11 +22,12 @@ final class SpeedCheck
     /**
      * @param list<string> $urls
      * @param callable(string): array{status: int, body: string} $get
-     * @return int pages checked
+     * @return array{checked: int, failed: int}
      */
-    public static function run(\PDO $pdo, array $urls, string $apiKey, callable $get, \DateTimeImmutable $now): int
+    public static function run(\PDO $pdo, array $urls, string $apiKey, callable $get, \DateTimeImmutable $now): array
     {
         $day = $now->setTimezone(new \DateTimeZone('America/Argentina/Buenos_Aires'))->format('Y-m-d');
+        $failed = 0;
         foreach ($urls as $url) {
             $query = ['url' => $url, 'strategy' => 'mobile', 'category' => 'performance'] + ($apiKey !== '' ? ['key' => $apiKey] : []);
             $row = ['score' => null, 'lcp_ms' => null, 'cls_milli' => null, 'tbt_ms' => null, 'field_lcp_ms' => null, 'field_inp_ms' => null, 'field_cls_milli' => null, 'error' => null];
@@ -38,13 +39,16 @@ final class SpeedCheck
                 $row = self::parse(json_decode($res['body'], true, 512, JSON_THROW_ON_ERROR)) + $row;
             } catch (\Throwable $e) {
                 $row['error'] = mb_substr($e->getMessage(), 0, 160);
+                $failed++;
             }
+            // One row per page and day: a retry replaces the failed one.
+            $pdo->prepare('DELETE FROM speed_checks WHERE day = ? AND url = ?')->execute([$day, mb_substr($url, 0, 191)]);
             $pdo->prepare(
                 'INSERT INTO speed_checks (day, url, score, lcp_ms, cls_milli, tbt_ms, field_lcp_ms, field_inp_ms, field_cls_milli, error, created_at)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             )->execute([$day, mb_substr($url, 0, 191), $row['score'], $row['lcp_ms'], $row['cls_milli'], $row['tbt_ms'], $row['field_lcp_ms'], $row['field_inp_ms'], $row['field_cls_milli'], $row['error'], Db::now($now)]);
         }
-        return count($urls);
+        return ['checked' => count($urls), 'failed' => $failed];
     }
 
     /**
