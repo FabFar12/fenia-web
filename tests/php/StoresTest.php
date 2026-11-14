@@ -48,6 +48,26 @@ final class StoresTest extends TestCase
         Db::migrate($this->pdo);
         Db::migrate($this->pdo);
         self::assertSame(1, (int) $this->pdo->query('SELECT COUNT(*) FROM schema_version')->fetchColumn());
+        self::assertSame(Db::SCHEMA_VERSION, (int) $this->pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn());
+    }
+
+    /** D25: a database of schema 1 (production since the launch) gets the new column and 10 downloads per link. */
+    public function testMigrationFromSchema1RaisesLinksToTenAndLogsKinds(): void
+    {
+        [, , $old] = $this->paidOrderWithToken('2026-12-06 12:00:00', 5);
+        $this->tokens->consume($this->pdo->query("SELECT token_hash FROM download_tokens WHERE id = $old")->fetchColumn(), self::NOW);
+        $this->pdo->exec('ALTER TABLE download_log DROP COLUMN kind');
+        $this->pdo->exec('DELETE FROM schema_version');
+        $this->pdo->exec('INSERT INTO schema_version (version) VALUES (1)');
+
+        Db::migrate($this->pdo);
+        Db::migrate($this->pdo);
+
+        $token = $this->pdo->query("SELECT max_downloads, download_count FROM download_tokens WHERE id = $old")->fetch();
+        self::assertSame([10, 1], [(int) $token['max_downloads'], (int) $token['download_count']], 'raised, the download already made is kept');
+        self::assertSame(2, (int) $this->pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn());
+        $this->tokens->logDownload($old, 'ip', null, self::NOW, 'fichas');
+        self::assertSame('fichas', $this->pdo->query('SELECT kind FROM download_log')->fetchColumn());
     }
 
     public function testCreatesAndFindsOrders(): void
@@ -146,6 +166,28 @@ final class StoresTest extends TestCase
             $this->tokens->logDownload($tokenId, hash('sha256', $ip), 'Mozilla/5.0', self::NOW);
         }
         self::assertSame(3, $this->tokens->distinctIps($tokenId));
+
+        // "Tu kit": reading and the fichas from other IPs (a phone on 4G and on wifi) are not sharing.
+        foreach (['open', 'read', 'fichas', 'imprimibles'] as $i => $kind) {
+            $this->tokens->logDownload($tokenId, hash('sha256', 'ip-view-' . $i), null, self::NOW, $kind);
+        }
+        self::assertSame(3, $this->tokens->distinctIps($tokenId));
+        $this->tokens->logDownload($tokenId, hash('sha256', 'ip-d'), null, self::NOW, 'guide');
+        self::assertSame(4, $this->tokens->distinctIps($tokenId), 'the guide PDF is a download');
+    }
+
+    public function testFindsATokenByIdWithItsOrder(): void
+    {
+        [$orderId, $hash, $tokenId] = $this->paidOrderWithToken();
+        $row = $this->tokens->findById($tokenId);
+        self::assertSame($hash, $row['token_hash']);
+        self::assertSame('kit-ensenar-con-ia', $row['kit_id']);
+        self::assertSame('paid', $row['order_status']);
+        self::assertSame('ana@example.com', $row['order_email']);
+        self::assertSame(self::NOW, $row['order_paid_at']);
+        self::assertSame($row, $this->tokens->findByHash($hash));
+        self::assertSame($orderId, (int) $row['order_id']);
+        self::assertNull($this->tokens->findById($tokenId + 100));
     }
 
     public function testU30RateLimiterBlocksAboveTheLimitAndForgetsAfterTheWindow(): void

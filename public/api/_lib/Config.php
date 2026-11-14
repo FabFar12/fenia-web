@@ -39,10 +39,20 @@ final class Config
 
     private const DEFAULTS = [
         'download_days' => 30,      // D3
-        'max_downloads' => 5,       // D3
+        'max_downloads' => 10,      // D25: only file downloads count; reading and the fichas do not
         'order_ttl_minutes' => 60,  // checkout links expire (threat model B3)
         'alert_email' => '',        // alerts and daily report; '' = mail_reply_to
         'daily_report' => true,
+    ];
+
+    /**
+     * Optional files of a kit besides its ZIP: name => [extension, size key].
+     * The size (pages, number of fichas) is only shown on the buyer's page.
+     */
+    public const RESOURCES = [
+        'guide' => ['pdf', 'pages'],         // D24: the guide PDF, opens on a phone without unzipping
+        'fichas' => ['html', 'count'],       // D25 "Tu kit": interactive fichas, served as a page of the site
+        'imprimibles' => ['html', 'count'],  // D25 "Tu kit": the printable versions
     ];
 
     /** @var array<string, mixed> */
@@ -92,13 +102,16 @@ final class Config
             ) {
                 throw new \RuntimeException('Config kit entry malformed');
             }
-            // Optional guide PDF served on its own (opens on a phone without unzipping).
-            if (isset($kit['guide']) && (
-                !is_array($kit['guide']) || !isset($kit['guide']['file'], $kit['guide']['sha256'])
-                || !is_string($kit['guide']['file']) || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*\.pdf$/D', $kit['guide']['file'])
-                || !is_string($kit['guide']['sha256']) || !preg_match('/^[a-f0-9]{64}$/D', $kit['guide']['sha256'])
-            )) {
-                throw new \RuntimeException('Config kit guide malformed');
+            foreach (self::RESOURCES as $name => [$extension, $sizeKey]) {
+                $resource = $kit[$name] ?? null;
+                if ($resource !== null && (
+                    !is_array($resource) || !isset($resource['file'], $resource['sha256'])
+                    || !is_string($resource['file']) || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*\.' . $extension . '$/D', $resource['file'])
+                    || !is_string($resource['sha256']) || !preg_match('/^[a-f0-9]{64}$/D', $resource['sha256'])
+                    || (isset($resource[$sizeKey]) && (!is_int($resource[$sizeKey]) || $resource[$sizeKey] < 1 || $resource[$sizeKey] > 999))
+                )) {
+                    throw new \RuntimeException("Config kit $name malformed");
+                }
             }
         }
         return new self($values + self::DEFAULTS);
@@ -129,7 +142,22 @@ final class Config
     /** The kit's guide PDF, served on its own, if configured. @return array{file: string, sha256: string}|null */
     public function guide(string $kitId): ?array
     {
-        $guide = $this->values['kits'][$kitId]['guide'] ?? null;
-        return is_array($guide) ? ['file' => $guide['file'], 'sha256' => $guide['sha256']] : null;
+        $guide = $this->resource($kitId, 'guide');
+        return $guide === null ? null : ['file' => $guide['file'], 'sha256' => $guide['sha256']];
+    }
+
+    /**
+     * One of the kit's optional files (see RESOURCES), if configured.
+     *
+     * @return array{file: string, sha256: string, size: ?int}|null
+     */
+    public function resource(string $kitId, string $name): ?array
+    {
+        $resource = isset(self::RESOURCES[$name]) ? ($this->values['kits'][$kitId][$name] ?? null) : null;
+        if (!is_array($resource)) {
+            return null;
+        }
+        $size = $resource[self::RESOURCES[$name][1]] ?? null;
+        return ['file' => $resource['file'], 'sha256' => $resource['sha256'], 'size' => is_int($size) ? $size : null];
     }
 }

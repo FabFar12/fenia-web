@@ -2,7 +2,7 @@
 
 > **Leé esto primero.** Es el punto de entrada para cualquier persona o sesión de IA que trabaje en la venta de kits.
 > Arquitectura: [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) · Riesgos (anti-estafa y bugs): [threat-model.md](./threat-model.md) · Pruebas: [test-plan.md](./test-plan.md) · Tareas humanas de la Fase 1: [guia-fase-1.md](./guia-fase-1.md)
-> Última actualización: 2026-11-07 (lanzamiento).
+> Última actualización: 2026-11-14 ("Tu kit" en staging, D26).
 
 ## Objetivo
 
@@ -79,7 +79,7 @@ Del dev o de Fab:
 De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
-8. **Entorno FENIA (D25):** propuesta visual de "Tu kit" (propuesta-visual.md §6) **aprobada por el dev el 2026-11-12**, con el tope de 10 descargas. Sigue: fase 1 con Enseñar en staging, cuando el dev dé la orden de avanzar → producción. Mientras, el dev reformatea Evaluar y Aprender con Claude Design (`reformateo\LEEME.txt`).
+8. **"Tu kit" (D25, D26):** construida y probada; staging con material de prueba. Los tres kits quedaron estandarizados y verificados (Evaluar y Aprender con Claude Design). Sigue: el dev la mira en staging y da el OK para el mail nuevo, la subida a producción de los tres kits y la corrección de H-11 en el ZIP de Enseñar.
 9. **Después del entorno:** sección interna de métricas del sitio y de ventas, solo para el dev y Fab (pedido del dev, 2026-11-12).
 
 ## Cómo se corren las pruebas
@@ -91,7 +91,7 @@ De la IA:
 | Suite de seguridad (S) | PowerShell: `$env:BASE_URL="https://fenia.com.ar"; npm run test:ventas` | Contra producción, solo las pruebas ✱. Con `MODE=staging` contra staging, todas |
 | Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), capturas de referencia y accesibilidad (axe). 60 pruebas, unos 2 minutos |
 | E2E en producción | `npm run e2e:prod` | Lo mismo pero sin comprar nada y sin capturas de referencia. 54 pruebas |
-| Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, descarga, reembolso y link anulado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP |
+| Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, "Tu kit" (guía, fichas, descargas), reembolso y kit cerrado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP. Con `E2E_KEEP=1` no reembolsa e imprime el link, para que una persona pruebe staging |
 | Capturas de referencia | `npm run e2e:update` | Solo después de un cambio visual aprobado. Las capturas nuevas quedan en `tests/e2e/fotos/` y hay que hacerles commit |
 
 `npm run dev` no cambia: ninguna de estas pruebas se encadena ahí ([ADR-006](../adr/ADR-006-dx-single-command-dev.md)).
@@ -108,6 +108,11 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D26 | 2026-11-14 | **"Tu kit" (fase 1 de D25), construida y probada para staging.**
+  - `/descarga` pasa a ser "Tu kit" ([propuesta-visual.md §6](./propuesta-visual.md)): la guía para leer o bajar, las fichas y los imprimibles montados, y el ZIP. Leer y usar no gasta nada. El tope es de **10 descargas de archivos**, también para los links ya enviados (la base migra sola al esquema 2).
+  - El token no viaja en ninguna URL: el dispositivo recibe un **pase de lectura** (cookie `HttpOnly` firmada) y las páginas del kit se sirven con él (A18). Esas páginas tienen una CSP propia en `api/.htaccess`, que no deja salir nada a internet (A19).
+  - **Kits estandarizados:** Evaluar y Aprender, con guía (prompts integrados), fichas, imprimibles y Word, verificados palabra por palabra contra los originales. Los paquetes listos para subir están en `C:\Fenia\entregables\tu-kit\` (fuera del repo).
+  - **Falta el OK del dev para:** (1) el texto nuevo del mail para kits con fichas; (2) subir a producción los kits nuevos y las páginas; (3) usar en el ZIP de Enseñar la corrección de H-11 | 🟡 Staging · producción con OK del dev |
 | D25 | 2026-11-12 | **Entorno FENIA ("Tu kit" / "Mis kits")**, acordado con el dev tras la idea de Fab. En vez de bajar un archivo, la compradora llega a una página con su kit montado. En fases:
   - **Fase 1, "Tu kit"**: la página de descarga pasa a mostrar la guía (leer o bajar), las fichas interactivas montadas, los imprimibles y el ZIP. Ver no gasta descargas. Arranca con Enseñar, el único con fichas HTML. Los links ya mandados siguen funcionando.
   - **Fase 2, "Mis kits"**: entrar con el email, sin contraseña (link mágico). Todas las compras de ese email, **de por vida**; se limitan solo las descargas de archivos (reemplaza D3). La identidad y una marca al pie de los PDF reemplazan al contador como freno a compartir.
@@ -177,6 +182,7 @@ eformateo`;
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | ✅ Parte IP cerrada el 2026-11-07: `health` de producción muestra la IP real del visitante detrás de la CDN, así que los límites por IP funcionan. Sigue vigente la purga después de cada deploy (D18). Detalle original: | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
+| H-11 | 2026-11-14 | **Las fichas de Enseñar que se venden no muestran lo guardado** al reabrir una ficha o recargar la página: el paquete de Claude Design pasa el valor en el atributo `defaultvalue`, que el navegador no muestra. Lo escrito no se pierde: queda en el navegador y "Copiar para la IA" lo incluye. Las fichas nuevas de Evaluar y Aprender no tienen el problema | Medio: parece que la ficha no guardó | Corrección de pocas líneas, sin tocar ningún texto, en la copia que sirve "Tu kit" (`tu-kit\kit-ensenar-con-ia\fichas.html`). Probada en compu y celular, con la CSP del sitio. Falta el OK del dev para usarla también en el ZIP |
 | H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
 | H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
 | H-08 | 2026-11-07 | `www.fenia.com.ar` servía el sitio entero sin redirigir. Una compra empezada ahí habría fallado: la API exige que el pedido venga de `fenia.com.ar`. Además, Google veía dos copias | **Alto para el lanzamiento** | 3.5: redirección 301 en `public/.htaccess`. Verificar en producción después del merge |
@@ -190,6 +196,12 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-14 (26)** — **"Tu kit" fase 1** (D26).
+  - Reformateo verificado contra los originales: Evaluar (guía, mini pack 26/26, 10 fichas, 2 imprimibles) y Aprender (29 secciones, los 25 prompts en tarjetas con su advertencia, 8 fichas, 4 imprimibles). Fichas probadas en Edge, en compu y celular, desde el disco y servidas con la CSP del sitio: guardan, copian y no piden nada a internet.
+  - Hallazgo H-11 en las fichas de Enseñar, con su corrección probada.
+  - Backend: `kit.php` y `guia.php`, pase de lectura, esquema 2, config con guía, fichas e imprimibles, buzón que acepta `.html`. 179 tests de PHP.
+  - Comprobado en staging que LiteSpeed reemplaza los encabezados que pone PHP: la CSP de las páginas del kit va en `api/.htaccess` (ADR-023).
+  - Pruebas nuevas: S-30…S-36, U-40…U-42, E2E-01 ampliada y E2E-05 (captura y accesibilidad de "Tu kit" con datos simulados). `E2E_KEEP=1` deja un link de prueba sin reembolsar.
 - **2026-11-12 (25)** — Diálogo con el dev sobre el "entorno FENIA" (idea de Fab): acordado D25 (identidad por link mágico, ver de por vida, guardar respuestas, arrancar con Enseñar). Inspección de las fichas de Enseñar: app en un solo archivo, sin recursos externos, guarda en `localStorage` bajo `fenia_plantillas_editable_v1`, fichas `t1…tN`. Por eso el prompt de reformateo pide una clave por kit e ids estables. Carpeta `reformateo` simplificada: un prompt por kit, el ZIP se adjunta directo. Pendiente nuevo: métricas internas (punto 9).
 
 - **2026-11-09 (24)** — A+B en producción (D24, PR #25): las 3 guías reales se subieron por el buzón, `health` las ve y la batería contra producción dio 54/54. Primera venta real registrada el 7/11, entregada bien (Aprender, $13.000); falta que el dev confirme si fue su compra de prueba para reembolsarla. Otro cobro de $13.000 ("Varios") no pasó por el sitio: probablemente un Link de Pago viejo (D6).

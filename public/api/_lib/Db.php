@@ -14,7 +14,8 @@ defined('FENIA_API') || exit;
  */
 final class Db
 {
-    public const SCHEMA_VERSION = 1;
+    /** 2 (D25, "Tu kit"): download_log.kind, and links raised from 5 to 10 downloads. */
+    public const SCHEMA_VERSION = 2;
 
     public static function connect(string $dsn, string $user = '', string $password = ''): \PDO
     {
@@ -77,11 +78,14 @@ final class Db
         )$tail");
 
         // Evidence for disputes (threat model A13) and link-sharing alerts (A14).
+        // `kind`: what was served (see Shop::LOG_KINDS); NULL = a download
+        // logged before schema 2.
         $pdo->exec("CREATE TABLE IF NOT EXISTS download_log (
             id $id,
             token_id INT NOT NULL,
             ip_hash CHAR(64) NULL,
             user_agent VARCHAR(255) NULL,
+            kind VARCHAR(16) NULL,
             created_at DATETIME NOT NULL" . $index('ix_log_token', 'token_id') . "
         )$tail");
 
@@ -101,9 +105,47 @@ final class Db
         }
 
         $current = $pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn();
-        if ($current === null || (int) $current < self::SCHEMA_VERSION) {
+        $current = $current === null || $current === false ? 0 : (int) $current;
+        if ($current >= 1 && $current < 2) {
+            self::upgradeTo2($pdo);
+        }
+        if ($current < self::SCHEMA_VERSION) {
             $pdo->prepare('INSERT INTO schema_version (version) VALUES (?)')->execute([self::SCHEMA_VERSION]);
         }
+    }
+
+    /**
+     * Schema 1 → 2. Safe to run twice at the same time (two first requests
+     * after a deploy): the column is added once, the UPDATE is idempotent.
+     */
+    private static function upgradeTo2(\PDO $pdo): void
+    {
+        if (!self::hasColumn($pdo, 'download_log', 'kind')) {
+            try {
+                $pdo->exec('ALTER TABLE download_log ADD COLUMN kind VARCHAR(16) NULL');
+            } catch (\PDOException $e) {
+                if (!self::hasColumn($pdo, 'download_log', 'kind')) {
+                    throw $e;
+                }
+            }
+        }
+        // D25: the cap goes from 5 to 10 file downloads, also for links already sent.
+        $pdo->exec('UPDATE download_tokens SET max_downloads = 10 WHERE max_downloads < 10');
+    }
+
+    private static function hasColumn(\PDO $pdo, string $table, string $column): bool
+    {
+        if (self::driver($pdo) === 'mysql') {
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+            $stmt->execute([$table, $column]);
+            return (int) $stmt->fetchColumn() > 0;
+        }
+        foreach ($pdo->query('PRAGMA table_info(' . $table . ')')->fetchAll() as $info) {
+            if ($info['name'] === $column) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function driver(\PDO $pdo): string

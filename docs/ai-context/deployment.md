@@ -155,9 +155,17 @@ The migration from Vercel to Hostinger is staged so production is never at risk:
 
 The PHP sales API ships inside `dist/api/` with every deploy, but what makes it run never lives in git:
 
-- **Secrets and kit ZIPs** live in `~/fenia-private/<env>/` (outside `public_html`). They arrive through the
+- **Secrets and kit files** live in `~/fenia-private/<env>/` (outside `public_html`). They arrive through the
   `api/_inbox/` drop folder (denied over HTTP), uploaded with Hostinger's file API. The first API request moves
-  them into the private folder (`Inbox.php`). Deploys never touch them, and neither do database contents.
+  them into the private folder (`Inbox.php`: `config.php` and kit files named `<kit-id>….zip|pdf|html`).
+  Deploys never touch them, and neither do database contents.
+- **"Tu kit" (D25):** each kit in the config can list, besides its ZIP, a `guide` PDF (with `pages`), and the
+  `fichas` and `imprimibles` HTML (with `count`), each with its SHA-256 (template in
+  `api/_lib/config.example.php`). `/descarga` opens the kit through `api/kit.php`, which sets a view-pass cookie;
+  `api/kit.php?k=…&r=fichas|imprimibles` and `api/guia.php?k=…` serve the pages with it. Their
+  Content-Security-Policy is in `public/api/.htaccess`, because LiteSpeed replaces headers set by PHP.
+- **Database schema** migrates itself on the first request after a deploy (a marker file per version in the
+  private folder). Schema 2 (D25) adds `download_log.kind` and raises links already sent to 10 downloads.
 - **Health check:** `GET /api/health.php` → `{"ok":true,"sales":true,"kits":true,…}`. A `503` means the API is
   failing closed (missing or invalid config, database down): nothing can be bought, nothing breaks.
 - **Hourly job:** Hostinger cron runs `php ~/domains/fenia.com.ar/public_html[/staging]/api/_lib/hourly.php`

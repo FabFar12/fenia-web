@@ -12,7 +12,8 @@ defined('FENIA_API') || exit;
  * Hostinger's file API and the deploy FTP account can only write inside
  * public_html. So files are dropped into `api/_inbox/` — denied over HTTP by
  * its .htaccess — and the API moves them into `<privateDir>` the next time it
- * runs, leaving nothing behind. Only `config.php`, kit ZIPs and guide PDFs are accepted;
+ * runs, leaving nothing behind. Only `config.php` and kit files (ZIP, guide PDF,
+ * the HTML of the fichas and printables) are accepted;
  * anything else is left untouched (and stays unreachable).
  */
 final class Inbox
@@ -27,7 +28,7 @@ final class Inbox
         foreach (scandir($inboxDir) ?: [] as $name) {
             if ($name === 'config.php') {
                 $target = $privateDir . '/config.php';
-            } elseif (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*\.(zip|pdf)$/D', $name)) {
+            } elseif (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*\.(zip|pdf|html)$/D', $name)) {
                 $target = $privateDir . '/kits/' . $name;
             } else {
                 continue;

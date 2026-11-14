@@ -31,6 +31,16 @@ final class Shop
     /** Failed delivery mails are retried hourly for this long (typo in the address?). */
     private const MAIL_RETRY_HOURS = 48;
 
+    /**
+     * What download_log records. Downloads (count toward the limit): 'zip',
+     * 'guide'. Views ("Tu kit", count nothing): 'open' (the page), 'read'
+     * (the guide in the browser), 'fichas', 'imprimibles'.
+     */
+    public const LOG_KINDS = ['zip', 'guide', 'open', 'read', 'fichas', 'imprimibles'];
+
+    /** The kit's pages that "Tu kit" serves with a view pass (Config::RESOURCES). */
+    private const PAGES = ['guide', 'fichas', 'imprimibles'];
+
     /** bucket => [limit, window seconds]. Threat model A4, B3, A15; tests U-30, S-08, S-16. */
     private const LIMITS = [
         'checkout-ip' => [10, 3600],
@@ -39,6 +49,7 @@ final class Shop
         'status-sync' => [1, 5],
         'download-ip' => [60, 3600],
         'download-bad-ip' => [20, 3600],
+        'kit-ip' => [300, 3600],
         'resend-ip' => [5, 3600],
         'resend-email' => [3, 86400],
     ];
@@ -408,15 +419,118 @@ final class Shop
         if ($used === null) {
             return ['status' => 410];
         }
-        $this->tokens->logDownload($used['token_id'], $this->hashed($ip), $userAgent, Db::now($this->now()));
+        $this->tokens->logDownload($used['token_id'], $this->hashed($ip), $userAgent, Db::now($this->now()), $which === 'guide' ? 'guide' : 'zip');
         if ($this->tokens->distinctIps($used['token_id']) > self::SHARING_ALERT_IPS) {
             $this->log('alert', 'link_sharing', ['order' => $used['order_id']]);
         }
         return ['status' => 200, 'path' => $path, 'filename' => $kit['file']];
     }
 
-    /** @return array<string, mixed>|int the usable token row, or the HTTP status to answer */
-    private function lookupToken(string $token, string $ip)
+    // ── "Tu kit" (D25) ──────────────────────────────────────────────────────
+
+    /**
+     * What the buyer's page shows, and a view pass for this device (see
+     * KitPass). Opening and using the kit counts nothing: only file downloads
+     * do, so a link with no downloads left still opens until it expires.
+     *
+     * @param bool $refresh the page reloads its numbers after a download: not a new visit
+     * @return array{0: int, 1: array<string, mixed>, 2?: array{name: string, value: string, max_age: int}}
+     */
+    public function openKit(string $token, string $ip, ?string $userAgent, bool $refresh = false): array
+    {
+        $row = $this->lookupToken($token, $ip, false);
+        if (is_int($row)) {
+            return [$row, ['usable' => false]];
+        }
+        $kitId = (string) $row['kit_id'];
+        $expires = self::utc((string) $row['expires_at']);
+        $paid = self::utc((string) ($row['order_paid_at'] ?? ''));
+        $art = new \DateTimeZone('America/Argentina/Buenos_Aires');
+
+        $resources = [];
+        foreach (self::PAGES as $name) {
+            $resource = $this->config->resource($kitId, $name);
+            if ($resource !== null) {
+                $resources[$name] = ['size' => $resource['size']];
+            }
+        }
+        if (!$refresh) {
+            $this->tokens->logDownload((int) $row['id'], $this->hashed($ip), $userAgent, Db::now($this->now()), 'open');
+        }
+
+        $body = [
+            'usable' => true,
+            'kit' => $kitId,
+            'kit_title' => $this->catalog->find($kitId)['title'] ?? 'Tu kit FENIA',
+            'remaining' => max(0, (int) $row['max_downloads'] - (int) $row['download_count']),
+            'max' => (int) $row['max_downloads'],
+            'expires_on' => $expires === null ? '' : $expires->setTimezone($art)->format('d/m/Y'),
+            'bought_on' => $paid === null ? '' : $paid->setTimezone($art)->format('j/n'),
+            'email_masked' => self::maskEmail((string) $row['order_email']),
+            'resources' => (object) $resources,
+        ];
+        if ($expires === null) {
+            return [200, $body];
+        }
+        $until = $expires->getTimestamp();
+        return [200, $body, [
+            'name' => KitPass::cookieName($kitId),
+            'value' => KitPass::issue((string) $this->config->get('hash_salt'), $kitId, (int) $row['id'], $until),
+            'max_age' => max(0, $until - $this->now()->getTimestamp()),
+        ]];
+    }
+
+    /**
+     * One of the kit's pages: the guide to read in the browser, the
+     * interactive fichas or the printables. Needs the device's view pass
+     * (never the link token). Counts nothing; it is logged as a view.
+     *
+     * @param string $name 'guide' | 'fichas' | 'imprimibles'
+     * @return array{status: int, path?: string, filename?: string, type?: string}
+     */
+    public function kitResource(string $kitId, string $name, ?string $pass, string $ip, ?string $userAgent): array
+    {
+        if (!$this->allow('kit-ip', $ip)) {
+            return ['status' => 429];
+        }
+        $resource = in_array($name, self::PAGES, true) && Validate::kitId($kitId) ? $this->config->resource($kitId, $name) : null;
+        if ($resource === null) {
+            return ['status' => 404];
+        }
+        $tokenId = $pass === null || $pass === ''
+            ? null
+            : KitPass::verify((string) $this->config->get('hash_salt'), $kitId, $pass, $this->now()->getTimestamp());
+        if ($tokenId === null) {
+            if ($pass !== null && $pass !== '' && !$this->allow('download-bad-ip', $ip)) {
+                return ['status' => 429]; // forged passes count like guessed links (A4)
+            }
+            return ['status' => 403];
+        }
+        $row = $this->tokens->findById($tokenId);
+        $reason = $row === null ? 'unknown' : Tokens::unusableReason($row, $this->now());
+        if ($row === null || (string) $row['kit_id'] !== $kitId || $row['order_status'] !== 'paid' || ($reason !== null && $reason !== 'exhausted')) {
+            return ['status' => 410];
+        }
+
+        $path = $this->kitsDir . '/' . $resource['file'];
+        if (!is_file($path) || !hash_equals($resource['sha256'], (string) hash_file('sha256', $path))) {
+            $this->log('alert', 'kit_file_problem', ['kit' => $kitId, 'file' => $name]);
+            return ['status' => 503];
+        }
+        $this->tokens->logDownload($tokenId, $this->hashed($ip), $userAgent, Db::now($this->now()), $name === 'guide' ? 'read' : $name);
+        return [
+            'status' => 200,
+            'path' => $path,
+            'filename' => $resource['file'],
+            'type' => $name === 'guide' ? 'application/pdf' : 'text/html; charset=utf-8',
+        ];
+    }
+
+    /**
+     * @param bool $forDownload false for "Tu kit": a link out of downloads still opens
+     * @return array<string, mixed>|int the usable token row, or the HTTP status to answer
+     */
+    private function lookupToken(string $token, string $ip, bool $forDownload = true)
     {
         if (!$this->allow('download-ip', $ip)) {
             return 429;
@@ -429,7 +543,8 @@ final class Shop
             // Guessing links (threat model A4): failures are capped per IP.
             return $this->allow('download-bad-ip', $ip) ? 404 : 429;
         }
-        if ($row['order_status'] !== 'paid' || Tokens::unusableReason($row, $this->now()) !== null) {
+        $reason = Tokens::unusableReason($row, $this->now());
+        if ($row['order_status'] !== 'paid' || ($reason !== null && ($forDownload || $reason !== 'exhausted'))) {
             return 410;
         }
         return $row;
@@ -521,14 +636,16 @@ final class Shop
             return false;
         }
         $site = rtrim((string) $this->config->get('site_url'), '/');
+        $kitId = (string) $order['kit_id'];
         $mail = DeliveryMail::build(
-            $this->catalog->find((string) $order['kit_id'])['title'] ?? 'Tu kit FENIA',
+            $this->catalog->find($kitId)['title'] ?? 'Tu kit FENIA',
             $site . '/descarga/#t=' . $this->tokenFor((string) $order['reference'], (int) $token['generation']),
             $site,
             (string) $this->config->get('mail_reply_to'),
             (int) $this->config->get('download_days'),
             (int) $token['max_downloads'],
-            $this->config->guide((string) $order['kit_id']) !== null
+            $this->config->guide($kitId) !== null,
+            $this->config->resource($kitId, 'fichas') !== null
         );
 
         try {
@@ -601,18 +718,30 @@ final class Shop
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
-    /** Every configured kit has its ZIP in place (health check after an upload). */
+    /** Every configured kit has its ZIP and its other files in place (health check after an upload). */
     public function kitsReady(): bool
     {
         $kits = (array) $this->config->get('kits');
         foreach (array_keys($kits) as $kitId) {
             $kit = $this->config->kit((string) $kitId);
-            $guide = $this->config->guide((string) $kitId);
-            if ($kit === null || !is_file($this->kitsDir . '/' . $kit['file']) || ($guide !== null && !is_file($this->kitsDir . '/' . $guide['file']))) {
+            if ($kit === null || !is_file($this->kitsDir . '/' . $kit['file'])) {
                 return false;
+            }
+            foreach (array_keys(Config::RESOURCES) as $name) {
+                $resource = $this->config->resource((string) $kitId, $name);
+                if ($resource !== null && !is_file($this->kitsDir . '/' . $resource['file'])) {
+                    return false;
+                }
             }
         }
         return $kits !== [];
+    }
+
+    /** A UTC 'Y-m-d H:i:s' from the database, or null. */
+    private static function utc(string $value): ?\DateTimeImmutable
+    {
+        $at = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $value, new \DateTimeZone('UTC'));
+        return $at === false ? null : $at;
     }
 
     /** a***@gmail.com — enough for the buyer to recognise, useless to anyone else. */

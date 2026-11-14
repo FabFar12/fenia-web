@@ -145,3 +145,9 @@ FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.
 - **Evaluar y Aprender, hasta que se reformateen:** la misma página, sin la fila de fichas (guía, imprimibles en PDF dentro del ZIP, y ZIP).
 - **Sin cambios** en el resto del sitio: tarjetas, página del kit, `/gracias` y "No me llegó" siguen igual.
 
+**Implementada el 2026-11-14 (D26), en staging.** Diferencias con el boceto de arriba:
+- Íconos de línea propios (libro, ficha, impresora, paquete) en lugar de emojis, que cambian de un teléfono a otro.
+- Debajo del ZIP sigue la ayuda "¿Cómo abro el ZIP en el celular?" de D24.
+- Si se terminan las 10 descargas, la página lo dice y sigue dejando leer y usar las fichas hasta que vence.
+- Para kits con fichas, el mail cambia a "Abrir mi kit" y explica que leer y completar no gasta. Ese texto espera el OK del dev.
+

@@ -75,7 +75,7 @@ test.describe('Páginas de soporte', () => {
     await page.goto('about:blank');
     await page.goto(`/descarga/#t=${'A'.repeat(42)}Q`);
     await expect(page.locator('#dl-error')).toContainText(/venció|demasiados intentos/);
-    await expect(page.locator('#dl-form')).toBeHidden();
+    await expect(page.locator('#dl-kit')).toBeHidden();
   });
 
   test('"No me llegó" responde siempre lo mismo', async ({ page }) => {

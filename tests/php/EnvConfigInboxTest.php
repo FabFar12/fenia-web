@@ -74,10 +74,28 @@ final class EnvConfigInboxTest extends TestCase
         $config = Config::fromArray(self::validConfig(['db_user' => 'u']), 'staging');
         self::assertTrue($config->salesEnabled());
         self::assertSame(30, $config->get('download_days'));
-        self::assertSame(5, $config->get('max_downloads'));
+        self::assertSame(10, $config->get('max_downloads'), 'D25');
         self::assertSame(['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64)], $config->kit('kit-a'));
         self::assertNull($config->kit('kit-b'));
+        self::assertNull($config->resource('kit-a', 'fichas'), 'optional');
         self::assertFalse(Config::fromArray(self::validConfig(['db_user' => 'u', 'sales_enabled' => false]), 'staging')->salesEnabled());
+    }
+
+    public function testTuKitResourcesAreReadWithTheirSize(): void
+    {
+        $sha = str_repeat('b', 64);
+        $config = Config::fromArray(self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => [
+            'file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64),
+            'guide' => ['file' => 'kit-a-guia.pdf', 'sha256' => $sha, 'pages' => 37],
+            'fichas' => ['file' => 'kit-a-fichas.html', 'sha256' => $sha, 'count' => 8],
+            'imprimibles' => ['file' => 'kit-a-imprimibles.html', 'sha256' => $sha],
+        ]]]), 'staging');
+        self::assertSame(['file' => 'kit-a-guia.pdf', 'sha256' => $sha], $config->guide('kit-a'));
+        self::assertSame(['file' => 'kit-a-guia.pdf', 'sha256' => $sha, 'size' => 37], $config->resource('kit-a', 'guide'));
+        self::assertSame(['file' => 'kit-a-fichas.html', 'sha256' => $sha, 'size' => 8], $config->resource('kit-a', 'fichas'));
+        self::assertSame(['file' => 'kit-a-imprimibles.html', 'sha256' => $sha, 'size' => null], $config->resource('kit-a', 'imprimibles'));
+        self::assertNull($config->resource('kit-a', 'file'), 'only the known resources');
+        self::assertNull($config->resource('kit-b', 'fichas'));
     }
 
     /** @return iterable<string, array{0: array<string, mixed>}> */
@@ -97,6 +115,14 @@ final class EnvConfigInboxTest extends TestCase
         yield 'guide path traversal' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => '../config.php', 'sha256' => str_repeat('a', 64)]]]])];
         yield 'guide not a pdf' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => 'kit-a.php', 'sha256' => str_repeat('a', 64)]]]])];
         yield 'guide without checksum' => [self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64), 'guide' => ['file' => 'kit-a.pdf']]]])];
+        $kit = static fn (array $extra): array => self::validConfig(['db_user' => 'u', 'kits' => ['kit-a' => ['file' => 'kit-a.zip', 'sha256' => str_repeat('a', 64)] + $extra]]);
+        $sha = str_repeat('a', 64);
+        yield 'guide pages as text' => [$kit(['guide' => ['file' => 'kit-a.pdf', 'sha256' => $sha, 'pages' => '37']])];
+        yield 'fichas not html' => [$kit(['fichas' => ['file' => 'kit-a-fichas.php', 'sha256' => $sha]])];
+        yield 'fichas path traversal' => [$kit(['fichas' => ['file' => '../kit-a.html', 'sha256' => $sha]])];
+        yield 'fichas count zero' => [$kit(['fichas' => ['file' => 'kit-a-fichas.html', 'sha256' => $sha, 'count' => 0]])];
+        yield 'imprimibles without checksum' => [$kit(['imprimibles' => ['file' => 'kit-a-imprimibles.html']])];
+        yield 'imprimibles as a string' => [$kit(['imprimibles' => 'kit-a-imprimibles.html'])];
     }
 
     /** @dataProvider brokenConfigs */
@@ -121,16 +147,20 @@ final class EnvConfigInboxTest extends TestCase
         file_put_contents($inbox . '/config.php', '<?php return [];');
         file_put_contents($inbox . '/kit-ensenar-con-ia.zip', 'zip');
         file_put_contents($inbox . '/kit-ensenar-con-ia-guia.pdf', 'pdf');
+        file_put_contents($inbox . '/kit-ensenar-con-ia-fichas.html', '<!doctype html>');
         file_put_contents($inbox . '/guia.PDF.php', '<?php echo 1;');
+        file_put_contents($inbox . '/fichas.html.php', '<?php echo 1;');
         file_put_contents($inbox . '/evil.php', '<?php echo 1;');
         file_put_contents($inbox . '/../x.zip', 'outside');
 
         $moved = Inbox::promote($inbox, $private);
         sort($moved);
 
-        self::assertSame(['config.php', 'kit-ensenar-con-ia-guia.pdf', 'kit-ensenar-con-ia.zip'], $moved);
+        self::assertSame(['config.php', 'kit-ensenar-con-ia-fichas.html', 'kit-ensenar-con-ia-guia.pdf', 'kit-ensenar-con-ia.zip'], $moved);
         self::assertFileExists($private . '/kits/kit-ensenar-con-ia-guia.pdf');
+        self::assertFileExists($private . '/kits/kit-ensenar-con-ia-fichas.html');
         self::assertFileExists($inbox . '/guia.PDF.php', 'only real .pdf names');
+        self::assertFileExists($inbox . '/fichas.html.php', 'only real .html names');
         self::assertFileExists($private . '/config.php');
         self::assertFileExists($private . '/kits/kit-ensenar-con-ia.zip');
         self::assertFileDoesNotExist($inbox . '/config.php');

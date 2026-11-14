@@ -48,10 +48,31 @@ final class TokenStore
      */
     public function findByHash(string $tokenHash): ?array
     {
+        return $this->findWhere('t.token_hash = ?', $tokenHash);
+    }
+
+    /**
+     * Same view by id, for a view pass ("Tu kit"), which carries the token id
+     * and never the token itself.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findById(int $tokenId): ?array
+    {
+        return $this->findWhere('t.id = ?', $tokenId);
+    }
+
+    /**
+     * @param int|string $value
+     * @return array<string, mixed>|null
+     */
+    private function findWhere(string $condition, $value): ?array
+    {
         $stmt = $this->pdo->prepare(
-            "SELECT t.*, o.kit_id, o.status AS order_status FROM download_tokens t JOIN orders o ON o.id = t.order_id WHERE t.token_hash = ?"
+            "SELECT t.*, o.kit_id, o.status AS order_status, o.email AS order_email, o.paid_at AS order_paid_at
+             FROM download_tokens t JOIN orders o ON o.id = t.order_id WHERE $condition"
         );
-        $stmt->execute([$tokenHash]);
+        $stmt->execute([$value]);
         $row = $stmt->fetch();
         return $row === false ? null : $row;
     }
@@ -93,16 +114,21 @@ final class TokenStore
         return $stmt->rowCount();
     }
 
-    public function logDownload(int $tokenId, ?string $ipHash, ?string $userAgent, string $now): void
+    /** @param string $kind what was served: a download ('zip', 'guide') or a view (see Shop::LOG_KINDS) */
+    public function logDownload(int $tokenId, ?string $ipHash, ?string $userAgent, string $now, string $kind = 'zip'): void
     {
-        $this->pdo->prepare('INSERT INTO download_log (token_id, ip_hash, user_agent, created_at) VALUES (?, ?, ?, ?)')
-            ->execute([$tokenId, $ipHash, $userAgent === null ? null : mb_substr($userAgent, 0, 255), $now]);
+        $this->pdo->prepare('INSERT INTO download_log (token_id, ip_hash, user_agent, kind, created_at) VALUES (?, ?, ?, ?, ?)')
+            ->execute([$tokenId, $ipHash, $userAgent === null ? null : mb_substr($userAgent, 0, 255), $kind, $now]);
     }
 
-    /** Distinct IPs that used a token (link-sharing alert, threat model A14). */
+    /**
+     * Distinct IPs that downloaded files with a token (link-sharing alert,
+     * threat model A14). Views do not count: a phone changes IP all the time,
+     * and reading the kit is free.
+     */
     public function distinctIps(int $tokenId): int
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(DISTINCT ip_hash) FROM download_log WHERE token_id = ?');
+        $stmt = $this->pdo->prepare("SELECT COUNT(DISTINCT ip_hash) FROM download_log WHERE token_id = ? AND (kind IS NULL OR kind IN ('zip', 'guide'))");
         $stmt->execute([$tokenId]);
         return (int) $stmt->fetchColumn();
     }
