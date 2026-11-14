@@ -172,6 +172,11 @@ describe('Métricas internas (ADR-029)', { skip: skipWithoutTarget }, () => {
     if (!needsApi(t)) return;
     for (const query of ['', '?rango=todo', '?rango=../../config']) {
       const res = await request(`/api/metricas.php${query}`);
+      if (query.includes('..') && res.status === 403) {
+        // Hostinger's firewall stops `../` before PHP sees it (production).
+        assert.doesNotMatch(res.body, /visits|sales|recent|@/);
+        continue;
+      }
       assert.equal(res.status, 401, query);
       assert.equal(res.body, '{"error":"login"}');
       assert.match(res.headers.get('cache-control') ?? '', /no-store/);

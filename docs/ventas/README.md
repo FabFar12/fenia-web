@@ -2,7 +2,7 @@
 
 > **Leé esto primero.** Es el punto de entrada para cualquier persona o sesión de IA que trabaje en la venta de kits.
 > Arquitectura: [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) · Riesgos (anti-estafa y bugs): [threat-model.md](./threat-model.md) · Pruebas: [test-plan.md](./test-plan.md) · Tareas humanas de la Fase 1: [guia-fase-1.md](./guia-fase-1.md)
-> Última actualización: 2026-11-14 ("Tu kit" en staging, D26).
+> Última actualización: 2026-11-14 ("Tu kit" y métricas en producción, PR #26).
 
 ## Objetivo
 
@@ -79,8 +79,8 @@ Del dev o de Fab:
 De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
-8. **"Tu kit" (D25, D26):** construida y probada; staging con material de prueba. Los tres kits quedaron estandarizados y verificados (Evaluar y Aprender con Claude Design). Sigue: el dev la mira en staging y da el OK para el mail nuevo, la subida a producción de los tres kits y la corrección de H-11 en el ZIP de Enseñar.
-9. **Métricas internas (D28):** construidas y en staging. El dev y Fab entran con usuario y contraseña; las claves de staging están en `~/fenia-secrets/staging/cuentas-metricas.txt`. Tareas del dev: crear el monitor de UptimeRobot y la propiedad de Google Search Console. Pasan a producción junto con "Tu kit", con el OK del dev.
+8. **"Tu kit" y métricas: en producción desde el 2026-11-14 (PR #26).** Los tres kits nuevos (guía, fichas, imprimibles y ZIP) están subidos. Falta ver "Tu kit" con archivos reales en una compra real: sirve la compra del dev del punto 1 (6.3), que la IA reembolsa. Las contraseñas de las métricas están en `~/fenia-secrets/production/cuentas-metricas.txt`; la de `fab` se la pasa el dev en persona.
+9. **Tareas del dev para las métricas:** crear el monitor de UptimeRobot y la propiedad de Google Search Console (método "Archivo HTML": el dev pasa el nombre del archivo y la IA lo agrega a `public/`). Pendiente con el abogado: mencionar el contador de visitas en la política de privacidad.
 
 ## Cómo se corren las pruebas
 
@@ -112,18 +112,18 @@ De la IA:
   - **Visitas con un contador propio:** todo queda en nuestra base, sin cookies ni datos personales, y nada va a terceros. Se descartaron Plausible y Umami.
   - **Entrada con usuario y contraseña** para el dev y Fab, con sesiones que después sirven para las cuentas de compradoras (fase 2 de D25).
   - **Pantalla `/metricas/`:** visitas, embudo de compra, ventas, uso de "Tu kit", últimas ventas y velocidad.
-  - **Aparte y gratis:** control diario de velocidad (PageSpeed Insights), UptimeRobot y Google Search Console, con cuentas del dev | ✅ Decisión del dev · en staging |
+  - **Aparte y gratis:** control diario de velocidad (PageSpeed Insights), UptimeRobot y Google Search Console, con cuentas del dev | ✅ En producción (2026-11-14, PR #26) |
 | D27 | 2026-11-14 | **Acceso para siempre y botones de "Tu kit"** (decisiones del dev, respuesta a Q7–Q9).
   - **"No me llegó" siempre devuelve el acceso:** un link vencido se renueva todas las veces que haga falta, siempre al email de la compra (sigue el límite de 3 pedidos por día). Reemplaza el tope de 2 renovaciones de D19.
   - **10 descargas por compra, para siempre:** el link nuevo arrastra las que quedaban y nunca suma más. Un link sin descargas sigue abriendo el kit; si alguien necesita más, las suma soporte.
   - **Botones, opción B** ([propuesta-visual.md §7](./propuesta-visual.md)): abrir en coral (no gasta) y descargar con borde celeste (cuenta 1), todos del mismo ancho, con una línea que explica la diferencia.
   - **Categorías:** a futuro; por ahora todos los kits son de Educación. "Mis kits" queda para la fase 2.
-  - Aprobados también el texto del mail para kits con fichas y la corrección de H-11 en el ZIP de Enseñar | ✅ Decisión del dev |
+  - Aprobados también el texto del mail para kits con fichas y la corrección de H-11 en el ZIP de Enseñar | ✅ En producción (2026-11-14, PR #26) |
 | D26 | 2026-11-14 | **"Tu kit" (fase 1 de D25), construida y probada para staging.**
   - `/descarga` pasa a ser "Tu kit" ([propuesta-visual.md §6](./propuesta-visual.md)): la guía para leer o bajar, las fichas y los imprimibles montados, y el ZIP. Leer y usar no gasta nada. El tope es de **10 descargas de archivos**, también para los links ya enviados (la base migra sola al esquema 2).
   - El token no viaja en ninguna URL: el dispositivo recibe un **pase de lectura** (cookie `HttpOnly` firmada) y las páginas del kit se sirven con él (A18). Esas páginas tienen una CSP propia en `api/.htaccess`, que no deja salir nada a internet (A19).
   - **Kits estandarizados:** Evaluar y Aprender, con guía (prompts integrados), fichas, imprimibles y Word, verificados palabra por palabra contra los originales. Los paquetes listos para subir están en `C:\Fenia\entregables\tu-kit\` (fuera del repo).
-  - **Falta el OK del dev para:** (1) el texto nuevo del mail para kits con fichas; (2) subir a producción los kits nuevos y las páginas; (3) usar en el ZIP de Enseñar la corrección de H-11 | 🟡 Staging · producción con OK del dev |
+  - El dev aprobó las tres cosas pendientes (mail, subida y corrección de H-11) | ✅ En producción (2026-11-14, PR #26) |
 | D25 | 2026-11-12 | **Entorno FENIA ("Tu kit" / "Mis kits")**, acordado con el dev tras la idea de Fab. En vez de bajar un archivo, la compradora llega a una página con su kit montado. En fases:
   - **Fase 1, "Tu kit"**: la página de descarga pasa a mostrar la guía (leer o bajar), las fichas interactivas montadas, los imprimibles y el ZIP. Ver no gasta descargas. Arranca con Enseñar, el único con fichas HTML. Los links ya mandados siguen funcionando.
   - **Fase 2, "Mis kits"**: entrar con el email, sin contraseña (link mágico). Todas las compras de ese email, **de por vida**; se limitan solo las descargas de archivos (reemplaza D3). La identidad y una marca al pie de los PDF reemplazan al contador como freno a compartir.
@@ -211,6 +211,7 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-14 (29)** — **A producción con el OK del dev** (PR #26, D13). Deploy y purga de la CDN (D18). La base migró sola a los esquemas 2 y 3. Cuentas de métricas de producción generadas (contraseñas solo en `~/fenia-secrets/production/`). Configuración armada con los paquetes de `tu-kit`, la clave de los links conservada (comparada por hash) y validada localmente con el código del servidor, con cada archivo verificado por su huella. Subidos por el buzón los 12 archivos de los kits y la configuración; `health` OK. Verificado en producción: suite de seguridad 79 OK y 0 fallas (S-40 se ajustó: el firewall de Hostinger frena `../` con 403); batería E2E de producción 66 OK; ingreso real a las métricas con la venta real y su email enmascarado.
 - **2026-11-14 (28)** — Decisiones del dev: botones B, categorías a futuro, acceso para siempre con 10 descargas por compra (D27), corrección de H-11 y texto del mail aprobados. Métricas privadas (D28, ADR-029): contador propio, usuario y contraseña, velocidad diaria. Probadas localmente con la API real sobre SQLite y un navegador: visitas, fuentes, WhatsApp, ingreso, salida, celular, y las visitas del dueño no cuentan. 193 tests de PHP. Pruebas nuevas S-40…S-45, U-50…U-52, E2E-06. **En staging:** suite de seguridad 80 OK y 0 fallas; batería E2E 78 OK; ingreso real con la cuenta `dev`, una visita de prueba contada con su fuente, cookies de sesión como se diseñaron.
 - **2026-11-14 (27)** — El dev probó "Tu kit" en staging. Pidió: botones según su función (Q8), "Mis kits" con categorías (Q9), acceso de por vida con 10 descargas (Q7) e investigar métricas (Q10, con visitas). Reportó "4 descargas por bajar el ZIP y el PDF": no es un error. El link de prueba ya tenía 2 descargas de la prueba automática, y cada archivo cuenta una sola vez (el ZIP cuenta como uno, también en E2E-01). Propuestas escritas, con imágenes en `C:\Fenia\entregables\propuestas\2026-11-14\`.
 - **2026-11-14 (26)** — **"Tu kit" fase 1** (D26).
