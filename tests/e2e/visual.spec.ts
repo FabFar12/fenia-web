@@ -5,7 +5,7 @@
 // Tagged @staging: the references were taken there.
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
-import { catalog, setClock, openTuKit, DAY } from './helpers';
+import { catalog, setClock, openTuKit, openMetricas, DAY } from './helpers';
 
 const stylePath = fileURLToPath(new URL('./fotos.css', import.meta.url));
 
@@ -46,5 +46,11 @@ test.describe('@staging capturas de referencia', () => {
     await openTuKit(page);
     await page.evaluate(() => document.fonts.ready);
     await expect(page.locator('.dl-section')).toHaveScreenshot('tu-kit.png', { stylePath });
+  });
+
+  test('métricas (datos simulados, sin entrar)', async ({ page }) => {
+    await openMetricas(page);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('.mt-section')).toHaveScreenshot('metricas.png', { stylePath });
   });
 });

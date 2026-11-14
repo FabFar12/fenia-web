@@ -50,6 +50,12 @@ return [
         ],
     ],
 
+    // Internal metrics (ADR-029): user => password_hash() of a long random
+    // password. The plaintext lives only in ~/fenia-secrets/<env>/. Optional.
+    'owners' => [
+        'dev' => '$2y$10$…',
+    ],
+
     // Optional (defaults in Config.php): download_days 30, max_downloads 10,
     // order_ttl_minutes 60, alert_email '' (= mail_reply_to; alerts and the
     // daily report of the hourly job), daily_report true.

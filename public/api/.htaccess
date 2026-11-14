@@ -5,14 +5,14 @@
 # would be let through by this allowlist.
 <IfModule mod_authz_core.c>
   Require all denied
-  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia)\.php|catalog\.json)$">
+  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia|hit|sesion|metricas)\.php|catalog\.json)$">
     Require all granted
   </FilesMatch>
 </IfModule>
 <IfModule !mod_authz_core.c>
   Order deny,allow
   Deny from all
-  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia)\.php|catalog\.json)$">
+  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia|hit|sesion|metricas)\.php|catalog\.json)$">
     Allow from all
   </FilesMatch>
 </IfModule>

@@ -164,6 +164,11 @@ The PHP sales API ships inside `dist/api/` with every deploy, but what makes it 
   `api/_lib/config.example.php`). `/descarga` opens the kit through `api/kit.php`, which sets a view-pass cookie;
   `api/kit.php?k=…&r=fichas|imprimibles` and `api/guia.php?k=…` serve the pages with it. Their
   Content-Security-Policy is in `public/api/.htaccess`, because LiteSpeed replaces headers set by PHP.
+- **Internal metrics (ADR-029):** `/metricas/` (user and password) shows visits, the purchase funnel, sales and
+  "Tu kit" use. Accounts are the config's `owners` (user => `password_hash`); the plaintext passwords live only in
+  `~/fenia-secrets/<env>/cuentas-metricas.txt`. Visits are counted by `/api/hit.php` without cookies. The hourly
+  job checks the site's speed once a day (PageSpeed Insights; optional `psi_api_key`) and deletes visits older than
+  400 days and expired sessions. Uptime: UptimeRobot; searches: Google Search Console (the dev's accounts).
 - **Database schema** migrates itself on the first request after a deploy (a marker file per version in the
   private folder). Schema 2 (D25) adds `download_log.kind` and raises links already sent to 10 downloads.
 - **Health check:** `GET /api/health.php` → `{"ok":true,"sales":true,"kits":true,…}`. A `503` means the API is

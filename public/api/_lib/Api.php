@@ -24,7 +24,7 @@ final class Api
      * or null when it already wrote its own response (file download).
      *
      * @param list<string> $methods
-     * @param callable(Shop, Config): ?array{0: int, 1: array<string, mixed>} $handler
+     * @param callable(Shop, Config, array<string, mixed>): ?array{0: int, 1: array<string, mixed>} $handler gets the booted app (pdo, log…) as third argument
      */
     public static function run(array $methods, callable $handler): void
     {
@@ -51,7 +51,7 @@ final class Api
         $log = $app['log'];
 
         try {
-            $result = $handler($app['shop'], $app['config']);
+            $result = $handler($app['shop'], $app['config'], $app);
             if ($result !== null) {
                 self::json($result[0], $result[1]);
             }
@@ -239,6 +239,43 @@ final class Api
             . '<p style="font-size:16px;line-height:1.6">' . $e($message) . '</p>'
             . '<p style="font-size:16px;line-height:1.6">Pedí un link nuevo en <a style="color:#00b4d8" href="/no-me-llego/">No me llegó</a> con el email de tu compra.</p>'
             . '</div></body></html>';
+    }
+
+    /**
+     * The JSON body whatever its Content-Type: navigator.sendBeacon posts it as
+     * text/plain (no preflight). Small bodies only.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function beaconInput(int $maxBytes = 2048): ?array
+    {
+        $raw = file_get_contents('php://input', false, null, 0, $maxBytes + 1);
+        if ($raw === false || $raw === '' || strlen($raw) > $maxBytes) {
+            return null;
+        }
+        $data = json_decode($raw, true, 3);
+        return is_array($data) ? $data : null;
+    }
+
+    /** Owners' session (ADR-029): HttpOnly, HTTPS only, only for /api/, never from another site. */
+    public static function setSessionCookies(string $token): void
+    {
+        $expires = time() + Owners::DAYS * 86400;
+        setcookie(Owners::COOKIE, $token, ['expires' => $expires, 'path' => '/api/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+        // Readable flag (no secret): the visit counter skips the owners' own visits.
+        setcookie(Owners::FLAG, '1', ['expires' => $expires, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Strict']);
+    }
+
+    public static function clearSessionCookies(): void
+    {
+        setcookie(Owners::COOKIE, '', ['expires' => 1, 'path' => '/api/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+        setcookie(Owners::FLAG, '', ['expires' => 1, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Strict']);
+    }
+
+    public static function sessionCookie(): ?string
+    {
+        $value = $_COOKIE[Owners::COOKIE] ?? null;
+        return is_string($value) ? $value : null;
     }
 
     /** @return array<string, string> request headers we read, lowercased names */

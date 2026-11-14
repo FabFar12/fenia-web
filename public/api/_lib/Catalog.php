@@ -94,6 +94,16 @@ final class Catalog
     }
 
     /**
+     * Every listed kit, in catalogue order (internal metrics).
+     *
+     * @return list<array{id: string, title: string, status: string, price_cents: ?int, currency: string}>
+     */
+    public function all(): array
+    {
+        return array_values($this->products);
+    }
+
+    /**
      * Any listed kit, sellable or not: for titles in emails and on the download
      * page of kits already bought.
      *

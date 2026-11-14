@@ -21,6 +21,8 @@ final class CronTest extends TestCase
     private FakeMailer $mailer;
     private string $dir;
     private \DateTimeImmutable $now;
+    /** @var list<string> pages the speed check asked Google about (never the real network) */
+    private array $speedAsked = [];
 
     protected function setUp(): void
     {
@@ -67,7 +69,12 @@ final class CronTest extends TestCase
     private function cron(array $overrides = []): Cron
     {
         $config = $this->config($overrides);
-        return new Cron($this->shop($config), $this->pdo, $this->mailer, $config, $this->dir, fn (): \DateTimeImmutable => $this->now);
+        return new Cron($this->shop($config), $this->pdo, $this->mailer, $config, $this->dir, fn (): \DateTimeImmutable => $this->now,
+            function (string $url): array {
+                parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+                $this->speedAsked[] = (string) $query['url'];
+                return ['status' => 200, 'body' => '{"lighthouseResult":{"categories":{"performance":{"score":0.9}}}}'];
+            });
     }
 
     /** @param array<string, mixed> $event */
@@ -135,6 +142,21 @@ final class CronTest extends TestCase
         $summary = $this->cron(['daily_report' => false, 'alert_email' => ''])->run();
         self::assertSame('skip', $summary['report']);
         self::assertSame(['soporte@fenia.com.ar'], array_column($this->mailer->sent, 'to'));
+    }
+
+    public function testSpeedCheckOnceADayAndOldVisitsAndSessionsForgotten(): void
+    {
+        $this->now = new \DateTimeImmutable('2026-11-07 07:30:00', new \DateTimeZone('UTC')); // 04:30 ART
+        self::assertSame('skip', $this->cron()->run()['speed'], 'before 05:00');
+        $this->now = $this->now->modify('+1 hour');
+        self::assertSame('2 páginas', $this->cron()->run()['speed']);
+        self::assertSame(['https://staging.fenia.com.ar/', 'https://staging.fenia.com.ar/kits/kit-a/'], $this->speedAsked, 'the home and the first kit');
+        self::assertSame('skip', $this->cron()->run()['speed'], 'once a day');
+
+        $this->pdo->exec("INSERT INTO site_events (at, day, kind, path, source, device, visitor, entry) VALUES ('2025-01-01 10:00:00', '2025-01-01', 'view', '/', 'Directo', 'compu', 'aaaaaaaaaaaaaaaa', 1)");
+        $this->pdo->exec("INSERT INTO sessions (token_hash, subject, created_at, expires_at, last_seen_at) VALUES ('" . str_repeat('a', 64) . "', 'owner:fab', '2026-09-01 00:00:00', '2026-10-01 00:00:00', '2026-09-01 00:00:00')");
+        $summary = $this->cron()->run();
+        self::assertSame([1, 1], [$summary['visits_purged'], $summary['sessions_purged']]);
     }
 
     public function testPurgesOldRateLimitEvents(): void

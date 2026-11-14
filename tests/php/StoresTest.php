@@ -65,7 +65,7 @@ final class StoresTest extends TestCase
 
         $token = $this->pdo->query("SELECT max_downloads, download_count FROM download_tokens WHERE id = $old")->fetch();
         self::assertSame([10, 1], [(int) $token['max_downloads'], (int) $token['download_count']], 'raised, the download already made is kept');
-        self::assertSame(2, (int) $this->pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn());
+        self::assertSame(Db::SCHEMA_VERSION, (int) $this->pdo->query('SELECT MAX(version) FROM schema_version')->fetchColumn());
         $this->tokens->logDownload($old, 'ip', null, self::NOW, 'fichas');
         self::assertSame('fichas', $this->pdo->query('SELECT kind FROM download_log')->fetchColumn());
     }

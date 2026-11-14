@@ -1,7 +1,7 @@
 # ADR-024 — Observability baseline on Hostinger (no Cloudflare)
 
 ## Status
-Accepted (2026-05-26). Supersedes [ADR-021](./ADR-021-observability-baseline.md). Required by [ADR-022](./ADR-022-pivot-to-hostinger-only.md). Implementation deferred until after the Vercel → Hostinger cutover stabilises.
+Accepted (2026-05-26). **Analytics layer superseded by [ADR-029](./ADR-029-private-metrics-and-owner-accounts.md) (2026-11-14):** visits are counted by our own private counter, not Plausible. Uptime (UptimeRobot) stays; Sentry stays deferred. Supersedes [ADR-021](./ADR-021-observability-baseline.md). Required by [ADR-022](./ADR-022-pivot-to-hostinger-only.md). Implementation deferred until after the Vercel → Hostinger cutover stabilises.
 
 ## Context
 

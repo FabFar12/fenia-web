@@ -78,6 +78,17 @@ test.describe('Páginas de soporte', () => {
     await expect(page.locator('#dl-kit')).toBeHidden();
   });
 
+  test('/metricas pide usuario y contraseña, y no entra con una equivocada', async ({ page }) => {
+    await page.goto('/metricas/');
+    await expect(page.locator('#mt-login')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('#mt-board')).toBeHidden();
+    await page.fill('#mt-u', 'e2e-nadie');
+    await page.fill('#mt-p', 'no-es-la-clave');
+    await page.click('#mt-login button[type=submit]');
+    await expect(page.locator('#mt-login-error')).toContainText(/incorrectos|demasiados intentos|no están habilitadas/);
+    await expect(page.locator('#mt-board')).toBeHidden();
+  });
+
   test('"No me llegó" responde siempre lo mismo', async ({ page }) => {
     await page.goto('/no-me-llego/');
     await page.fill('input[name=email]', 'nadie-e2e@example.com');

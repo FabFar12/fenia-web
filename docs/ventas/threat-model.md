@@ -97,6 +97,11 @@
 | D5 | Errores que muestran rutas o trazas | `display_errors` apagado; mensajes genéricos | S-11 |
 | D6 | Datos personales de más en los logs | Solo lo necesario, fuera de la web, con retención definida | OPS-04 |
 | D7 | Respuestas de la API cacheadas, o tokens filtrados por el encabezado `Referer` | `Cache-Control: no-store` en `/api`; `Referrer-Policy: no-referrer` en la página de descarga | S-24 |
+| D9 | **Adivinar la contraseña de las métricas** (ADR-029) | Contraseñas largas generadas al azar, guardadas solo como hash bcrypt en la config. 10 intentos por IP cada 15 minutos y 10 por usuario por hora. Clave equivocada y usuario inexistente responden lo mismo, en el mismo tiempo | MetricsTest, S-43 |
+| D10 | **Robar la sesión de las métricas** | Cookie `HttpOnly`, `Secure`, `SameSite=Strict`, solo para `/api/`, 30 días; en la base solo su SHA-256. Salir la borra; sacar un usuario de la config mata sus sesiones. El ingreso exige el propio sitio como origen (D4) | MetricsTest, S-41, S-42 |
+| D11 | **Ver las métricas sin ser dueño** (ventas, emails, visitas) | La página no trae datos: la API los da solo con sesión de dueño. Los emails se muestran enmascarados. noindex, fuera del sitemap y sin caché | S-40, S-45 |
+| D12 | **Privacidad de los visitantes** (ADR-029) | Contador propio sin cookies: ni IP, ni navegador, ni query, ni el `#` de los links de compra. Una huella que cambia cada día impide seguir a alguien entre días. 400 días y se borra. Nada va a terceros. Pendiente: mencionarlo en la política de privacidad (abogado, Bloque 5) | MetricsTest |
+| D13 | **Inflar o ensuciar las visitas** con pedidos falsos a `/api/hit.php` | Máximo 300 eventos por IP por hora, filtro de bots, solo rutas del sitio y fuentes con caracteres de dominio. La pantalla muestra todo como texto, nunca como HTML. En el peor caso, números inflados, sin acceso a nada | MetricsTest, S-44 |
 | D8 | Texto arbitrario en una página de FENIA vía parámetros de la URL (hoy `titulo` en `/recursos-gratuitos`, H-03): links de aspecto oficial para phishing | Los textos salen de datos del sitio (id del producto → título), nunca de la URL | E2E-04 |
 
 ## E. Operación

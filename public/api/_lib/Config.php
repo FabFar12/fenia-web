@@ -43,6 +43,8 @@ final class Config
         'order_ttl_minutes' => 60,  // checkout links expire (threat model B3)
         'alert_email' => '',        // alerts and daily report; '' = mail_reply_to
         'daily_report' => true,
+        'owners' => [],             // ADR-029: user => password hash (password_hash); [] = metrics closed
+        'psi_api_key' => '',        // PageSpeed Insights key for the daily speed check; '' = without key
     ];
 
     /**
@@ -114,7 +116,26 @@ final class Config
                 }
             }
         }
+        // Owners who see the internal metrics (ADR-029): user => password hash.
+        foreach ((array) ($values['owners'] ?? []) as $user => $hash) {
+            if (!is_string($user) || !preg_match('/^[a-z0-9._-]{1,40}$/D', $user)
+                || !is_string($hash) || !preg_match('/^\$(2y|argon2id)\$/', $hash)) {
+                throw new \RuntimeException('Config owners malformed');
+            }
+        }
+        if (isset($values['owners']) && !is_array($values['owners'])) {
+            throw new \RuntimeException('Config owners malformed');
+        }
+        if (isset($values['psi_api_key']) && !is_string($values['psi_api_key'])) {
+            throw new \RuntimeException('Config psi_api_key malformed');
+        }
         return new self($values + self::DEFAULTS);
+    }
+
+    /** @return array<string, string> user => password hash; empty means nobody can log in */
+    public function owners(): array
+    {
+        return (array) $this->values['owners'];
     }
 
     /** @return mixed */

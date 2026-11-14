@@ -9,8 +9,9 @@ export default defineConfig({
   site: 'https://fenia.com.ar',
   integrations: [
     react(),
-    // Purchase-flow pages are noindex; keep them out of the sitemap too (ADR-028).
-    sitemap({ filter: (page) => !/\/(gracias|descarga|no-me-llego)\/?$/.test(page) }),
+    // Purchase-flow pages and the internal metrics are noindex; keep them out
+    // of the sitemap too (ADR-028, ADR-029).
+    sitemap({ filter: (page) => !/\/(gracias|descarga|no-me-llego|metricas)\/?$/.test(page) }),
   ],
   vite: {
     plugins: [tailwindcss()],

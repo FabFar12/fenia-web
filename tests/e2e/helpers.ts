@@ -71,3 +71,34 @@ export async function openTuKit(page: Page, info: object = TU_KIT): Promise<void
   await page.goto(`/descarga/#t=${'A'.repeat(43)}`);
   await page.locator('#dl-kit').waitFor({ state: 'visible' });
 }
+
+/** A sample answer of /api/metricas.php (ADR-029), for tests that look at the board without logging in. */
+export const METRICAS = {
+  range: '7d',
+  from: '08/11',
+  updated: '14/11 12:00',
+  visits: {
+    visitors: 1240, visits: 1610, views: 3020, whatsapp: 38,
+    sources: [{ name: 'Instagram', n: 610, pct: 38 }, { name: 'Google', n: 354, pct: 22 }, { name: 'WhatsApp', n: 274, pct: 17 }, { name: 'Directo', n: 242, pct: 15 }, { name: 'Mail', n: 130, pct: 8 }],
+    devices: [{ name: 'celular', n: 1004, pct: 81 }, { name: 'compu', n: 236, pct: 19 }],
+    pages: [{ name: '/', n: 1500 }, { name: '/kits/kit-ensenar-con-ia/', n: 620 }, { name: '/kits/guia-evaluar-tiempos-ia/', n: 410 }],
+    per_day: Array.from({ length: 30 }, (_, i) => ({ day: `${(i % 30) + 1}/11`, n: 20 + ((i * 37) % 60) })),
+  },
+  funnel: {
+    total: { seen: 420, checkout: 40, paid: 12, rate: 2.9 },
+    kits: [{ id: 'kit-ensenar-con-ia', title: 'Enseñar con IA sin automatizar la pedagogía', seen: 200, checkout: 20, paid: 6 }],
+    since: '08/11',
+  },
+  sales: { count: 12, revenue: 156000, refunds: 0, failed: 1, review: 0, mail_pending: 0, per_kit: [{ name: 'Evaluar en tiempos de IA', n: 5 }, { name: 'Aprender con IA sin dejar de pensar', n: 4 }], per_day: Array.from({ length: 30 }, (_, i) => ({ day: `${(i % 30) + 1}/11`, n: i % 4 })) },
+  kit_use: { buyers: 12, opened: 11, read: 9, fichas: 7, imprimibles: 3, zip: 6, guide: 4, renewed: 1 },
+  recent: [{ when: '14/11 09:12', kit: 'Enseñar con IA sin automatizar la pedagogía', email: 'a***@gmail.com', amount: 13000, refunded: false, opened: true }],
+  speed: [{ url: 'https://fenia.com.ar/', day: '2026-11-14', score: 88, lcp_ms: 2300, cls: 0.04, tbt_ms: 120, field_lcp_ms: null, field_inp_ms: null, field_cls: null, error: null }],
+};
+
+/** Opens /metricas with the API answered by the test: logged in as "dev", showing `METRICAS`. */
+export async function openMetricas(page: Page): Promise<void> {
+  await page.route('**/api/sesion.php', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"user":"dev"}' }));
+  await page.route('**/api/metricas.php**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(METRICAS) }));
+  await page.goto('/metricas/');
+  await page.locator('#mt-board').waitFor({ state: 'visible' });
+}

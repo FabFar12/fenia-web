@@ -4,7 +4,7 @@
 // approved design decision. Each run reports the known ones still present.
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { catalog, openTuKit } from './helpers';
+import { catalog, openTuKit, openMetricas } from './helpers';
 
 /** Found by this battery on 2026-11-08 (docs/ventas, accessibility debt). */
 const KNOWN: { rule: string; target: RegExp; why: string }[] = [
@@ -36,6 +36,7 @@ const pages: [string, string, string[]][] = [
   ['/gracias', '/gracias/', ['main']],
   ['/descarga', '/descarga/', ['main']],
   ['No me llegó', '/no-me-llego/', ['main']],
+  ['métricas: ingreso', '/metricas/', ['main']],
 ];
 
 /** Fails on new serious/critical problems inside `include`; known ones are only reported. */
@@ -73,5 +74,11 @@ for (const [name, path, include] of pages) {
 // "Tu kit" (D25) with the API answered by the test: the page with all its rows, without buying.
 test('accesibilidad: Tu kit (datos simulados)', async ({ page }) => {
   await openTuKit(page);
+  await checkPage(page, ['main']);
+});
+
+// Internal metrics (ADR-029) with the API answered by the test.
+test('accesibilidad: métricas (datos simulados)', async ({ page }) => {
+  await openMetricas(page);
   await checkPage(page, ['main']);
 });
