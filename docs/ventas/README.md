@@ -80,7 +80,7 @@ De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
 8. **"Tu kit" (D25, D26):** construida y probada; staging con material de prueba. Los tres kits quedaron estandarizados y verificados (Evaluar y Aprender con Claude Design). Sigue: el dev la mira en staging y da el OK para el mail nuevo, la subida a producción de los tres kits y la corrección de H-11 en el ZIP de Enseñar.
-9. **Después del entorno:** sección interna de métricas del sitio y de ventas, solo para el dev y Fab (pedido del dev, 2026-11-12).
+9. **Después del entorno:** sección interna de métricas del sitio y de ventas, solo para el dev y Fab (pedido del dev, 2026-11-12). Propuesta lista para aprobar: [propuesta-metricas.md](./propuesta-metricas.md), con 3 decisiones del dev.
 
 ## Cómo se corren las pruebas
 
