@@ -89,7 +89,7 @@ De la IA:
 | Unitarias PHP (U) | `vendor/bin/phpunit`, después de `composer install` | CI, en cada push. En local hace falta PHP ≥ 8.1, que no es obligatorio |
 | Catálogo = `.md` (U-31) | `npm run build` y después `node scripts/verify-catalog.mjs` | CI, en cada push |
 | Suite de seguridad (S) | PowerShell: `$env:BASE_URL="https://fenia.com.ar"; npm run test:ventas` | Contra producción, solo las pruebas ✱. Con `MODE=staging` contra staging, todas |
-| Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), capturas de referencia y accesibilidad (axe). 60 pruebas, unos 2 minutos |
+| Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), "Tu kit" con datos simulados, capturas de referencia y accesibilidad (axe). 69 pruebas, unos 2 minutos (66 en staging; 3 son solo de producción) |
 | E2E en producción | `npm run e2e:prod` | Lo mismo pero sin comprar nada y sin capturas de referencia. 54 pruebas |
 | Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, "Tu kit" (guía, fichas, descargas), reembolso y kit cerrado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP. Con `E2E_KEEP=1` no reembolsa e imprime el link, para que una persona pruebe staging |
 | Capturas de referencia | `npm run e2e:update` | Solo después de un cambio visual aprobado. Las capturas nuevas quedan en `tests/e2e/fotos/` y hay que hacerles commit |
