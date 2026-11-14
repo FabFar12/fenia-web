@@ -14,6 +14,7 @@
       <li><strong>HTTP headers (CSP, HSTS), redirects, cache policy</strong> 👉 <code>public/.htaccess</code> &amp; <code>docs/adr/ADR-023-htaccess-hosting-config.md</code></li>
       <li><strong>CI / quality gate / FTPS deploy / branch protection</strong> 👉 <code>.github/workflows/ci.yml</code> &amp; <code>docs/adr/ADR-020-ci-minimal-github-actions.md</code></li>
       <li><strong>Observability (analytics, error tracking, uptime)</strong> 👉 <code>docs/adr/ADR-024-observability-on-hostinger.md</code> (current) &amp; <code>ADR-021</code> (superseded, historical) &amp; <code>.env.example</code></li>
+      <li><strong>Internal metrics, private visit counter, owners' accounts (user + password), sessions</strong> 👉 <code>docs/adr/ADR-029-private-metrics-and-owner-accounts.md</code> &amp; <code>docs/ventas/propuesta-metricas.md</code> — <strong>visits never go to third parties</strong></li>
       <li><strong>Stack choices, framework versions, why Astro/React/Tailwind</strong> 👉 <code>docs/adr/ADR-001-tech-stack.md</code></li>
       <li><strong>Testimonial collection / publication flow</strong> 👉 <code>docs/adr/ADR-005-testimonial-collection.md</code></li>
       <li><strong>Local dev experience / scripts / why <code>npm run dev</code> must stay single-command</strong> 👉 <code>docs/adr/ADR-006-dx-single-command-dev.md</code></li>

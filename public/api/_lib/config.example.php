@@ -36,12 +36,27 @@ return [
     // it (Shop::tokenFor), so every link already sent would stop working.
     'hash_salt' => '…',
 
-    // Kit id (the .md slug) => ZIP in <privateDir>/kits/ + its SHA-256 (E2E-02)
+    // Kit id (the .md slug) => ZIP in <privateDir>/kits/ + its SHA-256 (E2E-02).
+    // Optional, each with its own SHA-256 (Config::RESOURCES):
+    //   'guide'       => the guide PDF on its own (D24), with 'pages' for "Tu kit";
+    //   'fichas'      => the interactive fichas HTML (D25), with 'count';
+    //   'imprimibles' => the printables HTML (D25), with 'count'.
     'kits' => [
-        'guia-evaluar-tiempos-ia' => ['file' => 'guia-evaluar-tiempos-ia.zip', 'sha256' => '…'],
+        'guia-evaluar-tiempos-ia' => [
+            'file' => 'guia-evaluar-tiempos-ia.zip', 'sha256' => '…',
+            'guide' => ['file' => 'guia-evaluar-tiempos-ia-guia.pdf', 'sha256' => '…', 'pages' => 31],
+            'fichas' => ['file' => 'guia-evaluar-tiempos-ia-fichas.html', 'sha256' => '…', 'count' => 10],
+            'imprimibles' => ['file' => 'guia-evaluar-tiempos-ia-imprimibles.html', 'sha256' => '…', 'count' => 2],
+        ],
     ],
 
-    // Optional (defaults in Config.php): download_days 30, max_downloads 5,
+    // Internal metrics (ADR-029): user => password_hash() of a long random
+    // password. The plaintext lives only in ~/fenia-secrets/<env>/. Optional.
+    'owners' => [
+        'dev' => '$2y$10$…',
+    ],
+
+    // Optional (defaults in Config.php): download_days 30, max_downloads 10,
     // order_ttl_minutes 60, alert_email '' (= mail_reply_to; alerts and the
     // daily report of the hourly job), daily_report true.
 ];

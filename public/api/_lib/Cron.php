@@ -11,7 +11,9 @@ defined('FENIA_API') || exit;
  *  - reconciliation: re-syncs pending orders whose webhook got lost and
  *    retries delivery mails that did not go out (threat model C2, C22);
  *  - alerts: mails every new `alert`/`error` log event to `alert_email`;
- *  - daily report: one summary mail a day, after 09:00 Argentina time.
+ *  - daily report: one summary mail a day, after 09:00 Argentina time;
+ *  - metrics upkeep (ADR-029): one speed check of the site a day, after
+ *    05:00, and forgetting expired sessions and visits older than 400 days.
  *
  * Logs carry order ids, never emails or tokens, so alert mails do too.
  */
@@ -19,13 +21,15 @@ final class Cron
 {
     private const LOCAL_TZ = 'America/Argentina/Buenos_Aires';
     private const REPORT_HOUR = 9;
+    private const SPEED_HOUR = 5;
+    private const VISITS_DAYS = 400;
 
     /** Plain-language meaning of each event, for the person reading the alert. */
     private const EXPLAIN = [
         'order_review' => 'Una orden quedó para revisar a mano. No se entregó nada automáticamente.',
         'kit_file_problem' => 'El ZIP de un kit falta o no coincide con el revisado: las descargas de ese kit están frenadas.',
         'link_sharing' => 'Un link de descarga se usó desde más de 3 conexiones distintas (¿lo compartieron?).',
-        'renewals_exhausted' => 'Un comprador pidió otro link y ya usó las 2 renovaciones: atenderlo por soporte.',
+        'link_missing' => 'No se pudo armar el link de un comprador: revisarlo a mano.',
         'mail_failed' => 'Un mail de entrega no salió (¿email mal escrito?). Se reintenta cada hora durante 2 días; el comprador igual tiene /gracias y "No me llegó".',
         'checkout_mp_error' => 'Mercado Pago no pudo crear un pago (el comprador vio un error y puede reintentar).',
         'checkout_mp_malformed' => 'Mercado Pago respondió algo inesperado al crear un pago.',
@@ -41,9 +45,13 @@ final class Cron
     private string $privateDir;
     /** @var callable(): \DateTimeImmutable */
     private $clock;
+    /** @var callable(string): array{status: int, body: string} */
+    private $httpGet;
 
-    public function __construct(Shop $shop, \PDO $pdo, MailSender $mailer, Config $config, string $privateDir, ?callable $clock = null)
+    /** @param (callable(string): array{status: int, body: string})|null $httpGet for the speed check; tests pass a fake */
+    public function __construct(Shop $shop, \PDO $pdo, MailSender $mailer, Config $config, string $privateDir, ?callable $clock = null, ?callable $httpGet = null)
     {
+        $this->httpGet = $httpGet ?? [SpeedCheck::class, 'curlGet'];
         $this->shop = $shop;
         $this->pdo = $pdo;
         $this->mailer = $mailer;
@@ -75,6 +83,17 @@ final class Cron
             $state['report'] = $today;
             $summary['report'] = 'sent';
         }
+
+        $summary['speed'] = 'skip';
+        if ((int) $local->format('G') >= self::SPEED_HOUR && ($state['speed'] ?? '') !== $today) {
+            $state['speed'] = $today; // once a day, even if Google fails: tomorrow it tries again
+            $this->saveState($state);
+            $summary['speed'] = SpeedCheck::run($this->pdo, $this->speedUrls(), (string) $this->config->get('psi_api_key'), $this->httpGet, $now) . ' páginas';
+        }
+        $summary['sessions_purged'] = (new Owners($this->pdo, $this->config, $this->clock))->purge();
+        $old = $this->pdo->prepare('DELETE FROM site_events WHERE day < ?');
+        $old->execute([$local->modify('-' . self::VISITS_DAYS . ' days')->format('Y-m-d')]);
+        $summary['visits_purged'] = $old->rowCount();
 
         $this->saveState($state);
         return $summary;
@@ -190,6 +209,18 @@ final class Cron
     }
 
     /** @return array<string, mixed> */
+    /** The home and the first kit's page: what most visitors see first. @return list<string> */
+    private function speedUrls(): array
+    {
+        $site = rtrim((string) $this->config->get('site_url'), '/');
+        $urls = [$site . '/'];
+        $kits = array_keys((array) $this->config->get('kits'));
+        if ($kits !== []) {
+            $urls[] = $site . '/kits/' . $kits[0] . '/';
+        }
+        return $urls;
+    }
+
     private function loadState(): array
     {
         $raw = @file_get_contents($this->privateDir . '/cron-state.json');

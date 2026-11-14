@@ -350,14 +350,14 @@ final class ShopTest extends TestCase
         return [$shop, $ref, $mpId, $this->mailer->lastToken()];
     }
 
-    public function testFiveDownloadsThenTheLinkIsSpent(): void
+    public function testTenDownloadsThenTheLinkIsSpent(): void
     {
         [$shop, , , $token] = $this->delivered();
         $info = $shop->downloadInfo($token, self::IP);
-        self::assertSame([200, ['usable' => true, 'kit_title' => 'Kit <A> & más', 'remaining' => 5, 'max' => 5, 'expires_on' => '07/12/2026', 'guide' => false]], $info);
-        self::assertSame(5, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'looking counts nothing (C6)');
+        self::assertSame([200, ['usable' => true, 'kit_title' => 'Kit <A> & más', 'remaining' => 10, 'max' => 10, 'expires_on' => '07/12/2026', 'guide' => false]], $info);
+        self::assertSame(10, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'looking counts nothing (C6)');
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $got = $shop->download($token, self::IP, 'Mozilla/5.0');
             self::assertSame(200, $got['status'], "download $i");
             self::assertSame('PK-the-reviewed-kit', file_get_contents($got['path']));
@@ -381,12 +381,12 @@ final class ShopTest extends TestCase
         self::assertSame('kit-a-guia.pdf', $got['filename']);
         self::assertSame('%PDF-1.7 guía', file_get_contents($got['path']));
         self::assertSame('kit-a.zip', $shop->download($token, self::IP, null)['filename']);
-        self::assertSame(3, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'guide + zip = 2 of 5');
+        self::assertSame(8, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'guide + zip = 2 of 10');
         self::assertTrue($shop->kitsReady());
 
         file_put_contents($this->kitsDir . '/kit-a-guia.pdf', '%PDF tampered');
         self::assertSame(503, $shop->download($token, self::IP, null, 'guide')['status'], 'a changed guide is never served');
-        self::assertSame(3, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'nor counted');
+        self::assertSame(8, $shop->downloadInfo($token, self::IP)[1]['remaining'], 'nor counted');
         self::assertSame(404, $this->shop()->download($token, self::IP, null, 'guide')['status'], 'kit without a guide');
     }
 
@@ -403,7 +403,7 @@ final class ShopTest extends TestCase
         file_put_contents($this->kitsDir . '/kit-a.zip', 'PK-something-else');
         self::assertSame(503, $shop->download($token, self::IP, null)['status']);
         self::assertContains('kit_file_problem', $this->events());
-        self::assertSame(5, $shop->downloadInfo($token, self::IP)[1]['remaining']);
+        self::assertSame(10, $shop->downloadInfo($token, self::IP)[1]['remaining']);
     }
 
     public function testGuessingLinksIsCappedPerIp(): void
@@ -436,6 +436,175 @@ final class ShopTest extends TestCase
         self::assertSame(['state' => 'unknown'], $shop->status($ref, self::IP)[1]);
     }
 
+    // ── "Tu kit" (D25) ──────────────────────────────────────────────────────
+
+    /** kit-a with its guide, fichas and printables; kit-b with fichas only. */
+    private function tuKitConfig(): array
+    {
+        $files = [
+            'kit-a-guia.pdf' => '%PDF-1.7 guía',
+            'kit-a-fichas.html' => '<!doctype html><title>Fichas</title>',
+            'kit-a-imprimibles.html' => '<!doctype html><title>Imprimibles</title>',
+        ];
+        foreach ($files as $name => $content) {
+            file_put_contents($this->kitsDir . '/' . $name, $content);
+        }
+        $sha = fn (string $file): string => (string) hash_file('sha256', $this->kitsDir . '/' . $file);
+        return ['kits' => [
+            'kit-a' => [
+                'file' => 'kit-a.zip', 'sha256' => $sha('kit-a.zip'),
+                'guide' => ['file' => 'kit-a-guia.pdf', 'sha256' => $sha('kit-a-guia.pdf'), 'pages' => 37],
+                'fichas' => ['file' => 'kit-a-fichas.html', 'sha256' => $sha('kit-a-fichas.html'), 'count' => 8],
+                'imprimibles' => ['file' => 'kit-a-imprimibles.html', 'sha256' => $sha('kit-a-imprimibles.html'), 'count' => 8],
+            ],
+            'kit-b' => [
+                'file' => 'kit-a.zip', 'sha256' => $sha('kit-a.zip'),
+                'fichas' => ['file' => 'kit-a-fichas.html', 'sha256' => $sha('kit-a-fichas.html'), 'count' => 8],
+            ],
+        ]];
+    }
+
+    /** @return array{0: Shop, 1: string, 2: string, 3: string, 4: string} shop, ref, MP id, token, view pass */
+    private function openedKit(): array
+    {
+        [, $ref, $mpId, $token] = $this->delivered();
+        $shop = $this->shop($this->tuKitConfig());
+        $opened = $shop->openKit($token, self::IP, 'Mozilla/5.0');
+        self::assertSame(200, $opened[0]);
+        return [$shop, $ref, $mpId, $token, $opened[2]['value']];
+    }
+
+    /** @return list<string> */
+    private function loggedKinds(): array
+    {
+        return array_map('strval', $this->pdo->query('SELECT kind FROM download_log ORDER BY id')->fetchAll(\PDO::FETCH_COLUMN));
+    }
+
+    public function testTuKitOpensWithAViewPassAndCountsNothing(): void
+    {
+        [, , , $token] = $this->delivered();
+        $shop = $this->shop($this->tuKitConfig());
+
+        [$status, $body, $pass] = $shop->openKit($token, self::IP, 'Mozilla/5.0');
+        self::assertSame(200, $status);
+        self::assertEquals([
+            'usable' => true,
+            'kit' => 'kit-a',
+            'kit_title' => 'Kit <A> & más',
+            'remaining' => 10,
+            'max' => 10,
+            'expires_on' => '07/12/2026',
+            'bought_on' => '7/11',
+            'email_masked' => 'a***@example.com',
+            'resources' => (object) ['guide' => ['size' => 37], 'fichas' => ['size' => 8], 'imprimibles' => ['size' => 8]],
+        ], $body);
+        self::assertSame('fk_kit-a', $pass['name']);
+        self::assertSame(30 * 86400, $pass['max_age'], 'lives as long as the link');
+
+        $fichas = $shop->kitResource('kit-a', 'fichas', $pass['value'], self::IP, null);
+        self::assertSame(['status' => 200, 'path' => $this->kitsDir . '/kit-a-fichas.html', 'filename' => 'kit-a-fichas.html', 'type' => 'text/html; charset=utf-8'], $fichas);
+        $guide = $shop->kitResource('kit-a', 'guide', $pass['value'], self::IP, null);
+        self::assertSame(['application/pdf', '%PDF-1.7 guía'], [$guide['type'], file_get_contents($guide['path'])]);
+        self::assertSame(200, $shop->kitResource('kit-a', 'imprimibles', $pass['value'], self::IP, null)['status']);
+
+        self::assertSame(10, $shop->openKit($token, self::IP, null, true)[1]['remaining'], 'reading and the fichas count nothing');
+        self::assertSame(['open', 'fichas', 'read', 'imprimibles'], $this->loggedKinds(), 'a refresh is not a new visit');
+    }
+
+    public function testTuKitStillOpensWhenTheDownloadsRunOut(): void
+    {
+        [$shop, , , $token, $pass] = $this->openedKit();
+        for ($i = 0; $i < 10; $i++) {
+            self::assertSame(200, $shop->download($token, self::IP, null, $i % 2 === 0 ? 'zip' : 'guide')['status']);
+        }
+        self::assertSame(410, $shop->download($token, self::IP, null)['status']);
+        [$status, $body] = $shop->openKit($token, self::IP, null);
+        self::assertSame([200, 0], [$status, $body['remaining']]);
+        self::assertSame(200, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status'], 'reading stays free (D25)');
+        self::assertSame(410, $shop->downloadInfo($token, self::IP)[0], 'the old download page still says it is spent');
+    }
+
+    public function testTheViewPassOpensOnlyItsKitAndCannotBeForged(): void
+    {
+        [$shop, , , , $pass] = $this->openedKit();
+        self::assertSame(403, $shop->kitResource('kit-a', 'fichas', null, self::IP, null)['status'], 'no pass');
+        self::assertSame(403, $shop->kitResource('kit-b', 'fichas', $pass, self::IP, null)['status'], 'pass of another kit');
+        [$id, $until, $mac] = explode('.', $pass);
+        self::assertSame(403, $shop->kitResource('kit-a', 'fichas', ((int) $id + 1) . ".$until.$mac", self::IP, null)['status'], 'another link');
+        self::assertSame(403, $shop->kitResource('kit-a', 'fichas', "$id." . ((int) $until + 86400) . ".$mac", self::IP, null)['status'], 'a longer life');
+        self::assertSame(404, $shop->kitResource('kit-a', 'zip', $pass, self::IP, null)['status'], 'only the pages of the kit');
+        self::assertSame(404, $shop->kitResource('../kit-a', 'fichas', $pass, self::IP, null)['status']);
+        self::assertSame(404, $shop->kitResource('kit-b', 'guide', $pass, self::IP, null)['status'], 'kit-b has no guide');
+
+        $this->now = $this->now->modify('+30 days');
+        self::assertSame(403, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status'], 'expires with the link');
+    }
+
+    public function testForgedPassesAreCappedPerIp(): void
+    {
+        [$shop, , , , $pass] = $this->openedKit();
+        $forged = substr($pass, 0, -1) . (substr($pass, -1) === 'A' ? 'B' : 'A');
+        for ($i = 0; $i < 20; $i++) {
+            self::assertSame(403, $shop->kitResource('kit-a', 'fichas', $forged, self::IP, null)['status']);
+        }
+        self::assertSame(429, $shop->kitResource('kit-a', 'fichas', $forged, self::IP, null)['status']);
+        self::assertSame(200, $shop->kitResource('kit-a', 'fichas', $pass, '7.7.7.7', null)['status'], 'other IPs unaffected');
+    }
+
+    public function testARefundClosesTuKitAtOnce(): void
+    {
+        [$shop, , $mpId, $token, $pass] = $this->openedKit();
+        $this->mp->orders[$mpId]['status'] = 'refunded';
+        self::assertSame('revoked', $this->notify($shop, $mpId)[1]['result']);
+        self::assertSame(410, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status']);
+        self::assertSame(410, $shop->openKit($token, self::IP, null)[0]);
+    }
+
+    /** Second barrier: even with a live link, a kit opens only while its order is paid (like consume()). */
+    public function testOnlyPaidOrdersOpenTheKit(): void
+    {
+        [$shop, $ref, , $token, $pass] = $this->openedKit();
+        $this->pdo->prepare("UPDATE orders SET status = 'review' WHERE reference = ?")->execute([$ref]);
+        self::assertSame(410, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status']);
+        self::assertSame(410, $shop->openKit($token, self::IP, null)[0]);
+    }
+
+    public function testTuKitServesOnlyTheReviewedFiles(): void
+    {
+        [$shop, , , , $pass] = $this->openedKit();
+        file_put_contents($this->kitsDir . '/kit-a-fichas.html', '<script>changed()</script>');
+        self::assertSame(503, $shop->kitResource('kit-a', 'fichas', $pass, self::IP, null)['status']);
+        self::assertContains('kit_file_problem', $this->events());
+        self::assertTrue($shop->kitsReady());
+        unlink($this->kitsDir . '/kit-a-imprimibles.html');
+        self::assertFalse($shop->kitsReady(), 'health shows a missing page');
+    }
+
+    public function testOpeningTheKitFromManyPlacesIsNotSharing(): void
+    {
+        [, , , $token] = $this->delivered();
+        $shop = $this->shop($this->tuKitConfig());
+        foreach (['1.0.0.1', '1.0.0.2', '1.0.0.3', '1.0.0.4', '1.0.0.5'] as $ip) {
+            $pass = $shop->openKit($token, $ip, null)[2]['value'];
+            self::assertSame(200, $shop->kitResource('kit-a', 'fichas', $pass, $ip, null)['status']);
+        }
+        self::assertNotContains('link_sharing', $this->events());
+    }
+
+    public function testKitsWithFichasGetTheTuKitMail(): void
+    {
+        $shop = $this->shop($this->tuKitConfig());
+        self::assertSame(200, $shop->checkout(self::form(), self::IP)[0]);
+        $mpId = (string) array_key_last($this->mp->orders);
+        $this->mp->pay($mpId);
+        $this->notify($shop, $mpId);
+        $mail = $this->mailer->sent[0];
+        self::assertStringContainsString('Abrir mi kit', $mail['html']);
+        self::assertStringContainsString('completar las fichas', $mail['text']);
+        self::assertStringContainsString('las descargas de archivos son hasta 10', $mail['text']);
+        self::assertStringNotContainsString('te conviene la compu', $mail['text']);
+    }
+
     // ── "No me llegó" ───────────────────────────────────────────────────────
 
     public function testResendAnswersTheSameAndOnlyMailsTheBuyer(): void
@@ -453,23 +622,41 @@ final class ShopTest extends TestCase
         self::assertCount(2, $this->mailer->sent);
     }
 
-    public function testResendRenewsASpentLinkAtMostTwice(): void
+    /** D27: access for good through "No me llegó"; 10 downloads per purchase, never reset. */
+    public function testResendRenewsAnExpiredLinkForeverKeepingTheDownloadsLeft(): void
     {
         [$shop, , , $first] = $this->delivered();
-        $tokens = [$first];
-        for ($round = 1; $round <= 3; $round++) {
-            for ($i = 0; $i < 5; $i++) {
-                $shop->download(end($tokens), '3.3.3.' . $round, null);
-            }
-            $this->now = $this->now->modify('+1 day'); // resend allows 3 per email per day
-            $shop->resend(['email' => 'ana@example.com'], '4.4.4.' . $round);
-            $tokens[] = $this->mailer->lastToken();
+        for ($i = 0; $i < 3; $i++) {
+            self::assertSame(200, $shop->download($first, self::IP, null)['status']);
         }
-        self::assertCount(3, array_unique($tokens), 'first link + 2 renewals, then support');
-        self::assertSame(410, $shop->download($tokens[1], '6.6.6.6', null)['status']);
-        self::assertSame(410, $shop->download($tokens[2], '6.6.6.6', null)['status'], 'third link spent too');
-        self::assertContains('renewals_exhausted', $this->events());
-        self::assertSame(410, $shop->download($first, '6.6.6.6', null)['status'], 'old link stays dead');
+
+        $this->now = $this->now->modify('+31 days');
+        $shop->resend(['email' => 'ana@example.com'], '4.4.4.1');
+        $second = $this->mailer->lastToken();
+        self::assertNotSame($first, $second, 'an expired link is replaced');
+        self::assertSame(410, $shop->openKit($first, self::IP, null)[0], 'the old one stays closed');
+        self::assertSame([7, 10], array_values(array_intersect_key($shop->openKit($second, self::IP, null)[1], ['remaining' => 0, 'max' => 0])), 'the 7 left carry over');
+
+        for ($i = 0; $i < 7; $i++) {
+            self::assertSame(200, $shop->download($second, '5.5.5.5', null)['status']);
+        }
+        self::assertSame(410, $shop->download($second, '5.5.5.5', null)['status'], 'ten per purchase');
+        $this->now = $this->now->modify('+1 day');
+        $shop->resend(['email' => 'ana@example.com'], '4.4.4.2');
+        self::assertSame($second, $this->mailer->lastToken(), 'out of downloads: the same link, it still opens the kit');
+        self::assertSame(200, $shop->openKit($second, self::IP, null)[0]);
+
+        $links = [];
+        for ($round = 3; $round <= 6; $round++) {
+            $this->now = $this->now->modify('+31 days');
+            $shop->resend(['email' => 'ana@example.com'], '4.4.4.' . $round);
+            $links[] = $link = $this->mailer->lastToken();
+            [$status, $body] = $shop->openKit($link, self::IP, null);
+            self::assertSame([200, 0], [$status, $body['remaining']], "renewal $round: it opens, with no new downloads");
+        }
+        self::assertCount(4, array_unique($links), 'no limit of renewals');
+        self::assertSame(410, $shop->download(end($links), '5.5.5.5', null)['status']);
+        self::assertNotContains('link_missing', $this->events());
     }
 
     public function testResendIsRateLimitedSilentlyPerEmail(): void

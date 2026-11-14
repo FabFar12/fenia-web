@@ -45,8 +45,8 @@
   - las capturas de referencia;
   - accesibilidad WCAG AA con axe, con los problemas conocidos listados.
 - Suite de seguridad en [`tests/security/`](../../tests/security):
-  - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25 son ✱, seguras en producción; se saltean si `/api/health.php` no responde OK;
-  - S-13, S-16 y S-18 son solo para staging y necesitan variables opcionales (ver el encabezado de `api.test.mjs`);
+  - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25, S-30…S-35 y S-40…S-45 son ✱, seguras en producción; se saltean si `/api/health.php` no responde OK;
+  - S-13, S-16, S-18 y S-36 son solo para staging y necesitan variables opcionales (ver el encabezado de `api.test.mjs`);
   - S-03 y S-04 se prueban en INT.
 - OPS-01 y OPS-06: barrera automática en CI.
 
@@ -75,6 +75,13 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | U-30 | Limitador de frecuencia | Bloquea al superar el umbral y libera al pasar la ventana |
 | U-31 | Catálogo generado por el build (en Node, después del build en CI) | Coincide con los `.md` (productos visibles, título, estado, precio, moneda) |
 | U-32 | Validación de email | Rechaza saltos de línea y direcciones inválidas |
+| U-40 | "Tu kit" (ShopTest): abrir el kit, el pase de lectura, la guía, las fichas y los imprimibles | Leer y usar no gasta descargas; un link sin descargas sigue abriendo; el pase no sirve para otro kit, otro link ni más tiempo; los pases inventados se limitan por IP; un reembolso cierra el kit; un archivo cambiado no se sirve; abrir desde muchas IPs no dispara la alerta de link compartido; el mail de un kit con fichas invita a abrirlo |
+| U-41 | Migración del esquema 1 al 2 (StoresTest) | Agrega `download_log.kind` y sube los links ya enviados de 5 a 10 descargas, sin perder las ya hechas; correrla dos veces no cambia nada |
+| U-50 | Métricas (MetricsTest): contador de visitas | Guarda sin IP ni navegador; la huella cambia cada día; descarta bots, rutas de la API y de las métricas; clasifica fuentes; navegar dentro del sitio no es una visita nueva |
+| U-51 | Métricas: cuentas de dueños | Usuario y contraseña; la misma respuesta para clave mala y usuario inexistente; límite de intentos por IP y por usuario; la sesión vence, se cierra y muere con la cuenta; sin dueños, cerrado |
+| U-52 | Métricas: informe y velocidad | Junta visitas, embudo desde que empezó el contador, ventas, uso de "Tu kit" y últimas ventas con emails enmascarados; el control de velocidad guarda puntaje y Core Web Vitals, una vez por día, sin tocar la red en los tests |
+| U-43 | "No me llegó" con acceso para siempre (D27, ShopTest) | Un link vencido se renueva sin límite y el nuevo arrastra las descargas que quedaban; un link sin descargas se reenvía igual y sigue abriendo el kit; nunca hay más de 10 descargas por compra |
+| U-42 | Config de "Tu kit" (EnvConfigInboxTest) | Lee guía, fichas e imprimibles con su tamaño; rechaza extensiones, rutas y tamaños inválidos; el buzón acepta solo `.html` de nombre válido |
 
 ### S — Suite de seguridad (✱ = segura para correr contra producción)
 
@@ -105,6 +112,19 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | S-23 ✱ | POST desde otro origen (`Origin` ajeno) | Rechazado |
 | S-25 ✱ | `https://fenia.com.ar/staging/` y `/staging/api/…` (staging visto desde el dominio real, C20) | 403/404; staging solo responde en `staging.fenia.com.ar` y con `noindex` |
 | S-24 ✱ | Encabezados | `/api/*` con `Cache-Control: no-store`; descarga con `Referrer-Policy: no-referrer`; HSTS y CSP presentes |
+| S-30 ✱ | "Tu kit": fichas e imprimibles sin pase de lectura | 403, con la CSP de las páginas del kit (`default-src 'none'`, sin red ni formularios) y `no-store` |
+| S-31 ✱ | "Tu kit": la guía sin pase | 403 y sin CSP (comprueba que LiteSpeed respeta el `unset` de `api/.htaccess`) |
+| S-32 ✱ | Pase inventado, de otro kit, o con rutas raras en `k` y `r` | Nunca un archivo: 403/404/429 |
+| S-33 ✱ | Abrir el kit con tokens al azar | 404/429, sin pase |
+| S-34 ✱ | Abrir el kit desde otro sitio (`Origin` ajeno) | 403, sin pase |
+| S-35 ✱ | Métodos que no corresponden en `kit.php` y `guia.php` | 405 |
+| S-40 ✱ | Métricas sin sesión, con rangos raros | 401 y nada más, sin caché |
+| S-41 ✱ | Cookie de sesión inventada | 401 en los datos y en la sesión |
+| S-42 ✱ | Ingresar a las métricas desde otro sitio | 403, sin cookie |
+| S-43 ✱ | Clave equivocada y usuario inexistente | La misma respuesta, sin cookie |
+| S-44 ✱ | El contador de visitas con datos basura o de más | Siempre 204, vacío y sin cookies; GET 405 |
+| S-45 ✱ | La página de métricas | noindex, sin secretos en el HTML y fuera del sitemap |
+| S-36 | Con un token de una compra de prueba: el pase abre las fichas | 200, cookie `HttpOnly` + `SameSite=Strict` + `Path=/api/`, y las descargas restantes no cambian |
 
 ### INT — Integración con el sandbox de Mercado Pago (staging)
 
@@ -126,7 +146,9 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 
 | ID | Escenario | Pasa si |
 |---|---|---|
-| E2E-01 | Card → página del kit → email → checkout sandbox → `/gracias` → descarga | Funciona de punta a punta; el precio es el mismo en la card, la página y el checkout; sin errores de CSP en consola |
+| E2E-01 | Card → página del kit → email → checkout sandbox → `/gracias` → "Tu kit" (guía en el navegador, fichas, descargas) → reembolso | Funciona de punta a punta; el precio es el mismo en la card, la página y el checkout; leer y usar las fichas no gasta descargas; en la ficha de prueba corren el script `blob:` y `new Function`, internet queda bloqueado y lo escrito se guarda; el reembolso cierra el kit |
+| E2E-06 | Métricas: ingreso real en staging con usuario equivocado, y el tablero con datos simulados | El ingreso rechaza la clave equivocada; captura de referencia y accesibilidad del tablero en escritorio, celular y Firefox |
+| E2E-05 | "Tu kit" con datos simulados (sin comprar) | Captura de referencia en escritorio, celular y Firefox, y accesibilidad con axe sin problemas nuevos |
 | E2E-02 | Descarga de los 3 kits | La huella SHA-256 de cada ZIP descargado coincide con el original |
 | E2E-03 | Mobile (390 px) y desktop | Capturas antes/después aprobadas (regla de AGENTS.md) |
 | E2E-04 | `/recursos-gratuitos?titulo=Texto inventado` (H-03) | La página no muestra el texto de la URL; el título sale del id del producto |

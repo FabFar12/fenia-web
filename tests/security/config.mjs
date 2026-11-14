@@ -23,7 +23,8 @@ export async function request(path, init = {}) {
     redirect: 'follow',
     signal: AbortSignal.timeout(20_000),
     ...init,
-    headers: { 'User-Agent': 'fenia-security-suite/1.0', ...(init.headers ?? {}) },
+    // "bot": the private visit counter (ADR-029) must never count the suite as a visitor.
+    headers: { 'User-Agent': 'fenia-security-suite/1.0 (bot)', ...(init.headers ?? {}) },
   });
   const body = await response.text();
   return { status: response.status, headers: response.headers, body };

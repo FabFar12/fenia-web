@@ -1,7 +1,9 @@
 // A full purchase in the Mercado Pago sandbox, on staging (npm run e2e:compra):
-// kit page → MP test card → back to /gracias with the link → download the ZIP
-// → refund through MP's API → the link stops working. The delivery mail goes
-// to E2E_EMAIL (default kits@fenia.com.ar, a mailbox we own).
+// kit page → MP test card → back to /gracias with the link → "Tu kit" (guide
+// in the browser, fichas, downloads) → refund through MP's API → the kit
+// closes. The delivery mail goes to E2E_EMAIL (default kits@fenia.com.ar, a
+// mailbox we own). E2E_KEEP=1 stops before the refund and prints the link, to
+// let a person try staging.
 // Needs the TEST access token in ~/fenia-secrets/mp-test-token.txt (or
 // FENIA_SECRETS_DIR); it is read here and never printed.
 import { test, expect, type Page } from '@playwright/test';
@@ -78,20 +80,45 @@ test('compra completa en el sandbox: pago → entrega → descarga → reembolso
   expect(href).toMatch(/^\/descarga\/#t=[A-Za-z0-9_-]{43}$/);
   const dlToken = href!.split('#t=')[1];
 
-  // 4. Download: the guide PDF on its own (when the kit has one), then the
-  //    whole ZIP. Real files, one download counted each.
+  // 4. "Tu kit" (D25). Opening it spends nothing. The guide reads in the
+  //    browser, without a page CSP so the PDF viewer works. The fichas open
+  //    in a new tab under the kit CSP: their bundled code runs (blob: script,
+  //    new Function), the network stays blocked, and what is typed is kept.
   await page.goto(href!);
   const meta = page.locator('#dl-meta');
-  await expect(meta).toContainText('Te quedan 5 de 5');
-  let left = 5;
-  if (await page.locator('#dl-guide').isVisible()) {
-    const [guide] = await Promise.all([page.waitForEvent('download'), page.click('#dl-guide')]);
-    expect(readFileSync((await guide.path())!).subarray(0, 4).toString()).toBe('%PDF');
-    await expect(meta).toContainText(`Te quedan ${--left} de 5`);
-  }
+  await expect(meta).toContainText('Te quedan 10 descargas');
+  const api = page.context().request; // carries the view pass (HttpOnly cookie)
+  const read = await api.get((await page.locator('#read-guide').getAttribute('href'))!);
+  expect(read.status()).toBe(200);
+  expect((await read.body()).subarray(0, 4).toString()).toBe('%PDF');
+  expect(read.headers()['content-disposition']).toMatch(/^inline/);
+  expect(read.headers()['content-security-policy']).toBeUndefined();
+
+  const [fichas] = await Promise.all([page.context().waitForEvent('page'), page.click('#open-fichas')]);
+  await expect(fichas.locator('#c-blob')).toHaveText('OK');
+  await expect(fichas.locator('#c-eval')).toHaveText('OK');
+  await expect(fichas.locator('#c-net')).toHaveText('bloqueado (bien)');
+  await fichas.fill('#f1', 'Respuesta de prueba');
+  await fichas.reload();
+  await expect(fichas.locator('#f1')).toHaveValue('Respuesta de prueba');
+  const page2 = await api.get((await page.locator('#open-fichas').getAttribute('href'))!);
+  expect(page2.headers()['content-security-policy']).toContain("default-src 'none'");
+  const opened = await api.post('/api/kit.php', { data: { token: dlToken, refresh: true }, headers: { Origin: baseURL! } });
+  expect(((await opened.json()) as { remaining: number }).remaining, 'reading and the fichas count nothing').toBe(10);
+
+  // Downloads: the guide PDF and the whole ZIP, real files, one counted each.
+  const [guide] = await Promise.all([page.waitForEvent('download'), page.click('#dl-guide')]);
+  expect(readFileSync((await guide.path())!).subarray(0, 4).toString()).toBe('%PDF');
+  await expect(meta).toContainText('Te quedan 9 descargas');
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('#dl-zip')]);
   expect(readFileSync((await download.path())!).subarray(0, 2).toString()).toBe('PK');
-  await expect(meta).toContainText(`Te quedan ${--left} de 5`);
+  await expect(meta).toContainText('Te quedan 8 descargas');
+
+  if (process.env.E2E_KEEP === '1') {
+    // A link for a person to try staging (test content only): no refund.
+    console.log(`Link de prueba de Tu kit (staging, vence en 30 días): ${new URL(href!, baseURL).href}`);
+    return;
+  }
 
   // 5. Refund through MP's API → the webhook revokes the link on its own.
   // Right after paying, MP can still answer 422 while the payment settles:
@@ -109,11 +136,13 @@ test('compra completa en el sandbox: pago → entrega → descarga → reembolso
   expect(refund.status, `MP no aceptó el reembolso: ${refund.body}`).toBeLessThan(300);
   await expect
     .poll(async () => {
-      const r = await page.request.post('/api/download.php', { data: { token: dlToken, info: true }, headers: { Origin: baseURL! } });
-      return ((await r.json()) as { usable: boolean }).usable;
+      const r = await page.request.post('/api/kit.php', { data: { token: dlToken, refresh: true }, headers: { Origin: baseURL! } });
+      return r.status();
     }, { timeout: 60_000, intervals: [3000] })
-    .toBe(false);
+    .toBe(410);
+  await fichas.reload();
+  await expect(fichas.locator('h1')).toContainText('venció', { timeout: 10_000 });
   await page.goto('about:blank');
   await page.goto(href!);
-  await expect(page.locator('#dl-error')).toContainText('venció o ya no tiene descargas');
+  await expect(page.locator('#dl-error')).toContainText('venció');
 });

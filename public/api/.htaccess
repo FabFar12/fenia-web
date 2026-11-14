@@ -5,20 +5,37 @@
 # would be let through by this allowlist.
 <IfModule mod_authz_core.c>
   Require all denied
-  <FilesMatch "^((checkout|webhook|status|download|resend|health)\.php|catalog\.json)$">
+  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia|hit|sesion|metricas)\.php|catalog\.json)$">
     Require all granted
   </FilesMatch>
 </IfModule>
 <IfModule !mod_authz_core.c>
   Order deny,allow
   Deny from all
-  <FilesMatch "^((checkout|webhook|status|download|resend|health)\.php|catalog\.json)$">
+  <FilesMatch "^((checkout|webhook|status|download|resend|health|kit|guia|hit|sesion|metricas)\.php|catalog\.json)$">
     Allow from all
   </FilesMatch>
 </IfModule>
 
-# Never cached by the browser or Hostinger's CDN (threat model C21, test S-24).
 <IfModule mod_headers.c>
+  # Never cached by the browser or Hostinger's CDN (threat model C21, test S-24).
   Header always set Cache-Control "no-store"
   Header always set X-Robots-Tag "noindex, nofollow"
+
+  # "Tu kit" (D25). LiteSpeed replaces headers PHP sets with the ones set
+  # here, so the policy of each page lives in this file.
+  #
+  # kit.php serves the kit's own pages (interactive fichas, printables). They
+  # run the code they carry (Claude Design bundles unpack themselves into blob:
+  # scripts and run them with new Function) but can reach nothing else: no
+  # network, no forms, no frames, no outside images or fonts (threat model A17).
+  <Files "kit.php">
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob:; style-src 'unsafe-inline' blob:; img-src data: blob:; font-src data: blob:; media-src data: blob:; connect-src blob: data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  </Files>
+
+  # guia.php shows the guide PDF in the browser's own viewer, which a page
+  # policy can break; a PDF runs no page code of ours.
+  <Files "guia.php">
+    Header always unset Content-Security-Policy
+  </Files>
 </IfModule>

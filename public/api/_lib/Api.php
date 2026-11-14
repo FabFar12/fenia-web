@@ -24,7 +24,7 @@ final class Api
      * or null when it already wrote its own response (file download).
      *
      * @param list<string> $methods
-     * @param callable(Shop, Config): ?array{0: int, 1: array<string, mixed>} $handler
+     * @param callable(Shop, Config, array<string, mixed>): ?array{0: int, 1: array<string, mixed>} $handler gets the booted app (pdo, log…) as third argument
      */
     public static function run(array $methods, callable $handler): void
     {
@@ -51,7 +51,7 @@ final class Api
         $log = $app['log'];
 
         try {
-            $result = $handler($app['shop'], $app['config']);
+            $result = $handler($app['shop'], $app['config'], $app);
             if ($result !== null) {
                 self::json($result[0], $result[1]);
             }
@@ -168,6 +168,114 @@ final class Api
     public static function clientIp(): string
     {
         return (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    }
+
+    public static function userAgent(): ?string
+    {
+        $agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        return is_string($agent) ? $agent : null;
+    }
+
+    /**
+     * "Tu kit" view pass (KitPass): HttpOnly, only over HTTPS, only for /api/,
+     * never sent from another site.
+     *
+     * @param array{name: string, value: string, max_age: int} $pass
+     */
+    public static function setPassCookie(array $pass): void
+    {
+        setcookie($pass['name'], $pass['value'], [
+            'expires' => time() + $pass['max_age'],
+            'path' => '/api/',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+    }
+
+    public static function passCookie(string $kitId): ?string
+    {
+        $value = $_COOKIE[KitPass::cookieName($kitId)] ?? null;
+        return is_string($value) ? $value : null;
+    }
+
+    /**
+     * Streams one of the kit's pages for "Tu kit" (shown in the browser, not
+     * saved), or a page that says what to do.
+     *
+     * @param array{status: int, path?: string, filename?: string, type?: string} $file
+     */
+    public static function sendKitPage(array $file, Config $config): void
+    {
+        if ($file['status'] !== 200 || !isset($file['path'], $file['filename'], $file['type'])) {
+            [$title, $message] = [
+                403 => ['Abrí tu kit desde tu link', 'Para ver este material, entrá con el link de tu compra: el del mail, o el de la página de pago.'],
+                404 => ['No encontramos este material', 'Volvé a tu kit desde el link de tu compra.'],
+                410 => ['Este acceso venció', 'El link de tu compra venció o fue anulado.'],
+                429 => ['Hubo demasiados intentos', 'Probá de nuevo en unos minutos.'],
+            ][$file['status']] ?? ['No está disponible en este momento', 'Probá más tarde o escribinos a ' . (string) $config->get('mail_reply_to') . '.'];
+            self::messagePage($file['status'], $title, $message);
+            return;
+        }
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: ' . $file['type']);
+        header('Content-Disposition: inline; filename="' . $file['filename'] . '"');
+        header('Content-Length: ' . (string) filesize($file['path']));
+        readfile($file['path']);
+    }
+
+    /** A small page for the buyer when a file or a page of the kit cannot be served. */
+    public static function messagePage(int $status, string $title, string $message): void
+    {
+        $e = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        http_response_code($status);
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            . '<meta name="robots" content="noindex"><title>' . $e($title) . ' — FENIA</title></head>'
+            . '<body style="margin:0;padding:48px 20px;background:#0b1a2e;color:#fff;font-family:Arial,Helvetica,sans-serif">'
+            . '<div style="max-width:560px;margin:0 auto"><h1 style="font-size:24px">' . $e($title) . '</h1>'
+            . '<p style="font-size:16px;line-height:1.6">' . $e($message) . '</p>'
+            . '<p style="font-size:16px;line-height:1.6">Pedí un link nuevo en <a style="color:#00b4d8" href="/no-me-llego/">No me llegó</a> con el email de tu compra.</p>'
+            . '</div></body></html>';
+    }
+
+    /**
+     * The JSON body whatever its Content-Type: navigator.sendBeacon posts it as
+     * text/plain (no preflight). Small bodies only.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function beaconInput(int $maxBytes = 2048): ?array
+    {
+        $raw = file_get_contents('php://input', false, null, 0, $maxBytes + 1);
+        if ($raw === false || $raw === '' || strlen($raw) > $maxBytes) {
+            return null;
+        }
+        $data = json_decode($raw, true, 3);
+        return is_array($data) ? $data : null;
+    }
+
+    /** Owners' session (ADR-029): HttpOnly, HTTPS only, only for /api/, never from another site. */
+    public static function setSessionCookies(string $token): void
+    {
+        $expires = time() + Owners::DAYS * 86400;
+        setcookie(Owners::COOKIE, $token, ['expires' => $expires, 'path' => '/api/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+        // Readable flag (no secret): the visit counter skips the owners' own visits.
+        setcookie(Owners::FLAG, '1', ['expires' => $expires, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Strict']);
+    }
+
+    public static function clearSessionCookies(): void
+    {
+        setcookie(Owners::COOKIE, '', ['expires' => 1, 'path' => '/api/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+        setcookie(Owners::FLAG, '', ['expires' => 1, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Strict']);
+    }
+
+    public static function sessionCookie(): ?string
+    {
+        $value = $_COOKIE[Owners::COOKIE] ?? null;
+        return is_string($value) ? $value : null;
     }
 
     /** @return array<string, string> request headers we read, lowercased names */

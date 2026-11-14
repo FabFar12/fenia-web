@@ -100,7 +100,7 @@ final class TestDb
             $pdo = \Fenia\Api\Db::connect('sqlite::memory:');
         } else {
             $pdo = \Fenia\Api\Db::connect($dsn, (string) getenv('FENIA_TEST_DB_USER'), (string) getenv('FENIA_TEST_DB_PASSWORD'));
-            foreach (['orders', 'download_tokens', 'download_log', 'rate_events', 'schema_version'] as $table) {
+            foreach (['orders', 'download_tokens', 'download_log', 'rate_events', 'schema_version', 'site_events', 'sessions', 'speed_checks'] as $table) {
                 $pdo->exec("DROP TABLE IF EXISTS $table");
             }
         }

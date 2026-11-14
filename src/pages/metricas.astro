@@ -1,0 +1,388 @@
+---
+// metricas.astro — internal metrics, only for the owners (ADR-029,
+// docs/ventas/propuesta-metricas.md). The page itself holds no data: it asks
+// /api/metricas.php, which answers only with an owner's session (user and
+// password, /api/sesion.php). noindex and out of the sitemap.
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+---
+
+<Layout title="Métricas — FENIA" description="Métricas internas de FENIA.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+  </Fragment>
+
+  <Nav />
+
+  <main class="mt-main">
+    <section class="mt-section">
+      <header class="mt-top">
+        <p class="mt-eyebrow">Métricas internas</p>
+        <p id="mt-who" class="mt-who" hidden>
+          <span id="mt-user"></span> · <button id="mt-logout" type="button" class="mt-link">Salir</button>
+        </p>
+      </header>
+      <h1 class="mt-title">Métricas FENIA</h1>
+
+      <form id="mt-login" class="mt-login" hidden>
+        <p class="mt-note">Solo para el equipo de FENIA.</p>
+        <label class="mt-field">Usuario
+          <input id="mt-u" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="40" />
+        </label>
+        <label class="mt-field">Contraseña
+          <input id="mt-p" name="clave" type="password" autocomplete="current-password" required maxlength="200" />
+        </label>
+        <button type="submit" class="mt-button">Entrar</button>
+        <p id="mt-login-error" class="mt-error" role="alert" hidden></p>
+      </form>
+
+      <article id="mt-board" hidden>
+        <div class="mt-ranges" role="group" aria-label="Período">
+          <button type="button" data-range="hoy" aria-pressed="false">Hoy</button>
+          <button type="button" data-range="7d" aria-pressed="true">7 días</button>
+          <button type="button" data-range="30d" aria-pressed="false">30 días</button>
+          <button type="button" data-range="todo" aria-pressed="false">Todo</button>
+        </div>
+        <p id="mt-updated" class="mt-note"></p>
+
+        <div class="mt-grid">
+          <article class="mt-card" aria-labelledby="mt-h-visits">
+            <h2 id="mt-h-visits">Visitas</h2>
+            <div id="mt-visits"></div>
+          </article>
+          <article class="mt-card" aria-labelledby="mt-h-funnel">
+            <h2 id="mt-h-funnel">Embudo de compra</h2>
+            <div id="mt-funnel"></div>
+          </article>
+          <article class="mt-card" aria-labelledby="mt-h-sales">
+            <h2 id="mt-h-sales">Ventas</h2>
+            <div id="mt-sales"></div>
+          </article>
+          <article class="mt-card" aria-labelledby="mt-h-kit">
+            <h2 id="mt-h-kit">Tu kit: qué hacen después de comprar</h2>
+            <div id="mt-kit"></div>
+          </article>
+          <article class="mt-card mt-wide" aria-labelledby="mt-h-recent">
+            <h2 id="mt-h-recent">Últimas ventas</h2>
+            <div id="mt-recent"></div>
+          </article>
+          <article class="mt-card mt-wide" aria-labelledby="mt-h-speed">
+            <h2 id="mt-h-speed">Velocidad del sitio (celular)</h2>
+            <div id="mt-speed"></div>
+          </article>
+        </div>
+      </article>
+
+      <p id="mt-error" class="mt-error" role="alert" hidden></p>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  type Share = { name: string; n: number; pct: number };
+  type Day = { day: string; n: number };
+  type Report = {
+    range: string;
+    from: string | null;
+    updated: string;
+    visits: { visitors: number; visits: number; views: number; whatsapp: number; sources: Share[]; devices: Share[]; pages: { name: string; n: number }[]; per_day: Day[] };
+    funnel: { total: { seen: number; checkout: number; paid: number; rate: number | null }; kits: { id: string; title: string; seen: number; checkout: number; paid: number }[]; since: string | null };
+    sales: { count: number; revenue: number; refunds: number; failed: number; review: number; mail_pending: number; per_kit: { name: string; n: number }[]; per_day: Day[] };
+    kit_use: Record<'buyers' | 'opened' | 'read' | 'fichas' | 'imprimibles' | 'zip' | 'guide' | 'renewed', number>;
+    recent: { when: string; kit: string; email: string; amount: number; refunded: boolean; opened: boolean }[];
+    speed: { url: string; day: string; score: number | null; lcp_ms: number | null; cls: number | null; tbt_ms: number | null; field_lcp_ms: number | null; field_inp_ms: number | null; field_cls: number | null; error: string | null }[];
+  };
+
+  const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const money = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+  const int = (n: number) => new Intl.NumberFormat('es-AR').format(n);
+  const DEVICES: Record<string, string> = { celular: 'Celular', compu: 'Compu', tablet: 'Tablet', otro: 'Otro' };
+
+  /** Every value is put in as text, never as HTML: sources and pages come from visitors. */
+  function el(tag: string, cls = '', text?: string): HTMLElement {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function stats(items: [string, string][]): HTMLElement {
+    const box = el('dl', 'mt-stats');
+    for (const [label, value] of items) {
+      const item = el('div', 'mt-stat');
+      item.append(el('dt', '', label), el('dd', '', value));
+      box.append(item);
+    }
+    return box;
+  }
+  function bars(title: string, rows: { name: string; n: number; pct?: number }[], empty: string): HTMLElement {
+    const box = el('div', 'mt-block');
+    box.append(el('h3', '', title));
+    if (rows.length === 0) {
+      box.append(el('p', 'mt-note', empty));
+      return box;
+    }
+    const max = Math.max(...rows.map((r) => r.n), 1);
+    const list = el('ul', 'mt-bars');
+    for (const row of rows) {
+      const li = el('li');
+      const label = el('span', 'mt-bar-label', row.name);
+      const track = el('span', 'mt-bar-track');
+      const fill = el('span', 'mt-bar-fill');
+      fill.style.width = `${Math.max(2, Math.round((100 * row.n) / max))}%`;
+      track.append(fill);
+      li.append(label, track, el('span', 'mt-bar-value', row.pct !== undefined ? `${row.pct} %` : int(row.n)));
+      list.append(li);
+    }
+    box.append(list);
+    return box;
+  }
+  function chart(title: string, days: Day[]): HTMLElement {
+    const box = el('div', 'mt-block');
+    box.append(el('h3', '', title));
+    const max = Math.max(...days.map((d) => d.n), 1);
+    const row = el('div', 'mt-chart');
+    row.setAttribute('role', 'img');
+    row.setAttribute('aria-label', `${title}: ${days.map((d) => `${d.day} ${d.n}`).join(', ')}`);
+    for (const d of days) {
+      const bar = el('span', 'mt-col');
+      bar.style.height = `${d.n === 0 ? 2 : Math.max(6, Math.round((100 * d.n) / max))}%`;
+      bar.title = `${d.day}: ${d.n}`;
+      row.append(bar);
+    }
+    box.append(row, el('p', 'mt-axis', `${days[0]?.day ?? ''} … ${days[days.length - 1]?.day ?? ''}`));
+    return box;
+  }
+  function fill(id: string, ...nodes: HTMLElement[]): void {
+    byId(id).replaceChildren(...nodes);
+  }
+
+  function render(r: Report): void {
+    byId('mt-updated').textContent = `${r.from ? `Desde el ${r.from}` : 'Desde el comienzo'} · actualizado ${r.updated}`;
+
+    const v = r.visits;
+    fill('mt-visits',
+      stats([['Visitantes', int(v.visitors)], ['Visitas', int(v.visits)], ['Páginas vistas', int(v.views)], ['Clics a WhatsApp', int(v.whatsapp)]]),
+      bars('De dónde vienen', v.sources, 'Todavía no hay visitas en este período.'),
+      bars('Con qué entran', v.devices.map((d) => ({ ...d, name: DEVICES[d.name] ?? d.name })), 'Sin datos.'),
+      bars('Páginas más vistas', v.pages, 'Sin datos.'),
+      chart('Visitantes por día (30 días)', v.per_day));
+
+    const f = r.funnel;
+    const steps = el('ol', 'mt-steps');
+    for (const [label, n] of [['Vieron un kit', f.total.seen], ['Fueron a pagar', f.total.checkout], ['Pagaron', f.total.paid]] as [string, number][]) {
+      const li = el('li');
+      li.append(el('span', 'mt-step-n', int(n)), el('span', 'mt-step-label', label));
+      steps.append(li);
+    }
+    const rate = f.total.rate === null ? 'Todavía no hay visitas a los kits en este período.' : `Compran el ${String(f.total.rate).replace('.', ',')} % de los que ven un kit.`;
+    const since = f.since && f.since !== r.from ? ` Se calcula desde el ${f.since}, cuando empezó el contador de visitas.` : '';
+    fill('mt-funnel', steps, el('p', 'mt-note', rate + since),
+      bars('Por kit: vieron la página', f.kits.map((k) => ({ name: k.title, n: k.seen })), 'Sin kits a la venta.'));
+
+    const s = r.sales;
+    const sales = [stats([['Ventas', int(s.count)], ['Ingresos', money(s.revenue)], ['Reembolsos', int(s.refunds)], ['Pagos que fallaron', int(s.failed)]])];
+    if (s.review > 0 || s.mail_pending > 0) {
+      sales.push(el('p', 'mt-warn', `Para mirar: ${s.review} orden(es) para revisar a mano y ${s.mail_pending} mail(s) de entrega sin enviar.`));
+    }
+    fill('mt-sales', ...sales, bars('Por kit', s.per_kit, 'Todavía no hay ventas en este período.'), chart('Ventas por día (30 días)', s.per_day));
+
+    const k = r.kit_use;
+    fill('mt-kit',
+      stats([['Compraron', int(k.buyers)], ['Abrieron su kit', int(k.opened)], ['Leyeron la guía', int(k.read)], ['Usaron las fichas', int(k.fichas)],
+        ['Abrieron los imprimibles', int(k.imprimibles)], ['Bajaron el ZIP', int(k.zip)], ['Bajaron la guía', int(k.guide)], ['Links renovados', int(k.renewed)]]),
+      el('p', 'mt-note', 'Se registra desde el 14/11/2026. Cuenta compradores del período.'));
+
+    if (r.recent.length === 0) {
+      fill('mt-recent', el('p', 'mt-note', 'Todavía no hay ventas.'));
+    } else {
+      const table = el('table', 'mt-table');
+      const head = el('tr');
+      for (const h of ['Fecha', 'Kit', 'Comprador', 'Monto', '¿Abrió su kit?']) head.append(el('th', '', h));
+      table.append(head);
+      for (const sale of r.recent) {
+        const row = el('tr');
+        row.append(el('td', '', sale.when), el('td', '', sale.kit), el('td', '', sale.email), el('td', '', money(sale.amount)),
+          el('td', sale.opened ? 'mt-yes' : 'mt-no', sale.refunded ? 'Reembolsada' : sale.opened ? 'Sí' : 'Todavía no'));
+        table.append(row);
+      }
+      // Scrolls sideways on a phone: reachable with the keyboard, and named.
+      const wrap = el('div', 'mt-table-wrap');
+      wrap.tabIndex = 0;
+      wrap.setAttribute('role', 'region');
+      wrap.setAttribute('aria-label', 'Últimas ventas');
+      wrap.append(table);
+      fill('mt-recent', wrap);
+    }
+
+    if (r.speed.length === 0) {
+      fill('mt-speed', el('p', 'mt-note', 'Todavía no hay mediciones: se mide una vez por día, a partir de las 5.'));
+    } else {
+      const nodes: HTMLElement[] = [];
+      for (const c of r.speed) {
+        const box = el('div', 'mt-block');
+        box.append(el('h3', '', `${new URL(c.url).pathname} · ${c.day.split('-').reverse().slice(0, 2).join('/')}`));
+        if (c.error) {
+          box.append(el('p', 'mt-warn', `No se pudo medir: ${c.error}`));
+        } else {
+          const score = c.score ?? 0;
+          box.append(el('p', `mt-score ${score >= 90 ? 'good' : score >= 50 ? 'mid' : 'bad'}`, `Puntaje ${c.score ?? '—'} de 100`));
+          box.append(stats([
+            ['Carga principal (LCP)', c.lcp_ms === null ? '—' : `${(c.lcp_ms / 1000).toFixed(1).replace('.', ',')} s`],
+            ['Saltos al cargar (CLS)', c.cls === null ? '—' : c.cls.toFixed(2).replace('.', ',')],
+            ['Bloqueo (TBT)', c.tbt_ms === null ? '—' : `${int(c.tbt_ms)} ms`],
+            ['Respuesta al tocar, visitas reales (INP)', c.field_inp_ms === null ? 'sin datos todavía' : `${int(c.field_inp_ms)} ms`],
+          ]));
+        }
+        nodes.push(box);
+      }
+      nodes.push(el('p', 'mt-note', 'Bueno si la carga principal tarda 2,5 s o menos, la respuesta al tocar 200 ms o menos, y los saltos son 0,1 o menos.'));
+      fill('mt-speed', ...nodes);
+    }
+  }
+
+  const login = byId<HTMLFormElement>('mt-login');
+  const board = byId('mt-board');
+  const error = byId('mt-error');
+  const fail = (text: string) => {
+    error.textContent = text;
+    error.hidden = false;
+  };
+
+  function showLogin(): void {
+    board.hidden = true;
+    byId('mt-who').hidden = true;
+    login.hidden = false;
+    byId<HTMLInputElement>('mt-u').focus();
+  }
+
+  async function load(range = '7d'): Promise<void> {
+    error.hidden = true;
+    let res: Response;
+    try {
+      res = await fetch(`/api/metricas.php?rango=${encodeURIComponent(range)}`, { headers: { Accept: 'application/json' } });
+    } catch {
+      return fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+    if (res.status === 401) return showLogin();
+    if (!res.ok) return fail('Las métricas no están disponibles en este momento.');
+    render((await res.json()) as Report);
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-range]')) b.setAttribute('aria-pressed', String(b.dataset.range === range));
+    login.hidden = true;
+    board.hidden = false;
+  }
+
+  async function whoami(): Promise<void> {
+    try {
+      const res = await fetch('/api/sesion.php', { headers: { Accept: 'application/json' } });
+      if (!res.ok) return showLogin();
+      byId('mt-user').textContent = String(((await res.json()) as { user: string }).user);
+      byId('mt-who').hidden = false;
+      await load();
+    } catch {
+      fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+  }
+
+  login.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const message = byId('mt-login-error');
+    message.hidden = true;
+    const res = await fetch('/api/sesion.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ usuario: byId<HTMLInputElement>('mt-u').value, clave: byId<HTMLInputElement>('mt-p').value }),
+    }).catch(() => null);
+    byId<HTMLInputElement>('mt-p').value = '';
+    if (res?.ok) return whoami();
+    message.textContent =
+      res?.status === 429 ? 'Hubo demasiados intentos. Probá de nuevo en unos minutos.'
+      : res?.status === 401 ? 'Usuario o contraseña incorrectos.'
+      : res?.status === 503 ? 'Las métricas no están habilitadas en este servidor.'
+      : 'No hay conexión con el servidor. Probá de nuevo en unos minutos.';
+    message.hidden = false;
+  });
+
+  byId('mt-logout').addEventListener('click', async () => {
+    await fetch('/api/sesion.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ salir: true }) }).catch(() => null);
+    showLogin();
+  });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-range]')) {
+    button.addEventListener('click', () => load(button.dataset.range ?? '7d'));
+  }
+
+  whoami();
+</script>
+
+<!-- Global on purpose: the board is built by the script at run time, and Astro's scoped
+     styles only reach elements that exist at build time. Every class starts with mt-. -->
+<style is:global>
+  .mt-main { background: #0b1a2e; min-height: 80vh; }
+  .mt-section { max-width: 1040px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .mt-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; margin: 0 0 10px 0; }
+  .mt-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.65); margin: 0; }
+  .mt-who { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin: 0; }
+  .mt-link { font: inherit; background: none; border: none; padding: 0; color: #5fd6ec; text-decoration: underline; cursor: pointer; }
+  .mt-title { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 24px 0; }
+
+  .mt-login { max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
+  .mt-field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+  .mt-field input { font: inherit; font-weight: 400; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.05); color: #fff; }
+  .mt-field input:focus-visible { outline: 2px solid #5fd6ec; outline-offset: 2px; }
+  .mt-button { font: inherit; font-size: 15px; font-weight: 700; padding: 12px 24px; border-radius: 10px; border: 1px solid rgba(0, 180, 216, 0.65); background: rgba(0, 180, 216, 0.12); color: #5fd6ec; cursor: pointer; }
+
+  .mt-ranges { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px 0; }
+  .mt-ranges button { font: inherit; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.25); background: transparent; color: rgba(255, 255, 255, 0.85); cursor: pointer; }
+  .mt-ranges button[aria-pressed='true'] { background: #5fd6ec; border-color: #5fd6ec; color: #0b1a2e; }
+  .mt-note { font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.65); margin: 6px 0 0 0; }
+  .mt-warn { font-size: 14px; line-height: 1.5; color: #ffd28a; margin: 10px 0 0 0; }
+  .mt-error { font-size: 15px; line-height: 1.6; color: #ffb4a6; background: rgba(232, 87, 61, 0.1); border: 1px solid rgba(232, 87, 61, 0.35); border-radius: 10px; padding: 12px 14px; margin: 8px 0 0 0; }
+
+  .mt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  .mt-card { border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; background: rgba(255, 255, 255, 0.03); padding: 22px; min-width: 0; }
+  .mt-card h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5fd6ec; margin: 0 0 14px 0; }
+  .mt-wide { grid-column: 1 / -1; }
+  .mt-block { margin-top: 18px; }
+  .mt-block h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px 0; color: rgba(255, 255, 255, 0.9); }
+
+  .mt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0; }
+  .mt-stat dt { font-size: 12px; color: rgba(255, 255, 255, 0.65); }
+  .mt-stat dd { margin: 2px 0 0 0; font-size: 22px; font-weight: 800; }
+
+  .mt-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .mt-bars li { display: grid; grid-template-columns: minmax(80px, 38%) 1fr auto; align-items: center; gap: 10px; font-size: 13px; }
+  .mt-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, 0.85); }
+  .mt-bar-track { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+  .mt-bar-fill { display: block; height: 100%; border-radius: 99px; background: #5fd6ec; }
+  .mt-bar-value { color: rgba(255, 255, 255, 0.75); font-variant-numeric: tabular-nums; }
+
+  .mt-chart { display: flex; align-items: flex-end; gap: 3px; height: 90px; padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+  .mt-col { flex: 1; min-width: 2px; border-radius: 3px 3px 0 0; background: rgba(95, 214, 236, 0.75); }
+  .mt-axis { font-size: 12px; color: rgba(255, 255, 255, 0.55); margin: 4px 0 0 0; }
+
+  .mt-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; flex-wrap: wrap; }
+  .mt-steps li { flex: 1; min-width: 90px; border-radius: 12px; background: rgba(0, 180, 216, 0.1); padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+  .mt-step-n { font-size: 24px; font-weight: 800; }
+  .mt-step-label { font-size: 12px; color: rgba(255, 255, 255, 0.75); }
+
+  .mt-table-wrap { overflow-x: auto; }
+  .mt-table-wrap:focus-visible { outline: 2px solid #5fd6ec; outline-offset: 4px; border-radius: 6px; }
+  .mt-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .mt-table th { text-align: left; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.6); padding: 6px 10px 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+  .mt-table td { padding: 8px 10px 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); white-space: nowrap; }
+  .mt-yes { color: #7be3a1; }
+  .mt-no { color: rgba(255, 255, 255, 0.6); }
+
+  .mt-score { font-size: 18px; font-weight: 800; margin: 0 0 10px 0; }
+  .mt-score.good { color: #7be3a1; }
+  .mt-score.mid { color: #ffd28a; }
+  .mt-score.bad { color: #ffb4a6; }
+
+  @media (max-width: 760px) {
+    .mt-section { padding: 64px 16px 56px; }
+    .mt-title { font-size: 26px; }
+    .mt-grid { grid-template-columns: 1fr; }
+    .mt-card { padding: 18px 16px; }
+  }
+</style>

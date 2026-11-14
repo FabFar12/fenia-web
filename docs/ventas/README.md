@@ -2,7 +2,7 @@
 
 > **Leé esto primero.** Es el punto de entrada para cualquier persona o sesión de IA que trabaje en la venta de kits.
 > Arquitectura: [ADR-028](../adr/ADR-028-own-sales-circuit-on-hostinger.md) · Riesgos (anti-estafa y bugs): [threat-model.md](./threat-model.md) · Pruebas: [test-plan.md](./test-plan.md) · Tareas humanas de la Fase 1: [guia-fase-1.md](./guia-fase-1.md)
-> Última actualización: 2026-11-07 (lanzamiento).
+> Última actualización: 2026-11-14 ("Tu kit" en staging, D26).
 
 ## Objetivo
 
@@ -79,6 +79,8 @@ Del dev o de Fab:
 De la IA:
 6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
+8. **"Tu kit" (D25, D26):** construida y probada; staging con material de prueba. Los tres kits quedaron estandarizados y verificados (Evaluar y Aprender con Claude Design). Sigue: el dev la mira en staging y da el OK para el mail nuevo, la subida a producción de los tres kits y la corrección de H-11 en el ZIP de Enseñar.
+9. **Métricas internas (D28):** construidas y en staging. El dev y Fab entran con usuario y contraseña; las claves de staging están en `~/fenia-secrets/staging/cuentas-metricas.txt`. Tareas del dev: crear el monitor de UptimeRobot y la propiedad de Google Search Console. Pasan a producción junto con "Tu kit", con el OK del dev.
 
 ## Cómo se corren las pruebas
 
@@ -87,9 +89,9 @@ De la IA:
 | Unitarias PHP (U) | `vendor/bin/phpunit`, después de `composer install` | CI, en cada push. En local hace falta PHP ≥ 8.1, que no es obligatorio |
 | Catálogo = `.md` (U-31) | `npm run build` y después `node scripts/verify-catalog.mjs` | CI, en cada push |
 | Suite de seguridad (S) | PowerShell: `$env:BASE_URL="https://fenia.com.ar"; npm run test:ventas` | Contra producción, solo las pruebas ✱. Con `MODE=staging` contra staging, todas |
-| Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), capturas de referencia y accesibilidad (axe). 60 pruebas, unos 2 minutos |
+| Navegador real (E2E, Playwright) | `npm run e2e` | Contra staging, en escritorio (Edge), celular y Firefox. Cubre el sitio, la promo con reloj simulado (corriendo, último día, vencida), "Tu kit" y las métricas con datos simulados, el ingreso a las métricas, capturas de referencia y accesibilidad (axe). 81 pruebas, unos 2 minutos (78 en staging; 3 son solo de producción) |
 | E2E en producción | `npm run e2e:prod` | Lo mismo pero sin comprar nada y sin capturas de referencia. 54 pruebas |
-| Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, descarga, reembolso y link anulado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP |
+| Compra completa en el sandbox | `npm run e2e:compra` | Staging: compra con tarjeta de prueba, `/gracias`, "Tu kit" (guía, fichas, descargas), reembolso y kit cerrado. Necesita `~/fenia-secrets/mp-test-token.txt`. Hacerla **antes** que la suite de seguridad, que gasta el cupo de descargas de la IP. Con `E2E_KEEP=1` no reembolsa e imprime el link, para que una persona pruebe staging |
 | Capturas de referencia | `npm run e2e:update` | Solo después de un cambio visual aprobado. Las capturas nuevas quedan en `tests/e2e/fotos/` y hay que hacerles commit |
 
 `npm run dev` no cambia: ninguna de estas pruebas se encadena ahí ([ADR-006](../adr/ADR-006-dx-single-command-dev.md)).
@@ -106,6 +108,38 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D28 | 2026-11-14 | **Métricas internas privadas** ([ADR-029](../adr/ADR-029-private-metrics-and-owner-accounts.md), decisiones del dev).
+  - **Visitas con un contador propio:** todo queda en nuestra base, sin cookies ni datos personales, y nada va a terceros. Se descartaron Plausible y Umami.
+  - **Entrada con usuario y contraseña** para el dev y Fab, con sesiones que después sirven para las cuentas de compradoras (fase 2 de D25).
+  - **Pantalla `/metricas/`:** visitas, embudo de compra, ventas, uso de "Tu kit", últimas ventas y velocidad.
+  - **Aparte y gratis:** control diario de velocidad (PageSpeed Insights), UptimeRobot y Google Search Console, con cuentas del dev | ✅ Decisión del dev · en staging |
+| D27 | 2026-11-14 | **Acceso para siempre y botones de "Tu kit"** (decisiones del dev, respuesta a Q7–Q9).
+  - **"No me llegó" siempre devuelve el acceso:** un link vencido se renueva todas las veces que haga falta, siempre al email de la compra (sigue el límite de 3 pedidos por día). Reemplaza el tope de 2 renovaciones de D19.
+  - **10 descargas por compra, para siempre:** el link nuevo arrastra las que quedaban y nunca suma más. Un link sin descargas sigue abriendo el kit; si alguien necesita más, las suma soporte.
+  - **Botones, opción B** ([propuesta-visual.md §7](./propuesta-visual.md)): abrir en coral (no gasta) y descargar con borde celeste (cuenta 1), todos del mismo ancho, con una línea que explica la diferencia.
+  - **Categorías:** a futuro; por ahora todos los kits son de Educación. "Mis kits" queda para la fase 2.
+  - Aprobados también el texto del mail para kits con fichas y la corrección de H-11 en el ZIP de Enseñar | ✅ Decisión del dev |
+| D26 | 2026-11-14 | **"Tu kit" (fase 1 de D25), construida y probada para staging.**
+  - `/descarga` pasa a ser "Tu kit" ([propuesta-visual.md §6](./propuesta-visual.md)): la guía para leer o bajar, las fichas y los imprimibles montados, y el ZIP. Leer y usar no gasta nada. El tope es de **10 descargas de archivos**, también para los links ya enviados (la base migra sola al esquema 2).
+  - El token no viaja en ninguna URL: el dispositivo recibe un **pase de lectura** (cookie `HttpOnly` firmada) y las páginas del kit se sirven con él (A18). Esas páginas tienen una CSP propia en `api/.htaccess`, que no deja salir nada a internet (A19).
+  - **Kits estandarizados:** Evaluar y Aprender, con guía (prompts integrados), fichas, imprimibles y Word, verificados palabra por palabra contra los originales. Los paquetes listos para subir están en `C:\Fenia\entregables\tu-kit\` (fuera del repo).
+  - **Falta el OK del dev para:** (1) el texto nuevo del mail para kits con fichas; (2) subir a producción los kits nuevos y las páginas; (3) usar en el ZIP de Enseñar la corrección de H-11 | 🟡 Staging · producción con OK del dev |
+| D25 | 2026-11-12 | **Entorno FENIA ("Tu kit" / "Mis kits")**, acordado con el dev tras la idea de Fab. En vez de bajar un archivo, la compradora llega a una página con su kit montado. En fases:
+  - **Fase 1, "Tu kit"**: la página de descarga pasa a mostrar la guía (leer o bajar), las fichas interactivas montadas, los imprimibles y el ZIP. Ver no gasta descargas. Arranca con Enseñar, el único con fichas HTML. Los links ya mandados siguen funcionando.
+  - **Fase 2, "Mis kits"**: entrar con el email, sin contraseña (link mágico). Todas las compras de ese email, **de por vida**; se limitan solo las descargas de archivos (reemplaza D3). La identidad y una marca al pie de los PDF reemplazan al contador como freno a compartir.
+  - **Fase 3, entorno**: las fichas guardan las respuestas en la cuenta (hoy ya las guardan en el navegador). Implica datos personales: política de privacidad con el abogado antes.
+
+  Prerrequisito de las fases 1-3 para Evaluar y Aprender: estandarizarlos al formato de Enseñar con Claude Design (carpeta `C:\Fenia\entregables
+eformateo`, un prompt por kit). Restricción conocida: el mail de Hostinger permite 100 envíos por día por casilla; los links mágicos salen de ahí | ✅ Decisión del dev |
+| D24 | 2026-11-09 | **Descarga más simple en el celular (A+B), en producción** (decisión del dev).
+  - La página de descarga ofrece la **guía en PDF suelta** ("se abre directo, también en el celular") como botón principal y el ZIP completo como secundario. Cada descarga cuenta una de las 5.
+  - Hay una ayuda "¿Cómo abro el ZIP en el celular?" y el mail lo explica.
+  - Las guías son las de cada ZIP (la de Enseñar, la corregida).
+
+  **Para la semana:**
+  - estandarizar Evaluar y Aprender al formato de Enseñar con Claude Design: guía con los prompts como capítulo final, fichas HTML y los Word de plantillas en una carpeta aparte. La guía de cada sesión está en `C:\Fenia\entregables
+eformateo`;
+  - evaluar la página "Tu kit" con los datos de descargas desde el celular | ✅ Decisión del dev |
 | D23 | 2026-11-07 | **Actualización:** el dev pasó el fin al **lunes 16/11 a las 23:59**, así el lunes 9 "quedan 7 días". Es legítimo porque se cambió antes de anunciar y sin ventas. Diseño final, **aprobado por el dev** el 2026-11-07:
   - un cartel arriba de los 3 kits: "Oferta de 10 días: del sábado 7/11 al lunes 16/11" (días de calendario en hora argentina, así total, transcurrido y restante cierran), barra de avance "Día N de 10" y "Quedan 9 días y 10 h 05 min 30 s";
   - el último día dice "¡Último día! Quedan …";
@@ -122,7 +156,7 @@ De la IA:
 | D22 | 2026-11-08 | **En producción, los avisos y el resumen diario de la tarea horaria van a `soporte@`** (decisión del dev). En staging van a `kits@`, para no llenar la bandeja de Fab con pruebas | ✅ Decisión del dev |
 | D21 | 2026-11-07 | **Staging entrega ZIPs de prueba, nunca los kits reales** (A17): su sandbox se paga con tarjetas de prueba públicas. Los kits reales (renombrados con el id; Enseñar con la carpeta interna corregida) se suben solo a producción en el lanzamiento | ✅ Técnica |
 | D20 | 2026-11-07 | **`/gracias` muestra el link de descarga solo durante 24 h** después del pago. Después, el link está únicamente en el mail (y en "No me llegó"). Así, si alguien encuentra el código de orden en un historial, no le sirve | ✅ Técnica |
-| D19 | 2026-11-07 | **"No me llegó" con un link vencido o agotado manda uno nuevo** (otros 30 días / 5 descargas), como dice la página de descarga. Máximo 2 renovaciones por compra; después lo resuelve soporte. Si el link todavía funciona, se reenvía el mismo, sin renovar. Solo al email de la compra (A15) y con límite de 3 pedidos por día | ✅ Técnica (dentro de D3) |
+| D19 | 2026-11-07 | **(Reemplazada por D27 el 2026-11-14.)** **"No me llegó" con un link vencido o agotado manda uno nuevo** (otros 30 días / 5 descargas), como dice la página de descarga. Máximo 2 renovaciones por compra; después lo resuelve soporte. Si el link todavía funciona, se reenvía el mismo, sin renovar. Solo al email de la compra (A15) y con límite de 3 pedidos por día | ✅ Técnica (dentro de D3) |
 | D18 | 2026-11-06 | **Después de cada deploy a producción se purga la CDN de Hostinger** (`DELETE …/cdn/purge`, lo hace la IA al mergear). Sin eso, algunos visitantes ven la versión vieja durante días (H-06, comprobado: un pedido viejo y otro nuevo en la misma página). Antes del lanzamiento, decidir si se automatiza | ✅ |
 | D17 | 2026-11-06 | Hasta el lanzamiento, los kits "Próximamente" muestran **"Avisame cuando esté disponible"**. `/recursos-gratuitos` ya no promete un recurso gratis que no existe. Aprobado por el dev; en producción con PR #17 | ✅ |
 | D16 | 2026-11-06 | Contenido de los kits (decisiones del dev):
@@ -142,6 +176,10 @@ De la IA:
 
 | # | Pregunta | Cómo se responde |
 |---|---|---|
+| Q7 | ✅ Respondida 2026-11-14 (D27): aprobados los dos cambios. **Acceso de por vida ya en la fase 1** (pedido del dev, 2026-11-14: "si lo compró, le queda para siempre, pero hasta 10 descargas"). Propuesta: (a) "No me llegó" siempre manda un link nuevo al email de la compra, sin el tope de 2 renovaciones de D19 (sigue el límite de 3 pedidos por día); (b) **10 descargas en total por compra**, para siempre: renovar el link no las repone (si alguien necesita más, las suma soporte) | Decisión del dev. La fase 2 ("Mis kits", entrar con el email) mantiene las mismas reglas |
+| Q8 | ✅ Respondida 2026-11-14 (D27): opción B | — |
+| Q9 | ✅ Respondida 2026-11-14 (D27): las categorías son a futuro; por ahora todos los kits son de Educación. "Mis kits" en la fase 2 | — |
+| Q10 | ✅ Respondida 2026-11-14 (D28): contador propio, usuario y contraseña, y los controles gratis aparte | — |
 | Q1 | ✅ Respondida 2026-11-06 por API: plan **Business**, PHP **8.3.36** (disponibles de 7.3 a 8.5), `nd_pdo_mysql`, `curl`, `openssl`, `mbstring`, `zip`, `fileinfo` y `posix` activos. Cierra también [PENDING #3](../../PENDING.md) | — |
 | Q6 | CDN de Hostinger (H-06). Staging: ✅ desactivada el 2026-11-06 con OK del dev; la de producción sigue activa y sin tocar. Falta decidir cómo se purga la CDN de producción después de cada deploy | Antes del lanzamiento |
 | Q2 | ¿Mercado Pago firma también los avisos que manda a la `notification_url` de cada preferencia? (Mientras tanto aplica D7.) | Prueba INT-08 en staging |
@@ -159,6 +197,7 @@ De la IA:
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | ✅ Parte IP cerrada el 2026-11-07: `health` de producción muestra la IP real del visitante detrás de la CDN, así que los límites por IP funcionan. Sigue vigente la purga después de cada deploy (D18). Detalle original: | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
+| H-11 | 2026-11-14 | **Las fichas de Enseñar que se venden no muestran lo guardado** al reabrir una ficha o recargar la página: el paquete de Claude Design pasa el valor en el atributo `defaultvalue`, que el navegador no muestra. Lo escrito no se pierde: queda en el navegador y "Copiar para la IA" lo incluye. Las fichas nuevas de Evaluar y Aprender no tienen el problema | Medio: parece que la ficha no guardó | Corrección de pocas líneas, sin tocar ningún texto, en la copia que sirve "Tu kit" (`tu-kit\kit-ensenar-con-ia\fichas.html`). Probada en compu y celular, con la CSP del sitio. Falta el OK del dev para usarla también en el ZIP |
 | H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
 | H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
 | H-08 | 2026-11-07 | `www.fenia.com.ar` servía el sitio entero sin redirigir. Una compra empezada ahí habría fallado: la API exige que el pedido venga de `fenia.com.ar`. Además, Google veía dos copias | **Alto para el lanzamiento** | 3.5: redirección 301 en `public/.htaccess`. Verificar en producción después del merge |
@@ -171,6 +210,20 @@ De la IA:
 - El "Project Summary" de [AGENTS.md](../../AGENTS.md) dice que no hay backend y que el sitio está en Vercel → se actualiza en el paso 6.1.
 
 ## Bitácora
+
+- **2026-11-14 (28)** — Decisiones del dev: botones B, categorías a futuro, acceso para siempre con 10 descargas por compra (D27), corrección de H-11 y texto del mail aprobados. Métricas privadas (D28, ADR-029): contador propio, usuario y contraseña, velocidad diaria. Probadas localmente con la API real sobre SQLite y un navegador: visitas, fuentes, WhatsApp, ingreso, salida, celular, y las visitas del dueño no cuentan. 193 tests de PHP. Pruebas nuevas S-40…S-45, U-50…U-52, E2E-06. **En staging:** suite de seguridad 80 OK y 0 fallas; batería E2E 78 OK; ingreso real con la cuenta `dev`, una visita de prueba contada con su fuente, cookies de sesión como se diseñaron.
+- **2026-11-14 (27)** — El dev probó "Tu kit" en staging. Pidió: botones según su función (Q8), "Mis kits" con categorías (Q9), acceso de por vida con 10 descargas (Q7) e investigar métricas (Q10, con visitas). Reportó "4 descargas por bajar el ZIP y el PDF": no es un error. El link de prueba ya tenía 2 descargas de la prueba automática, y cada archivo cuenta una sola vez (el ZIP cuenta como uno, también en E2E-01). Propuestas escritas, con imágenes en `C:\Fenia\entregables\propuestas\2026-11-14\`.
+- **2026-11-14 (26)** — **"Tu kit" fase 1** (D26).
+  - Reformateo verificado contra los originales: Evaluar (guía, mini pack 26/26, 10 fichas, 2 imprimibles) y Aprender (29 secciones, los 25 prompts en tarjetas con su advertencia, 8 fichas, 4 imprimibles). Fichas probadas en Edge, en compu y celular, desde el disco y servidas con la CSP del sitio: guardan, copian y no piden nada a internet.
+  - Hallazgo H-11 en las fichas de Enseñar, con su corrección probada.
+  - Backend: `kit.php` y `guia.php`, pase de lectura, esquema 2, config con guía, fichas e imprimibles, buzón que acepta `.html`. 179 tests de PHP.
+  - Comprobado en staging que LiteSpeed reemplaza los encabezados que pone PHP: la CSP de las páginas del kit va en `api/.htaccess` (ADR-023).
+  - Pruebas nuevas: S-30…S-36, U-40…U-42, E2E-01 ampliada y E2E-05 (captura y accesibilidad de "Tu kit" con datos simulados). `E2E_KEEP=1` deja un link de prueba sin reembolsar.
+  - **En staging:** suite de seguridad 74 OK y 0 fallas; batería E2E 66 OK; compra completa en el sandbox OK (guía en el navegador sin CSP, fichas con su código corriendo e internet bloqueado, descargas de 10 a 8, y el reembolso cerró el kit). El mail nuevo llegó con DKIM, SPF y DMARC en pass. Prueba de mutación: romper a propósito cada control nuevo hace fallar un test (180 tests de PHP).
+  - Propuesta de la sección de métricas escrita: [propuesta-metricas.md](./propuesta-metricas.md).
+- **2026-11-12 (25)** — Diálogo con el dev sobre el "entorno FENIA" (idea de Fab): acordado D25 (identidad por link mágico, ver de por vida, guardar respuestas, arrancar con Enseñar). Inspección de las fichas de Enseñar: app en un solo archivo, sin recursos externos, guarda en `localStorage` bajo `fenia_plantillas_editable_v1`, fichas `t1…tN`. Por eso el prompt de reformateo pide una clave por kit e ids estables. Carpeta `reformateo` simplificada: un prompt por kit, el ZIP se adjunta directo. Pendiente nuevo: métricas internas (punto 9).
+
+- **2026-11-09 (24)** — A+B en producción (D24, PR #25): las 3 guías reales se subieron por el buzón, `health` las ve y la batería contra producción dio 54/54. Primera venta real registrada el 7/11, entregada bien (Aprender, $13.000); falta que el dev confirme si fue su compra de prueba para reembolsarla. Otro cobro de $13.000 ("Varios") no pasó por el sitio: probablemente un Link de Pago viejo (D6).
 
 - **2026-11-08 (23)** — Batería E2E con Playwright en `tests/e2e/`, a pedido del dev, para trabajar sobre ella en los próximos cambios. Resultados: staging 60/60, producción 54/54 y compra completa en el sandbox OK. Encontró 3 problemas de accesibilidad que ya existían. Quedan como "conocidos" en `accesibilidad.spec.ts` porque arreglarlos cambia la estética y necesita OK:
   - contraste del texto blanco sobre el coral de los botones;

@@ -167,6 +167,153 @@ describe('Descarga', { skip: skipWithoutTarget }, () => {
   it('S-14 link vencido → rechazado', { todo: 'cubierto por ShopTest (reloj simulado): en staging habría que esperar 30 días' });
 });
 
+describe('Métricas internas (ADR-029)', { skip: skipWithoutTarget }, () => {
+  it('S-40 ✱ los datos sin sesión → 401 y nada más', async (t) => {
+    if (!needsApi(t)) return;
+    for (const query of ['', '?rango=todo', '?rango=../../config']) {
+      const res = await request(`/api/metricas.php${query}`);
+      assert.equal(res.status, 401, query);
+      assert.equal(res.body, '{"error":"login"}');
+      assert.match(res.headers.get('cache-control') ?? '', /no-store/);
+    }
+  });
+
+  it('S-41 ✱ una cookie de sesión inventada no abre nada', async (t) => {
+    if (!needsApi(t)) return;
+    for (const cookie of [`fenia_sesion=${randomToken()}`, 'fenia_sesion=1', `fenia_sesion=${'A'.repeat(43)}; fm_owner=1`]) {
+      const res = await request('/api/metricas.php', { headers: { Cookie: cookie } });
+      assert.equal(res.status, 401, cookie);
+      assert.equal((await request('/api/sesion.php', { headers: { Cookie: cookie } })).status, 401);
+    }
+  });
+
+  it('S-42 ✱ ingresar desde otro sitio → 403, sin sesión', async (t) => {
+    if (!needsApi(t)) return;
+    const res = await json('/api/sesion.php', { usuario: 'dev', clave: 'x' }, { Origin: 'https://evil.example' });
+    assert.equal(res.status, 403);
+    assert.equal(res.headers.get('set-cookie'), null);
+  });
+
+  it('S-43 ✱ clave equivocada y usuario inexistente → la misma respuesta', async (t) => {
+    if (!needsApi(t)) return;
+    const wrong = await json('/api/sesion.php', { usuario: 'dev', clave: `no-es-${randomRef()}` });
+    const unknown = await json('/api/sesion.php', { usuario: `nadie${randomRef().slice(0, 6)}`, clave: 'x' });
+    for (const res of [wrong, unknown]) {
+      // 503 if this server has no owners yet; 429 once the IP used up its attempts.
+      assert.ok([401, 429, 503].includes(res.status), `estado ${res.status}`);
+      assert.equal(res.headers.get('set-cookie'), null);
+    }
+    assert.equal(wrong.body, unknown.body);
+  });
+
+  it('S-44 ✱ el contador de visitas responde 204 a todo y no pone cookies', async (t) => {
+    if (!needsApi(t)) return;
+    for (const body of ['{"p":"/","w":1200}', 'no es json', '{"p":"/api/kit.php"}', '{"k":"buy","p":"/"}', 'x'.repeat(5000)]) {
+      const res = await request('/api/hit.php', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body });
+      assert.equal(res.status, 204);
+      assert.equal(res.body, '');
+      assert.equal(res.headers.get('set-cookie'), null);
+    }
+    assert.equal((await request('/api/hit.php')).status, 405);
+  });
+
+  it('S-45 ✱ la página de métricas no se indexa ni figura en el sitemap', async () => {
+    const page = await request('/metricas/');
+    assert.equal(page.status, 200);
+    assert.match(page.body, /<meta name="robots" content="noindex, nofollow"/);
+    assert.doesNotMatch(page.body, /fenia_sesion|\$2y\$/);
+    const sitemap = await request('/sitemap-0.xml');
+    assert.doesNotMatch(sitemap.body, /metricas/);
+  });
+});
+
+describe('Tu kit (D25)', { skip: skipWithoutTarget }, () => {
+  const KIT = 'kit-ensenar-con-ia';
+  const forgedPass = `1.${Math.floor(Date.now() / 1000) + 86400}.${randomBytes(32).toString('base64url')}`;
+
+  it('S-30 ✱ fichas e imprimibles sin pase de lectura → 403, con la CSP de las páginas del kit', async (t) => {
+    if (!needsApi(t)) return;
+    for (const r of ['fichas', 'imprimibles']) {
+      const res = await request(`/api/kit.php?k=${KIT}&r=${r}`);
+      assert.equal(res.status, 403, r);
+      const csp = res.headers.get('content-security-policy') ?? '';
+      assert.match(csp, /default-src 'none'/, 'la página del kit no puede pedir nada afuera');
+      assert.match(csp, /connect-src blob: data:(;|$)/);
+      assert.match(csp, /form-action 'none'/);
+      assert.match(res.headers.get('cache-control') ?? '', /no-store/);
+      assert.equal(findLeak(res.body), null);
+    }
+  });
+
+  it('S-31 ✱ la guía sin pase → 403, y sin CSP (el visor de PDF del navegador tiene que funcionar)', async (t) => {
+    if (!needsApi(t)) return;
+    const res = await request(`/api/guia.php?k=${KIT}`);
+    assert.equal(res.status, 403);
+    assert.equal(res.headers.get('content-security-policy'), null);
+    assert.doesNotMatch(res.headers.get('content-type') ?? '', /pdf/);
+  });
+
+  it('S-32 ✱ pase falsificado, de otro kit o de otra página → nunca el archivo', async (t) => {
+    if (!needsApi(t)) return;
+    const cases = [
+      [`/api/kit.php?k=${KIT}&r=fichas`, `fk_${KIT}=${forgedPass}`],
+      [`/api/guia.php?k=${KIT}`, `fk_${KIT}=${forgedPass}`],
+      [`/api/kit.php?k=kit-aprender-con-ia&r=fichas`, `fk_${KIT}=${forgedPass}`],
+      [`/api/kit.php?k=${KIT}&r=../config.php`, `fk_${KIT}=${forgedPass}`],
+      [`/api/kit.php?k=../_lib&r=fichas`, `fk_${KIT}=${forgedPass}`],
+    ];
+    for (const [path, cookie] of cases) {
+      const res = await request(path, { headers: { Cookie: cookie } });
+      // 403 without a valid pass, 404 for what does not exist, 429 once the IP
+      // used up its failed attempts (shared with S-07), 403 too from the firewall.
+      assert.ok([403, 404, 429].includes(res.status), `${path}: ${res.status}`);
+      assert.doesNotMatch(res.headers.get('content-type') ?? '', /pdf|zip/);
+      assert.doesNotMatch(res.body, /<textarea|__bundler/);
+      assert.equal(findLeak(res.body), null);
+    }
+  });
+
+  it('S-33 ✱ abrir el kit con tokens al azar → rechazado igual que la descarga, sin pase', async (t) => {
+    if (!needsApi(t)) return;
+    for (let i = 0; i < 3; i++) {
+      const res = await json('/api/kit.php', { token: randomToken() });
+      assert.ok([404, 429].includes(res.status), `estado ${res.status}`);
+      assert.equal(res.headers.get('set-cookie'), null, 'sin pase para un token inválido');
+      assert.ok(res.body === '{"usable":false}' || res.body.includes('rate_limited'), res.body);
+    }
+  });
+
+  it('S-34 ✱ abrir el kit desde otro sitio → 403 (CSRF, D4)', async (t) => {
+    if (!needsApi(t)) return;
+    const res = await json('/api/kit.php', { token: randomToken() }, { Origin: 'https://evil.example' });
+    assert.equal(res.status, 403);
+    assert.equal(res.headers.get('set-cookie'), null);
+  });
+
+  it('S-35 ✱ métodos que no corresponden → 405', async (t) => {
+    if (!needsApi(t)) return;
+    assert.equal((await request('/api/kit.php', { method: 'PUT' })).status, 405);
+    assert.equal((await request('/api/guia.php', { method: 'POST' })).status, 405);
+  });
+
+  it('S-36 el pase de lectura abre el kit y no gasta descargas', { skip: stagingOnly }, async (t) => {
+    const token = process.env.DOWNLOAD_TOKEN ?? '';
+    if (!token) return t.skip('definí DOWNLOAD_TOKEN (de una compra de prueba)');
+    const open = await json('/api/kit.php', { token });
+    assert.equal(open.status, 200);
+    const cookie = (open.headers.get('set-cookie') ?? '').split(';')[0];
+    assert.match(open.headers.get('set-cookie') ?? '', /HttpOnly/i);
+    assert.match(open.headers.get('set-cookie') ?? '', /SameSite=Strict/i);
+    assert.match(open.headers.get('set-cookie') ?? '', /Path=\/api\//);
+    const { kit, remaining } = JSON.parse(open.body);
+    const fichas = await request(`/api/kit.php?k=${kit}&r=fichas`, { headers: { Cookie: cookie } });
+    assert.equal(fichas.status, 200);
+    assert.match(fichas.headers.get('content-type') ?? '', /text\/html/);
+    const again = JSON.parse((await json('/api/kit.php', { token, refresh: true })).body);
+    assert.equal(again.remaining, remaining);
+  });
+});
+
 describe('Checkout', { skip: skipWithoutTarget }, () => {
   it('S-12 price/amount/unit_price en el POST → ignorados', { todo: 'cubierto por ShopTest; en staging se ve el monto en la pantalla de MP' });
 

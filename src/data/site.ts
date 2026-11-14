@@ -295,5 +295,6 @@ export const sales = {
     'Acepto los términos de compra y entiendo que, por ser contenido digital de descarga inmediata, no admite arrepentimiento una vez descargado.',
   paymentNote: 'El pago se hace en Mercado Pago. FENIA nunca ve tu tarjeta.',
   noCardDataNote: 'FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.',
-  downloadPolicy: 'El link dura 30 días y permite 5 descargas.',
+  /** D25: reading the guide and using the fichas are free; only file downloads count. */
+  downloadPolicy: 'El link dura 30 días y permite 10 descargas.',
 };

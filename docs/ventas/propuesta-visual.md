@@ -111,3 +111,86 @@ Te quedan 4 de 5 descargas · vence el 06/12/2026
 
 1. ¿Aprobás la card, la página del kit, `/gracias`, "No me llegó" y la página de descarga tal como están? (Se pueden pedir cambios.)
 2. ¿Cambiamos **ya** el botón de los kits "Próximamente" a "Avisame cuando esté disponible"?
+
+## 6. "Tu kit" (D25, fase 1) — reemplaza la página de descarga
+
+Misma dirección que hoy (`/descarga/#t=…`, así los mails ya enviados siguen funcionando); cambia lo que muestra. Pensada para el celular primero.
+
+```
+TU KIT                                                   compra del 7/11 · a***@gmail.com
+Enseñar con IA sin automatizar la pedagogía
+
+┌───────────────────────────────────────────────────────────────┐
+│ 📖  La guía · 37 páginas                                      │
+│     [ Leer ahora ]            [ Descargar PDF ]               │
+├───────────────────────────────────────────────────────────────┤
+│ ✍️  Fichas para completar · 8                                 │
+│     Se completan acá mismo, en el celular o la compu.         │
+│     Lo que escribís queda guardado en este dispositivo.       │
+│     [ Abrir las fichas ]                                      │
+├───────────────────────────────────────────────────────────────┤
+│ 🖨️  Imprimibles · 8                [ Abrir para imprimir ]    │
+├───────────────────────────────────────────────────────────────┤
+│ 📦  Todo el kit en un ZIP (para la compu)   [ Descargar ]     │
+│     Te quedan 10 descargas de archivos · vence el 07/12       │
+└───────────────────────────────────────────────────────────────┘
+FENIA nunca te va a pedir datos de tarjeta por mail ni por WhatsApp.
+¿Perdiste este link? En "No me llegó" te lo reenviamos.
+```
+
+- **Leer, abrir y usar las fichas no gasta nada.** Solo cuentan las descargas de archivos (ZIP, PDF). El tope pasa de 5 a **10**, porque ahora hay más archivos sueltos.
+- **Las fichas se abren como una página del sitio**, con el mismo guardado automático que ya tienen: lo completado queda en ese dispositivo (fase 3: en la cuenta).
+- **El link sigue viajando después de `#`**: nunca queda en registros del servidor. Al abrir la página se crea un pase de lectura en ese dispositivo; los archivos y las fichas se sirven solo con ese pase.
+- **Duración en fase 1: igual que hoy (30 días)**, porque todavía no hay identidad. Con la fase 2 (entrar con el email) el acceso pasa a ser de por vida.
+- **Evaluar y Aprender, hasta que se reformateen:** la misma página, sin la fila de fichas (guía, imprimibles en PDF dentro del ZIP, y ZIP).
+- **Sin cambios** en el resto del sitio: tarjetas, página del kit, `/gracias` y "No me llegó" siguen igual.
+
+**Implementada el 2026-11-14 (D26), en staging.** Diferencias con el boceto de arriba:
+- Íconos de línea propios (libro, ficha, impresora, paquete) en lugar de emojis, que cambian de un teléfono a otro.
+- Debajo del ZIP sigue la ayuda "¿Cómo abro el ZIP en el celular?" de D24.
+- Si se terminan las 10 descargas, la página lo dice y sigue dejando leer y usar las fichas hasta que vence.
+- Para kits con fichas, el mail cambia a "Abrir mi kit" y explica que leer y completar no gasta. Ese texto espera el OK del dev.
+
+
+## 7. Botones de "Tu kit" según lo que hacen (pedido del dev, 2026-11-14)
+
+El dev pidió estandarizar los botones o diferenciarlos por función. Hoy "Abrir para imprimir" se ve igual que una descarga, aunque no gasta nada. Dos opciones, renderizadas sobre la página real en `C:\Fenia\entregables\propuestas\2026-11-14\` (fuera del repo):
+
+- **A. Todos iguales** (`botones-A-todos-iguales-*.png`): todos con borde y el mismo ancho; solo el ícono dice qué hace cada uno.
+- **B. Según su función, recomendada** (`botones-B-segun-funcion-*.png`): "Abrir" (ícono ↗, se ve en otra pestaña y no gasta) en coral; "Descargar" (ícono ↓, cuenta 1 de las 10) con borde celeste. Todos del mismo ancho, y una línea al pie explica la diferencia.
+
+```
+La guía · 31 páginas        [↗ Leer ahora]  [↓ Descargar PDF]
+Fichas para completar · 10  [↗ Abrir las fichas]
+Imprimibles · 2             [↗ Abrir para imprimir]
+Todo el kit en un ZIP       [↓ Descargar]
+↗ Abrir: se ve en otra pestaña y no gasta   ↓ Descargar: baja el archivo y cuenta 1 de las 10
+```
+
+## 8. "Mis kits": todos los kits de un email, por categoría (fase 2 de D25)
+
+Paso previo a "Tu kit": la persona entra con su email y ve todos los kits que compró, agrupados por categoría. Cada tarjeta abre la página "Tu kit" de ese kit. Imagen: `mis-kits-*.png` en la misma carpeta.
+
+```
+MIS KITS                                        k***@fenia.com.ar · Salir
+Tus kits FENIA
+[Todos] [Educación] [Organizaciones]        ← los filtros aparecen con 2 o más categorías
+
+EDUCACIÓN
+┌ EDUCACIÓN · PARA DOCENTES ─────────┐  ┌ EDUCACIÓN · PARA DOCENTES ─────────┐
+│ Evaluar en tiempos de IA           │  │ Enseñar con IA sin automatizar…    │
+│ Guía · 10 fichas · 2 imprimibles   │  │ Guía · 8 fichas · 8 imprimibles    │
+│ Comprado el 14/11                  │  │ Comprado el 9/11                   │
+│ [ Abrir mi kit → ]                 │  │ [ Abrir mi kit → ]                 │
+└────────────────────────────────────┘  └────────────────────────────────────┘
+
+TAMBIÉN TE PUEDE SERVIR
+┌ EDUCACIÓN · PARA ESTUDIANTES ──────┐
+│ Aprender con IA sin dejar de pensar│
+│ $ 13.000            [ Ver el kit ] │
+└────────────────────────────────────┘
+```
+
+- **Categoría:** campo nuevo en cada producto (`src/content/products/*.md`), con una lista cerrada. Propuesta a partir de los productos que ya existen: *Educación* (los tres kits), *Organizaciones* (Neuro-Liderazgo, Bienestar Organizacional), *Emprendimiento* (Toolkit de IA) y *General*. La define el dev con Fab.
+- **"Para quién":** una línea corta por producto (*Para docentes*, *Para estudiantes*, *Para equipos*).
+- La categoría también puede ordenar la sección de productos de la home cuando haya más kits.

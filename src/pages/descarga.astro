@@ -1,16 +1,21 @@
 ---
-// descarga.astro — the page the delivery email links to
-// (docs/ventas/propuesta-visual.md §5). The token travels after `#`, so it
-// never reaches server logs, and opening the page consumes nothing: mail
-// scanners and link previews only GET it. The file is served only on an
-// explicit click (POST /api/download.php) — threat model C6, test S-18.
+// descarga.astro — "Tu kit" (D25, docs/ventas/propuesta-visual.md §6), the
+// page the delivery email links to. Same address as before (/descarga/#t=…),
+// so links already sent keep working.
+//
+// The token travels after `#`, so it never reaches server logs. Opening the
+// page counts nothing: it sends the token once (POST /api/kit.php) and gets a
+// view pass for this device (HttpOnly cookie). Reading the guide and using the
+// fichas are plain links that carry only that pass. Files are downloaded, and
+// counted, only on an explicit click (POST /api/download.php): threat model
+// C6, test S-18.
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { sales } from '../data/site';
 ---
 
-<Layout title="Descargá tu kit — FENIA" description="Descarga de tu kit FENIA.">
+<Layout title="Tu kit — FENIA" description="Tu kit FENIA: la guía, las fichas para completar, los imprimibles y las descargas.">
   <Fragment slot="head">
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
@@ -20,36 +25,85 @@ import { sales } from '../data/site';
 
   <main class="dl-main">
     <section class="dl-section">
-      <p class="dl-eyebrow">Tu kit</p>
-      <h1 id="dl-title" class="dl-title">Descargá tu kit</h1>
-      <p id="dl-meta" class="dl-meta" hidden></p>
+      <!-- header/article, not div: global.css pads every `section > div` on phones -->
+      <header class="dl-top">
+        <p class="dl-eyebrow">Tu kit</p>
+        <p id="dl-bought" class="dl-bought" hidden></p>
+      </header>
+      <h1 id="dl-title" class="dl-title">Tu kit</h1>
 
-      <form id="dl-form" class="dl-form" method="post" action="/api/download.php" hidden>
-        <input id="dl-token" type="hidden" name="token" value="" />
-        <!-- The guide PDF opens straight away, also on a phone; the ZIP has everything. -->
-        <div id="dl-guide-row" class="dl-option" hidden>
-          <button id="dl-guide" type="submit" name="file" value="guide" class="dl-button">Descargar la guía (PDF)</button>
-          <p class="dl-note">Se abre directo, también en el celular.</p>
-        </div>
-        <div class="dl-option">
-          <button id="dl-zip" type="submit" name="file" value="zip" class="dl-button">Descargar el kit completo (ZIP)</button>
-          <p class="dl-note">Todo el material junto. Ideal para la compu.</p>
-        </div>
-        <details class="dl-howto">
-          <summary>¿Cómo abro el ZIP en el celular?</summary>
-          <ul>
-            <li><strong>iPhone:</strong> abrí la app <em>Archivos</em>, entrá a <em>Descargas</em> y tocá el ZIP: se crea una carpeta con todo.</li>
-            <li><strong>Android:</strong> abrí la app <em>Archivos</em> (o <em>Mis archivos</em>), entrá a <em>Descargas</em>, tocá el ZIP y elegí <em>Extraer</em>.</li>
-            <li>Para completar las plantillas y fichas te conviene la compu: el link del mail funciona ahí también.</li>
-          </ul>
-        </details>
-      </form>
+      <article id="dl-kit" hidden>
+        <ul class="dl-list">
+          <li id="row-guide" class="dl-row" hidden>
+            <span class="dl-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 6.5C10.2 5.2 7.6 4.5 4 4.5v13c3.6 0 6.2.7 8 2 1.8-1.3 4.4-2 8-2v-13c-3.6 0-6.2.7-8 2Z" /><path d="M12 6.5v13" /></svg>
+            </span>
+            <div class="dl-body">
+              <h2 class="dl-name">La guía<span id="guide-size" class="dl-size"></span></h2>
+              <div class="dl-actions">
+                <a id="read-guide" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Leer ahora</span></a>
+                <button id="dl-guide" type="button" class="dl-button dl-button--download" data-file="guide"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg><span class="dl-label">Descargar PDF</span></button>
+              </div>
+            </div>
+          </li>
+
+          <li id="row-fichas" class="dl-row" hidden>
+            <span class="dl-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 3.5h9l5 5v12H5z" /><path d="M14 3.5v5h5" /><path d="M8.5 13h7M8.5 16.5h4.5" /></svg>
+            </span>
+            <div class="dl-body">
+              <h2 class="dl-name">Fichas para completar<span id="fichas-size" class="dl-size"></span></h2>
+              <p class="dl-note">Se completan acá mismo, en el celular o la compu. Lo que escribís queda guardado en este dispositivo.</p>
+              <div class="dl-actions">
+                <a id="open-fichas" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Abrir las fichas</span></a>
+              </div>
+            </div>
+          </li>
+
+          <li id="row-imprimibles" class="dl-row" hidden>
+            <span class="dl-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 9V3.5h10V9" /><rect x="3.5" y="9" width="17" height="8" rx="2" /><path d="M7 14h10v6.5H7z" /></svg>
+            </span>
+            <div class="dl-body">
+              <h2 class="dl-name">Imprimibles<span id="imprimibles-size" class="dl-size"></span></h2>
+              <div class="dl-actions">
+                <a id="open-imprimibles" class="dl-button dl-button--open" href="/no-me-llego/" target="_blank" rel="noopener"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg><span>Abrir para imprimir</span></a>
+              </div>
+            </div>
+          </li>
+
+          <li class="dl-row">
+            <span class="dl-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z" /><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9" /></svg>
+            </span>
+            <div class="dl-body">
+              <h2 class="dl-name">Todo el kit en un ZIP <span class="dl-size">(para la compu)</span></h2>
+              <div class="dl-actions">
+                <button id="dl-zip" type="button" class="dl-button dl-button--download" data-file="zip"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg><span class="dl-label">Descargar</span></button>
+              </div>
+              <details class="dl-howto">
+                <summary>¿Cómo abro el ZIP en el celular?</summary>
+                <ul>
+                  <li><strong>iPhone:</strong> abrí la app <em>Archivos</em>, entrá a <em>Descargas</em> y tocá el ZIP: se crea una carpeta con todo.</li>
+                  <li><strong>Android:</strong> abrí la app <em>Archivos</em> (o <em>Mis archivos</em>), entrá a <em>Descargas</em>, tocá el ZIP y elegí <em>Extraer</em>.</li>
+                </ul>
+              </details>
+            </div>
+          </li>
+        </ul>
+        <p id="dl-meta" class="dl-meta" aria-live="polite"></p>
+        <p class="dl-legend">
+          <span><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>Abrir: se ve en otra pestaña y no gasta</span>
+          <span class="dl-legend-download"><svg class="dl-btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" /></svg>Descargar: baja el archivo y cuenta 1 de las 10</span>
+        </p>
+      </article>
 
       <p id="dl-error" class="dl-error" role="alert" data-support={sales.supportEmail} hidden></p>
 
       <p class="dl-help">
-        {sales.downloadPolicy} ¿Problemas? Pedí un link nuevo en <a href="/no-me-llego/">No me llegó</a>
-        o escribinos a <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a>.
+        {sales.noCardDataNote} ¿Se te venció o lo perdiste? En
+        <a href="/no-me-llego/">No me llegó</a> te mandamos uno nuevo, siempre al email de tu compra. ¿Algún problema? Escribinos a
+        <a href={`mailto:${sales.supportEmail}`}>{sales.supportEmail}</a>.
       </p>
     </section>
   </main>
@@ -58,65 +112,106 @@ import { sales } from '../data/site';
 </Layout>
 
 <script>
+  type Size = { size: number | null };
+  type Info = {
+    usable: true;
+    kit: string;
+    kit_title: string;
+    remaining: number;
+    max: number;
+    expires_on: string;
+    bought_on: string;
+    email_masked: string;
+    resources: { guide?: Size; fichas?: Size; imprimibles?: Size };
+  };
+
   const token = new URLSearchParams(window.location.hash.slice(1)).get('t') ?? '';
-  const form = document.getElementById('dl-form') as HTMLFormElement;
-  const error = document.getElementById('dl-error') as HTMLParagraphElement;
+  const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const kitBox = byId('dl-kit');
+  const meta = byId('dl-meta');
+  const error = byId('dl-error');
+  const buttons = { guide: byId<HTMLButtonElement>('dl-guide'), zip: byId<HTMLButtonElement>('dl-zip') };
+  // Only the text changes while downloading; the icon stays.
+  const label = (which: 'guide' | 'zip') => buttons[which].querySelector('.dl-label') as HTMLSpanElement;
+  const labels = { guide: label('guide').textContent ?? '', zip: label('zip').textContent ?? '' };
+  const AGAIN = 'Pedí uno nuevo en "No me llegó" con el email de tu compra.';
+  let left = 0;
+
   const fail = (text: string) => {
     error.textContent = text;
     error.hidden = false;
   };
-
-  const meta = document.getElementById('dl-meta') as HTMLParagraphElement;
-  const guideRow = document.getElementById('dl-guide-row') as HTMLDivElement;
-  const buttons = {
-    guide: document.getElementById('dl-guide') as HTMLButtonElement,
-    zip: document.getElementById('dl-zip') as HTMLButtonElement,
+  const enableDownloads = () => {
+    buttons.guide.disabled = buttons.zip.disabled = left <= 0;
   };
-  const labels = { guide: buttons.guide.textContent ?? '', zip: buttons.zip.textContent ?? '' };
-  const SPENT = 'Este link venció o ya no tiene descargas disponibles. Pedí uno nuevo en "No me llegó".';
 
-  async function load(afterDownload = false): Promise<void> {
-    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
-      return fail('Este link no es válido. Pedí uno nuevo en "No me llegó" con el email de tu compra.');
+  function show(info: Info, note: string): void {
+    byId('dl-title').textContent = info.kit_title;
+    if (info.bought_on && info.email_masked) {
+      const bought = byId('dl-bought');
+      bought.textContent = `compra del ${info.bought_on} · ${info.email_masked}`;
+      bought.hidden = false;
     }
-    (document.getElementById('dl-token') as HTMLInputElement).value = token;
-    try {
-      const res = await fetch('/api/download.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ token, info: true }),
-      });
-      const body = res.ok ? await res.json() : null;
-      if (!body || body.usable !== true) {
-        form.hidden = true;
-        if (afterDownload) {
-          meta.textContent = 'Listo. Esa era la última descarga de este link.';
-          return;
-        }
-        return fail(SPENT);
-      }
-      if (typeof body.kit_title === 'string') (document.getElementById('dl-title') as HTMLElement).textContent = body.kit_title;
-      // With a guide, it is the main button and the ZIP the secondary one.
-      guideRow.hidden = body.guide !== true;
-      buttons.zip.classList.toggle('dl-button--secondary', body.guide === true);
-      meta.textContent = `${afterDownload ? 'Listo, se descargó. ' : ''}Te quedan ${Number(body.remaining)} de ${Number(body.max)} descargas · vence el ${String(body.expires_on)}`;
-      meta.hidden = false;
-      form.hidden = false;
-    } catch {
-      fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+
+    // The kit's pages open in a new tab, with the view pass set by /api/kit.php.
+    const kit = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(info.kit) ? info.kit : '';
+    const rows: [keyof Info['resources'], string, string][] = [
+      ['guide', 'read-guide', `/api/guia.php?k=${kit}`],
+      ['fichas', 'open-fichas', `/api/kit.php?k=${kit}&r=fichas`],
+      ['imprimibles', 'open-imprimibles', `/api/kit.php?k=${kit}&r=imprimibles`],
+    ];
+    for (const [name, link, href] of rows) {
+      const resource = info.resources?.[name];
+      const size = Number(resource?.size) || 0;
+      const unit = name !== 'guide' ? '' : size === 1 ? ' página' : ' páginas';
+      byId(`row-${name}`).hidden = !resource || !kit;
+      byId(`${name}-size`).textContent = size > 0 ? ` · ${size}${unit}` : '';
+      byId<HTMLAnchorElement>(link).href = href;
     }
+
+    left = Math.max(0, Number(info.remaining));
+    const until = String(info.expires_on).slice(0, 5); // dd/mm: links last 30 days
+    if (left > 0) {
+      meta.textContent = `${note}Te ${left === 1 ? 'queda 1 descarga' : `quedan ${left} descargas`} de archivos · este link vence el ${until}`;
+    } else {
+      // D27: 10 downloads per purchase, for good; reading and the fichas stay free.
+      meta.textContent = `${note}Ya usaste las ${Number(info.max)} descargas de archivos de tu compra. Podés seguir leyendo y usando las fichas. Si necesitás bajar algo de nuevo, escribinos a ${error.dataset.support}.`;
+    }
+    enableDownloads();
+    kitBox.hidden = false;
   }
 
-  // The file is fetched here and handed to the browser complete. A native form
+  async function load(refresh = false, note = ''): Promise<void> {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+      return fail(`Este link no es válido. ${AGAIN}`);
+    }
+    let res: Response;
+    try {
+      res = await fetch('/api/kit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ token, refresh }),
+      });
+    } catch {
+      return fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
+    }
+    const body = res.ok ? await res.json().catch(() => null) : null;
+    if (body?.usable !== true) {
+      kitBox.hidden = true;
+      if (res.status === 429) return fail('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
+      if (res.status === 503) return fail(`Tu kit no está disponible en este momento. Probá más tarde o escribinos a ${error.dataset.support}.`);
+      return fail(`Este link venció o ya no es válido. ${AGAIN}`);
+    }
+    show(body as Info, note);
+  }
+
+  // Files are fetched here and handed to the browser complete. A native form
   // POST download got re-requested by the browser with GET (refused on purpose,
-  // threat model C6), wasting one of the buyer's downloads. Without JavaScript
-  // the plain form still works.
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const which = (event.submitter as HTMLButtonElement | null)?.value === 'guide' ? 'guide' : 'zip';
+  // threat model C6), wasting one of the buyer's downloads (H-10).
+  async function download(which: 'guide' | 'zip'): Promise<void> {
     error.hidden = true;
     buttons.guide.disabled = buttons.zip.disabled = true;
-    buttons[which].textContent = 'Descargando…';
+    label(which).textContent = 'Descargando…';
     try {
       const res = await fetch('/api/download.php', {
         method: 'POST',
@@ -124,54 +219,84 @@ import { sales } from '../data/site';
         body: new URLSearchParams({ token, file: which }),
       });
       if (res.ok && /^application\/(zip|pdf)/.test(res.headers.get('content-type') ?? '')) {
-        const name = /filename="([a-z0-9-]+\.(?:zip|pdf))"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? (which === 'guide' ? 'guia-fenia.pdf' : 'kit-fenia.zip');
+        const name =
+          /filename="([a-z0-9-]+\.(?:zip|pdf))"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ??
+          (which === 'guide' ? 'guia-fenia.pdf' : 'kit-fenia.zip');
         const url = URL.createObjectURL(await res.blob());
         const link = Object.assign(document.createElement('a'), { href: url, download: name });
         document.body.append(link);
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
-        await load(true);
-      } else if (res.status === 429) {
-        fail('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
-      } else if (res.status === 503) {
-        fail(`La descarga no está disponible en este momento. Probá más tarde o escribinos a ${error.dataset.support}.`);
-      } else {
-        form.hidden = true;
-        fail(SPENT);
+        label(which).textContent = labels[which];
+        await load(true, 'Listo, se descargó. ');
+        return;
       }
+      if (res.status === 429) fail('Hubo demasiados intentos. Probá de nuevo en unos minutos.');
+      else if (res.status === 503) fail(`La descarga no está disponible en este momento. Probá más tarde o escribinos a ${error.dataset.support}.`);
+      else await load(true); // 410: out of downloads or expired; the page shows which
     } catch {
       fail('No hay conexión con el servidor. Probá de nuevo en unos minutos.');
     }
-    buttons.guide.disabled = buttons.zip.disabled = false;
-    buttons[which].textContent = labels[which];
-  });
+    label(which).textContent = labels[which];
+    enableDownloads();
+  }
 
+  buttons.guide.addEventListener('click', () => download('guide'));
+  buttons.zip.addEventListener('click', () => download('zip'));
   load();
 </script>
 
 <style>
   .dl-main { background: #0b1a2e; min-height: 80vh; }
-  .dl-section { max-width: 640px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .dl-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.65); margin: 0 0 12px 0; }
-  .dl-title { font-size: 36px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin: 0 0 12px 0; }
-  .dl-meta { font-size: 15px; color: rgba(255, 255, 255, 0.72); margin: 0 0 26px 0; }
-  .dl-button { font: inherit; font-size: 16px; font-weight: 700; padding: 15px 34px; border-radius: 10px; border: none; background: #e8573d; color: #fff; cursor: pointer; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .dl-section { max-width: 720px; margin: 0 auto; padding: 100px 48px 80px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .dl-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; margin: 0 0 10px 0; }
+  .dl-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.65); margin: 0; }
+  .dl-bought { font-size: 13px; color: rgba(255, 255, 255, 0.65); margin: 0; }
+  .dl-title { font-size: 34px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin: 0 0 28px 0; }
+
+  .dl-list { list-style: none; margin: 0; padding: 0; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; background: rgba(255, 255, 255, 0.03); }
+  .dl-row { display: flex; align-items: flex-start; gap: 16px; padding: 22px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+  .dl-row:last-child { border-bottom: none; }
+  .dl-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 180, 216, 0.12); color: #5fd6ec; }
+  .dl-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .dl-body { flex: 1; min-width: 0; }
+  .dl-name { font-size: 17px; font-weight: 700; line-height: 1.35; margin: 10px 0 0 0; }
+  .dl-size { font-weight: 500; color: rgba(255, 255, 255, 0.65); }
+  .dl-note { font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin: 6px 0 0 0; }
+  .dl-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+  /* Option B (propuesta-visual.md §7): open = coral, free; download = cyan outline, counts one. */
+  .dl-button { font: inherit; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-width: 210px; padding: 12px 24px; border-radius: 10px; border: 1px solid transparent; text-decoration: none; cursor: pointer; }
   .dl-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-  .dl-button:disabled { opacity: 0.7; cursor: wait; }
-  .dl-button--secondary { background: transparent; border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: none; }
-  .dl-form { display: flex; flex-direction: column; gap: 18px; }
-  .dl-note { font-size: 13px; color: rgba(255, 255, 255, 0.65); margin: 6px 0 0 0; }
-  .dl-howto { font-size: 14px; line-height: 1.6; color: rgba(255, 255, 255, 0.75); }
+  .dl-button--open { background: #e8573d; color: #fff; box-shadow: 0 4px 20px rgba(232, 87, 61, 0.3); }
+  .dl-button--download { background: transparent; border-color: rgba(0, 180, 216, 0.65); color: #5fd6ec; }
+  .dl-button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dl-btn-icon, .dl-legend svg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .dl-btn-icon { width: 18px; height: 18px; }
+  .dl-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 10px 4px 0 4px; }
+  .dl-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dl-legend svg { width: 15px; height: 15px; }
+  .dl-legend-download { color: #5fd6ec; }
+
+  .dl-howto { margin-top: 14px; font-size: 14px; line-height: 1.6; color: rgba(255, 255, 255, 0.75); }
   .dl-howto summary { cursor: pointer; color: #00b4d8; font-weight: 600; }
   .dl-howto ul { margin: 10px 0 0 0; padding-left: 20px; }
   .dl-howto li { margin-bottom: 6px; }
+
+  .dl-meta { font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin: 14px 4px 0 4px; }
   .dl-error { font-size: 15px; line-height: 1.6; color: #ffb4a6; background: rgba(232, 87, 61, 0.1); border: 1px solid rgba(232, 87, 61, 0.35); border-radius: 10px; padding: 12px 14px; margin: 8px 0 0 0; }
   .dl-help { margin: 32px 0 0 0; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, 0.65); }
-  .dl-help a { color: #00b4d8; }
+  .dl-help a { color: #00b4d8; text-decoration: underline; text-underline-offset: 2px; }
+
   @media (max-width: 640px) {
-    .dl-section { padding: 64px 20px 56px; }
-    .dl-title { font-size: 28px; }
-    .dl-button { width: 100%; }
+    .dl-section { padding: 64px 16px 56px; }
+    .dl-title { font-size: 26px; margin-bottom: 22px; }
+    .dl-row { gap: 12px; padding: 18px 16px; }
+    .dl-icon { width: 38px; height: 38px; border-radius: 10px; }
+    .dl-icon svg { width: 20px; height: 20px; }
+    .dl-name { margin-top: 7px; font-size: 16px; }
+    .dl-actions { flex-direction: column; }
+    .dl-button { width: 100%; min-width: 0; }
   }
 </style>
