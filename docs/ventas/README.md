@@ -221,6 +221,16 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-18 (36)** — **PR #30 en producción** con el OK del dev: tarjeta destacada de «Conversar con IA» arriba de los kits, el rótulo «Kits para educación» y la intro sin «descargables». Deploy y purga de la CDN; batería E2E contra producción 66 OK, 0 fallas. Para el dev quedó publicada una guía con sus tareas del día:
+  - pruebas en el celular;
+  - Mailerlite;
+  - clave de PageSpeed;
+  - Search Console por DNS;
+  - DMARC a `p=quarantine`;
+  - UptimeRobot;
+  - invitación del piloto.
+
+  Cuando las haga, la IA conecta la URL del formulario de Mailerlite al botón «Avisame», carga la clave de PageSpeed en las dos configuraciones y verifica el DNS.
 - **2026-11-18 (35)** — **PR #29 en producción** con el OK del dev: fase A de «Conversar con IA». Deploy y purga de la CDN. Contra producción:
   - suite de seguridad 89 OK, 0 fallas: la CDN entrega las apps byte por byte iguales y con su CSP (S-50…S-53);
   - batería E2E 66 OK, 0 fallas.
