@@ -34,6 +34,22 @@ test('entrenamiento: fase A, muestra gratis y lista de espera, sin compra', asyn
   await expect(page.getByText('No. Todo funciona con las versiones gratuitas.')).toBeVisible();
 });
 
+// «Avisame» (ADR-027, E2E-04): the title comes from the product id, never from
+// the URL (H-03). With a Mailerlite form connected (leadCapture.formUrl) the
+// page embeds it; until then it offers WhatsApp with the training named.
+test('entrenamiento: «Avisame» lleva a la lista con el título correcto', async ({ page }) => {
+  await page.goto('/recursos-gratuitos?producto=conversar-con-ia&titulo=Texto%20inventado');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Sumate a la lista para\s+Conversar con IA sin creerle todo/);
+  await expect(page.getByText('Texto inventado')).toHaveCount(0);
+  const form = page.locator('#lg-iframe');
+  if (await form.count()) {
+    await expect(form).toHaveAttribute('src', /^https:\/\/([a-z0-9-]+\.)*mailerlite\.com\/.*producto=conversar-con-ia/);
+  } else {
+    const wa = page.locator('#lg-wa-link');
+    await expect(wa).toHaveAttribute('href', /wa\.me\/\d+\?text=.*Conversar%20con%20IA%20sin%20creerle%20todo/);
+  }
+});
+
 test('entrenamiento: a 360 px no hay desplazamiento horizontal', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 360, height: 780 } });
   const page = await context.newPage();

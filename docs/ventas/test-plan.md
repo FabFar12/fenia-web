@@ -161,7 +161,7 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | E2E-07 | «Conversar con IA», fase A (ADR-030) | La página muestra «Probá gratis» y «Avisame», el precio previsto y ninguna compra; a 360 px no hay desplazamiento horizontal; «Probá gratis» abre la muestra con carga completa, bajo su propia CSP y sin violaciones, y el clic se cuenta con la página de origen; accesibilidad con axe y captura de referencia de la portada |
 | E2E-02 | Descarga de los 3 kits | La huella SHA-256 de cada ZIP descargado coincide con el original |
 | E2E-03 | Mobile (390 px) y desktop | Capturas antes/después aprobadas (regla de AGENTS.md) |
-| E2E-04 | `/recursos-gratuitos?titulo=Texto inventado` (H-03) | La página no muestra el texto de la URL; el título sale del id del producto |
+| E2E-04 | `/recursos-gratuitos?producto=conversar-con-ia&titulo=Texto inventado` (H-03), en `entrenamientos.spec.ts` | La página no muestra el texto de la URL; el título sale del id del producto. Con el formulario de Mailerlite conectado, lo muestra con el producto; si no, ofrece WhatsApp con el entrenamiento nombrado |
 
 ### P — Protocolos humanos
 
