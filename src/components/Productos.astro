@@ -3,13 +3,22 @@
 // Reads from src/content/products/ via Astro Content Collections.
 // Status 'hidden' is never rendered. 'coming-soon' shows a "PRÓXIMAMENTE" suffix.
 // CTA behavior: see ADR-027, ADR-028 and docs/ventas/propuesta-visual.md.
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
+import { Picture } from 'astro:assets';
 import { whatsapp } from '../data/site';
-import { formatPrice, isPurchasable, isTraining, kitUrl, notifyUrl, offerFor } from '../lib/sales';
+import { formatPrice, isPurchasable, isTraining, kitUrl, notifyUrl, offerFor, productUrl } from '../lib/sales';
 
 const allProducts = await getCollection('products');
-// Trainings (ADR-030) are not kits: they have their own page and are left out
-// of this grid until their featured card is approved.
+// Trainings (ADR-030) are not kits: they have their own page, and a featured
+// card above the kits when their copy has a `card` block (approved 2026-11-18).
+const featured = (
+  await Promise.all(
+    allProducts
+      .filter((p) => isTraining(p) && p.data.status !== 'hidden')
+      .sort((a, b) => a.data.order - b.data.order)
+      .map(async (product) => ({ product, page: await getEntry('trainings', product.id) })),
+  )
+).flatMap(({ product, page }) => (page?.data.card ? [{ product, copy: page.data, card: page.data.card }] : []));
 const products = allProducts
   .filter((p) => !isTraining(p) && (p.data.status === 'live' || p.data.status === 'coming-soon'))
   .sort((a, b) => a.data.order - b.data.order);
@@ -59,7 +68,7 @@ function ctaFor(product: (typeof products)[number]) {
         </h2>
       </div>
       <p style="font-size:15px;line-height:1.7;color:rgba(255,255,255,0.7);margin:0;font-family:'Plus Jakarta Sans',sans-serif;">
-        Herramientas descargables basadas en evidencia, diseñadas para aplicar los principios de FENIA de forma autónoma e inmediata.
+        Herramientas basadas en evidencia, diseñadas para aplicar los principios de FENIA de forma autónoma e inmediata.
       </p>
     </div>
 
@@ -84,6 +93,28 @@ function ctaFor(product: (typeof products)[number]) {
         </div>
       </div>
     )}
+
+    {featured.map(({ product, copy, card }) => (
+      <!-- Featured training (ADR-030): one button, to its sales page. -->
+      <article class="reveal featured-card" aria-labelledby={`featured-${product.id}`}>
+        <div class="featured-text">
+          <p class="featured-pills">
+            <span class="featured-pill featured-pill--type"><span class="featured-dot" aria-hidden="true"></span>{copy.hero.pill}</span>
+            <span class="featured-pill featured-pill--free">{card.badge}</span>
+          </p>
+          <h3 id={`featured-${product.id}`} class="featured-title">{copy.hero.titleLine1} <span>{copy.hero.titleLine2}</span></h3>
+          <p class="featured-summary">{product.data.summary}</p>
+          <ul class="featured-facts">
+            {card.facts.map((fact) => <li>{fact}</li>)}
+          </ul>
+          <a class="featured-cta cta-magnetic" href={productUrl(product)}>{card.cta} <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="featured-phone" aria-hidden="true">
+          <Picture src={copy.hero.images[0].src} alt="" widths={[240, 480]} sizes="240px" formats={['avif']} fallbackFormat="webp" loading="lazy" />
+        </figure>
+      </article>
+    ))}
+    {featured.length > 0 && <p class="featured-kits-label">{featured[0].card.kitsLabel}</p>}
 
     <!-- Product cards -->
     <div class="reveal-stagger productos-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
@@ -182,6 +213,33 @@ function ctaFor(product: (typeof products)[number]) {
     .promo-card { padding: 20px; }
     .promo-left { text-align: left; }
     .promo-left-big { font-size: 30px; }
+  }
+  /* Featured training above the kits (ADR-030). Product palette: coral #CF4630
+     with white text is 4,6:1 (AA); cyan on night blue for accents. */
+  .featured-card { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 32px; align-items: center; margin: 0 0 40px 0; padding: 36px 40px 0 40px; border-radius: 22px; border: 1px solid rgba(0, 180, 216, 0.28); background: radial-gradient(ellipse 55% 90% at 85% 40%, rgba(0, 180, 216, 0.14), transparent 70%), linear-gradient(135deg, rgba(0, 180, 216, 0.07), rgba(255, 255, 255, 0.02)); font-family: 'Plus Jakarta Sans', sans-serif; }
+  .featured-text { padding-bottom: 36px; min-width: 0; }
+  .featured-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px 0; }
+  .featured-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 5px 12px; border-radius: 100px; }
+  .featured-pill--type { color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.35); }
+  .featured-pill--free { color: #0b1a2e; background: #00b4d8; }
+  .featured-dot { width: 5px; height: 5px; border-radius: 50%; background: #00b4d8; box-shadow: 0 0 8px #00b4d8; }
+  .featured-title { font-size: 30px; font-weight: 800; line-height: 1.12; letter-spacing: -0.03em; color: #fff; margin: 0 0 12px 0; }
+  .featured-title span { color: #00b4d8; }
+  .featured-summary { font-size: 15.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.75); margin: 0 0 18px 0; max-width: 560px; }
+  .featured-facts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 24px 0; padding: 0; list-style: none; font-size: 13.5px; color: rgba(255, 255, 255, 0.82); }
+  .featured-facts li::before { content: '✓'; color: #00b4d8; font-weight: 800; margin-right: 6px; }
+  .featured-cta { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; padding: 13px 24px; border-radius: 10px; background: #cf4630; color: #fff; text-decoration: none; box-shadow: 0 4px 20px rgba(207, 70, 48, 0.35); }
+  .featured-cta:focus-visible { outline: 3px solid #00b4d8; outline-offset: 3px; }
+  .featured-phone { align-self: end; margin: 0; height: 300px; overflow: hidden; border-radius: 28px 28px 0 0; padding: 7px 7px 0 7px; background: #1c2b40; border: 1px solid rgba(255, 255, 255, 0.14); border-bottom: 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3); }
+  .featured-phone img { display: block; width: 100%; height: auto; border-radius: 22px 22px 0 0; }
+  .featured-kits-label { display: flex; align-items: center; gap: 12px; margin: 0 0 18px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.6); font-family: 'Plus Jakarta Sans', sans-serif; }
+  .featured-kits-label::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.08); }
+  @media (max-width: 768px) {
+    .featured-card { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 26px 20px 0 20px; }
+    .featured-text { padding-bottom: 0; }
+    .featured-title { font-size: 25px; }
+    .featured-cta { display: flex; justify-content: center; }
+    .featured-phone { width: 62%; max-width: 240px; height: 230px; margin: 0 auto; }
   }
   /* "Comprar con 56% OFF" must stay inside the card. */
   .productos-grid a.cta-magnetic { padding-left: 14px !important; padding-right: 14px !important; }

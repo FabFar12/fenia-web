@@ -221,6 +221,15 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-18 (35)** — **PR #29 en producción** con el OK del dev: fase A de «Conversar con IA». Deploy y purga de la CDN. Contra producción:
+  - suite de seguridad 89 OK, 0 fallas: la CDN entrega las apps byte por byte iguales y con su CSP (S-50…S-53);
+  - batería E2E 66 OK, 0 fallas.
+
+  Decisiones del dev sobre la lista de pendientes:
+  - **tarjeta destacada:** aprobada, con los detalles a criterio de la IA (un botón a la página de venta, ADR-030);
+  - **Mailerlite:** lo crea el dev, no Fab;
+  - **abogado y contador:** los resuelven el dev y Fab;
+  - **Links de Pago viejos:** el dev decide no desactivarlos («lo dejamos ir»), así que queda aceptado el riesgo C19.
 - **2026-11-18 (34)** — **Fase A de «Conversar con IA» (D30) en `dev`.**
   - Apps copiadas idénticas (huellas SHA-256 iguales al handoff), con su CSP por archivo y el control de hashes en la CI. La prueba de mutación de ese control detecta un byte cambiado, finales de línea CRLF y un `programa.html` en la carpeta.
   - Página de venta con los textos aprobados, sin los pendientes entre corchetes y sin testimonios.
