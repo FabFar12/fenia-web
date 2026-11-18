@@ -43,3 +43,6 @@ tmp/
 # Playwright E2E (tests/e2e): reports and run artifacts, never committed.
 /tests/e2e/report/
 /tests/e2e/results/
+
+# Handoff of "Conversar con IA" (product prototype): local only, never pushed to main.
+handoff-conversar-con-ia/
