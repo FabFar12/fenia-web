@@ -69,7 +69,12 @@ test('entrenamiento: «Probá gratis» abre la muestra entera, sin errores de CS
 
   // The app ran: its whole screen is drawn by its own script into an empty page.
   await expect(page.getByRole('button', { name: /Empezar el día 0/ })).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp)).toEqual([]);
+  // Firefox asks for /favicon.ico on its own (the app declares no icon) and the
+  // app's policy blocks it: harmless, nothing of the app is missing. Anything
+  // else blocked is a real problem. (Asked of the product team for the next
+  // regeneration: an icon in data:, so the request disappears.)
+  const blocked = await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp);
+  expect(blocked.filter((v) => !/^img-src https:\/\/[^/]+\/favicon\.ico$/.test(v))).toEqual([]);
 
   // Beacons of the page: Chromium hands them to page.route; Firefox does not.
   if (browserName === 'chromium') {
