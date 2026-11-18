@@ -9,7 +9,7 @@
 
 ## Paso 1 — Crear cuenta en Mailerlite
 
-1. Entrá a [https://www.mailerlite.com/](https://www.mailerlite.com/) y creá una cuenta gratis (hasta 1.000 suscriptores sin costo).
+1. Entrá a [https://www.mailerlite.com/](https://www.mailerlite.com/) y creá una cuenta gratis con `soporte@fenia.com.ar`, así queda a nombre de FENIA. Desde 2026 el plan gratis llega hasta 250 suscriptores, 3 formularios y 2 usuarios.
 2. Confirmá tu email.
 
 ## Paso 2 — Crear un grupo ("Lista de lanzamiento FENIA")
@@ -39,7 +39,7 @@
 
 ## Paso 5 — Pasarme la URL
 
-Una vez que tengas la URL del Paso 3, mandámela — yo la configuro como variable de entorno del sitio (`PUBLIC_MAILERLITE_FORM_URL`) y en unos minutos el formulario queda embebido en el sitio en vez del fallback de WhatsApp.
+Una vez que tengas la URL del Paso 3, mandámela. Yo la cargo en `src/data/site.ts` (`leadCapture.formUrl`) y, con el deploy, el formulario queda embebido en el sitio en vez del fallback de WhatsApp. La variable `PUBLIC_MAILERLITE_FORM_URL`, si está, tiene prioridad.
 
 ---
 
