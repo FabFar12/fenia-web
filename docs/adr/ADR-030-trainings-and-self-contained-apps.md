@@ -62,6 +62,7 @@ The dev approved the plan on 2026-11-18, with these decisions:
 - The sample is public now, on the same origin as the future program, so day 0 progress carries over after buying.
 - Every update of an app is a regenerated file plus its new hashes, in both the file and the `.htaccess`. CI refuses a mismatch before deploying.
 - The training cannot be sold by mistake: the schema, U-31 and the API all refuse it while it is not `live`, and `live` is refused until phase B exists.
+- On iPhone, an app added to the home screen keeps its data apart from Safari's, so day 0 progress made in Safari does not show up under the icon (finding H-12 in docs/ventas). It is iOS behaviour, not the site's. The progress code in Ajustes moves it; the product team is asked for an in-app notice in the next regeneration.
 - The apps measure nothing themselves. The sample's real use (who finishes day 0) is unknown until the product team adds it in a future regeneration.
 - The repo is public: `muestra.html` and `piloto.html` (day 0 and week 1) are readable on GitHub, also after the pilot. `programa.html` never enters it (CI guard).
 - Tests: U-54 and U-55 (PHPUnit), S-50…S-55 (security suite), E2E-07 (sales page, 360 px, the sample under its policy, the counted click), and an axe check and a reference screenshot of the page.
