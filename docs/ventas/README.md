@@ -65,7 +65,7 @@ Leyenda: ✅ hecho · 🟡 en curso / esperando a alguien · ⏳ pendiente · �
 | **6. Lanzamiento** | 6.1 Docs: [guía de ventas para Fabián](./guia-fab-ventas.md) (resumen diario, avisos, P-01, P-02, reembolsos, contracargos, promo), `deployment.md` (operación de la API), ADR-023 y ADR-027 actualizados. Falta ensayar P-01/P-02 con Fab | ✅ docs · ⏳ ensayo | dev + Fab |
 | | 6.2 PR #18 `dev` → `main` (D13), 2026-11-07. **Infraestructura en producción, sin ventas habilitadas**: los kits siguen "Próximamente" y la API responde 503 hasta tener config. Capturas antes/después: la home queda idéntica; `/gracias` y `/recursos-gratuitos`, como se aprobaron. CDN purgada (D18). Verificado en vivo: `www` → 301 (H-08 ✅), archivo de estado → 403 (H-01 ✅). Suite ✱ contra producción: 54 OK, 0 fallas | ✅ infraestructura | dev |
 | | 6.3 Compra real + reembolso en producción. Orden real de producción ya inspeccionada sin pagar ($13.000, cuenta real, URLs y medios de pago correctos) | ⏳ Compra del dev; el reembolso lo hace la IA | dev |
-| | 6.4 **Kits a la venta desde el 2026-11-07** con la promo de lanzamiento (D23) y la franja de la home. Faltan: 72 h de monitoreo (tarea horaria + resumen diario a soporte@), anuncio a la lista y DMARC (H-02) | 🟡 en venta | Fab + dev |
+| | 6.4 **Kits a la venta desde el 2026-11-07** con la promo de lanzamiento (D23), que terminó el 16/11; desde entonces, $30.000. Faltan: 72 h de monitoreo (tarea horaria + resumen diario a soporte@), anuncio a la lista y DMARC (H-02) | 🟡 en venta | Fab + dev |
 
 **Próximo paso (pendientes al cierre del 2026-11-07):**
 
@@ -77,7 +77,7 @@ Del dev o de Fab:
 5. **Anuncio** (el lunes 9/11) y, después, DMARC a `p=quarantine` (H-02).
 
 De la IA:
-6. **Después del 16/11 23:59:** el sitio y Mercado Pago pasan solos a $30.000. Hay que hacer un deploy para que los datos de Google (`priceValidUntil`) muestren el precio nuevo, y decidir con el dev si se borra el bloque `promo`.
+6. ✅ **Promo cerrada (2026-11-18):** con el OK del dev se borró el bloque `promo` de los 3 kits y se hizo el deploy. Los datos de Google muestran $30.000, sin `priceValidUntil`.
 7. **Al terminar:** revocar el token de la API de Hostinger, que vence en 3 meses (D11). Antes, decidir cómo se purga la CDN sin él (D18).
 8. **"Tu kit" y métricas: en producción desde el 2026-11-14 (PR #26).** Los tres kits nuevos (guía, fichas, imprimibles y ZIP) están subidos. Falta ver "Tu kit" con archivos reales en una compra real: sirve la compra del dev del punto 1 (6.3), que la IA reembolsa. Las contraseñas de las métricas están en `~/fenia-secrets/production/cuentas-metricas.txt`; la de `fab` se la pasa el dev en persona.
 9. **Tareas del dev para las métricas:** crear el monitor de UptimeRobot y la propiedad de Google Search Console (método "Archivo HTML": el dev pasa el nombre del archivo y la IA lo agrega a `public/`). Pendiente con el abogado: mencionar el contador de visitas en la política de privacidad.
@@ -212,6 +212,7 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-18 (33)** — **Fin de la promo de lanzamiento (D23).** El 16/11 a las 23:59 el sitio y Mercado Pago pasaron solos a $30.000. Con el OK del dev se borró el bloque `promo` de los 3 kits: ya no hay franja, cartel, precio tachado ni cuenta regresiva, y los datos de Google muestran $30.000 sin `priceValidUntil`. Las pruebas de la promo se saltean solas cuando no hay promo. Se actualizaron las capturas de referencia de productos y de la caja de compra.
 - **2026-11-14 (32)** — **PR #27 en producción** con el OK del dev (comisión de Mercado Pago, D29, y reintento de la velocidad). Deploy, purga de la CDN y base migrada al esquema 4. Suite de seguridad contra producción: 79 OK y 0 fallas.
 - **2026-11-14 (31)** — El dev vio en producción "No se pudo medir: PageSpeed respondió HTTP 429". Sin clave propia, Google limita las consultas de velocidad, y más desde el servidor compartido de Hostinger. Corregido en `dev`: hasta 4 intentos por día y un mensaje en palabras simples. Para que mida siempre hace falta la clave gratuita de PageSpeed (`psi_api_key`), que crea el dev en Google Cloud y guarda en `~/fenia-secrets/psi-api-key.txt`. El merge del PR #27 (comisión y este arreglo) espera el OK explícito del dev: la herramienta de seguridad frenó el merge sin ese OK.
 - **2026-11-14 (30)** — Pedido del dev: ver en las métricas cuánto se queda Mercado Pago (D29). Verificado leyendo solo las ventas de kits, por nuestro código de orden: la venta real del 7/11 dejó $11.961,73 de $13.000, con una comisión del 7,99 % en dinero en cuenta; el sandbox también informa comisión. Esquema 4 (columnas de comisión en `orders`). 196 tests de PHP. También se le pasó al dev el paso a paso para comprar de prueba en staging.
