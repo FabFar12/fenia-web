@@ -159,3 +159,13 @@ faq:
 closing:
   title: "Empezá hoy por el día 0."
   text: "Ocho minutos, gratis, con tu propia IA. Te llevás tu punto de partida y el primer descubrimiento."
+
+# Featured card in the home's Productos section, above the kits.
+card:
+  badge: "Día 0 gratis"
+  facts:
+    - "5 minutos por día"
+    - "En el celular, sin descargar nada"
+    - "Con tu propia IA gratuita"
+  cta: "Conocé el entrenamiento"
+  kitsLabel: "Kits para educación"

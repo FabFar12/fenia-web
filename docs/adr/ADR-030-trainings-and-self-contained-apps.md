@@ -42,7 +42,8 @@ The dev approved the plan on 2026-11-18, with these decisions:
    - optional `plannedPrice`, the launch price announced as planned. Nothing is charged with it; when sales open, the launch price goes in `promo`, with a real deadline (D23).
    - deliveryMode **`web-app`**.
    - **Fail closed:** the schema and U-31 refuse a `live` training until buyer access exists. The sales API only charges `live` products (C18), and S-54 checks it on the live site.
-   - Trainings are not kits. They have no `/kits/<id>/` page and are left out of the kits grid. The **featured card above the trilogy** in Productos waits for an approved visual proposal.
+   - Trainings are not kits. They have no `/kits/<id>/` page and are left out of the kits grid.
+   - **Featured card above the trilogy** in Productos (proposal approved 2026-11-18; the dev left the details to the AI). It shows the training's pill, a «Día 0 gratis» badge, its summary and three facts, and has **one button**, «Conocé el entrenamiento», to the sales page. The measurement the dev chose lives on the sales page (visits and «Probá gratis» clicks), so the card does not jump straight to the sample. The kits get the label «Kits para educación». The section intro no longer says «descargables», since a training is not downloaded. The card copy is in the training's YAML (`card`); without that block, no card.
 4. **Sales page.** `/entrenamientos/[id].astro`, a template reusable for future trainings. The copy is in `src/content/trainings/<id>.yaml`, taken from the approved `pagina-de-venta.md`. Price, status and sample stay in the product's `.md`.
    - Phase A buttons: «Probá gratis el día 0» opens the sample, and «Avisame cuando esté completo» goes to `/recursos-gratuitos?producto=<id>`.
    - Visible price: «Precio de lanzamiento previsto: $15.000 (lista $30.000)». No purchase button.

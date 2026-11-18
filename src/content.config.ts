@@ -198,6 +198,20 @@ const trainings = defineCollection({
       price: z.object({ title: z.string(), note: z.string() }),
       faq: z.object({ title: z.string(), items: z.array(z.object({ q: z.string(), a: z.string() })).min(1) }),
       closing: z.object({ title: z.string(), text: z.string() }),
+      /**
+       * Featured card above the kits in the home's Productos section (approved
+       * 2026-11-18). One button, to the sales page: the page is where visits and
+       * "Probá gratis" clicks are measured (ADR-030). Without this block, no card.
+       */
+      card: z
+        .object({
+          badge: z.string(),
+          facts: z.array(z.string()).min(1).max(4),
+          cta: z.string(),
+          /** Label above the kits once a training sits on top of them. */
+          kitsLabel: z.string(),
+        })
+        .optional(),
     }),
 });
 
