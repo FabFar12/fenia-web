@@ -108,6 +108,15 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D30 | 2026-11-18 | **«Conversar con IA sin creerle todo», fase A** ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md), decisiones del dev sobre el plan):
+  - `muestra.html` y `piloto.html` se publican byte por byte en `/app/conversar-con-ia/`, cada una con su CSP exacta en un `.htaccess` de la carpeta, y la CI controla los hashes;
+  - `programa.html` queda afuera de lo público hasta la fase B, cuando se sirve desde la carpeta privada, detrás del ingreso, en la misma dirección;
+  - el piloto se retira de `public/` cuando el dev avise que terminó;
+  - página de venta `/entrenamientos/conversar-con-ia/` en fase A: «Probá gratis el día 0», «Avisame cuando esté completo» y el precio previsto ($15.000, lista $30.000), sin compra; el producto nuevo es de tipo «Entrenamiento» y queda en estado «muestra»;
+  - la tarjeta destacada arriba de la trilogía en Productos espera la propuesta visual aprobada;
+  - el mail se capta con la página de WhatsApp de siempre, y el formulario de Mailerlite pasa a ser prioridad (lo crea Fab);
+  - se mide en la página de venta: visitas y clics en «Probá gratis»; dentro de las apps no se mide nada;
+  - el ingreso de compradores es la opción 1, pensada una sola vez para kits y entrenamientos. No se construye todavía: se decide antes de la fase B, junto con el botón de arrepentimiento | ✅ Decisión del dev · 🟡 PR abierto |
 | D29 | 2026-11-14 | **La comisión real de Mercado Pago en las métricas** (pedido del dev). En la primera venta, de $13.000, quedaron $11.961,73: una comisión del 7,99 % con dinero en cuenta, que cambia según el medio de pago. Por eso no se fija un porcentaje: la tarea horaria le pregunta a Mercado Pago lo que retuvo en cada venta, buscando solo por nuestro código de orden, así que nunca lee otros movimientos de la cuenta. Las métricas muestran ingresos brutos, comisión en pesos y en porcentaje, neto, neto promedio por venta y comisión por medio de pago. Corre fuera del camino de la entrega: si falla, solo queda un número vacío por una hora | ✅ En producción (2026-11-14, PR #27) |
 | D28 | 2026-11-14 | **Métricas internas privadas** ([ADR-029](../adr/ADR-029-private-metrics-and-owner-accounts.md), decisiones del dev).
   - **Visitas con un contador propio:** todo queda en nuestra base, sin cookies ni datos personales, y nada va a terceros. Se descartaron Plausible y Umami.
@@ -212,6 +221,12 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-18 (34)** — **Fase A de «Conversar con IA» (D30) en `dev`.**
+  - Apps copiadas idénticas (huellas SHA-256 iguales al handoff), con su CSP por archivo y el control de hashes en la CI. La prueba de mutación de ese control detecta un byte cambiado, finales de línea CRLF y un `programa.html` en la carpeta.
+  - Página de venta con los textos aprobados, sin los pendientes entre corchetes y sin testimonios.
+  - Producto nuevo en estado «muestra», que la API nunca cobra (U-54, S-54). El clic en «Probá gratis» se cuenta en las métricas (U-55).
+  - Pruebas nuevas: S-50…S-55 y E2E-07. 200 tests de PHP.
+  - El PR espera el OK del dev para el merge.
 - **2026-11-18 (33)** — **Fin de la promo de lanzamiento (D23).** El 16/11 a las 23:59 el sitio y Mercado Pago pasaron solos a $30.000. Con el OK del dev se borró el bloque `promo` de los 3 kits: ya no hay franja, cartel, precio tachado ni cuenta regresiva, y los datos de Google muestran $30.000 sin `priceValidUntil`. Las pruebas de la promo se saltean solas cuando no hay promo. Se actualizaron las capturas de referencia de productos y de la caja de compra.
 - **2026-11-14 (32)** — **PR #27 en producción** con el OK del dev (comisión de Mercado Pago, D29, y reintento de la velocidad). Deploy, purga de la CDN y base migrada al esquema 4. Suite de seguridad contra producción: 79 OK y 0 fallas.
 - **2026-11-14 (31)** — El dev vio en producción "No se pudo medir: PageSpeed respondió HTTP 429". Sin clave propia, Google limita las consultas de velocidad, y más desde el servidor compartido de Hostinger. Corregido en `dev`: hasta 4 intentos por día y un mensaje en palabras simples. Para que mida siempre hace falta la clave gratuita de PageSpeed (`psi_api_key`), que crea el dev en Google Cloud y guarda en `~/fenia-secrets/psi-api-key.txt`. El merge del PR #27 (comisión y este arreglo) espera el OK explícito del dev: la herramienta de seguridad frenó el merge sin ese OK.

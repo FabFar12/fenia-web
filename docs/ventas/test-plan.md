@@ -45,7 +45,7 @@
   - las capturas de referencia;
   - accesibilidad WCAG AA con axe, con los problemas conocidos listados.
 - Suite de seguridad en [`tests/security/`](../../tests/security):
-  - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25, S-30…S-35 y S-40…S-45 son ✱, seguras en producción; se saltean si `/api/health.php` no responde OK;
+  - S-01, S-02, S-05…S-08, S-10, S-11, S-15, S-17, S-19…S-25, S-30…S-35, S-40…S-45 y S-50…S-55 son ✱, seguras en producción; las de la API se saltean si `/api/health.php` no responde OK;
   - S-13, S-16, S-18 y S-36 son solo para staging y necesitan variables opcionales (ver el encabezado de `api.test.mjs`);
   - S-03 y S-04 se prueban en INT.
 - OPS-01 y OPS-06: barrera automática en CI.
@@ -78,6 +78,8 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | U-40 | "Tu kit" (ShopTest): abrir el kit, el pase de lectura, la guía, las fichas y los imprimibles | Leer y usar no gasta descargas; un link sin descargas sigue abriendo; el pase no sirve para otro kit, otro link ni más tiempo; los pases inventados se limitan por IP; un reembolso cierra el kit; un archivo cambiado no se sirve; abrir desde muchas IPs no dispara la alerta de link compartido; el mail de un kit con fichas invita a abrirlo |
 | U-41 | Migración del esquema 1 al 2 (StoresTest) | Agrega `download_log.kind` y sube los links ya enviados de 5 a 10 descargas, sin perder las ya hechas; correrla dos veces no cambia nada |
 | U-53 | Comisión de Mercado Pago (D29, ShopTest, MetricsTest, StoresTest) | Guarda neto, comisión, medio de pago y cuotas de cada venta; pregunta solo por nuestro código de orden; espera unos minutos, reintenta si Mercado Pago todavía no la lista y nunca rompe si Mercado Pago falla; el informe calcula bruto, comisión, porcentaje, neto y comisión por medio de pago; la migración 3 → 4 agrega las columnas |
+| U-54 | Entrenamiento con muestra gratis (ADR-030, CatalogTest) | Se lista para títulos y métricas pero nunca se vende; la página de cada producto sale del catálogo (kits por defecto) y una página mal formada hace fallar el catálogo entero |
+| U-55 | Métricas: página de venta de un entrenamiento (ADR-030, MetricsTest) | Cuenta visitantes, páginas vistas, clics en «Probá gratis» y personas que la probaron, solo desde esa página; un clic nunca es una visita nueva; el embudo sigue siendo solo de lo que está a la venta |
 | U-50 | Métricas (MetricsTest): contador de visitas | Guarda sin IP ni navegador; la huella cambia cada día; descarta bots, rutas de la API y de las métricas; clasifica fuentes; navegar dentro del sitio no es una visita nueva |
 | U-51 | Métricas: cuentas de dueños | Usuario y contraseña; la misma respuesta para clave mala y usuario inexistente; límite de intentos por IP y por usuario; la sesión vence, se cierra y muere con la cuenta; sin dueños, cerrado |
 | U-52 | Métricas: informe y velocidad | Junta visitas, embudo desde que empezó el contador, ventas, uso de "Tu kit" y últimas ventas con emails enmascarados; el control de velocidad guarda puntaje y Core Web Vitals, una vez por día, sin tocar la red en los tests |
@@ -125,6 +127,12 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | S-43 ✱ | Clave equivocada y usuario inexistente | La misma respuesta, sin cookie |
 | S-44 ✱ | El contador de visitas con datos basura o de más | Siempre 204, vacío y sin cookies; GET 405 |
 | S-45 ✱ | La página de métricas | noindex, sin secretos en el HTML y fuera del sitemap |
+| S-50 ✱ | Apps de «Conversar con IA» (`muestra.html`, `piloto.html`) | Llegan con la CSP exacta de su `<Files>` en el `.htaccess`, y los hashes de esa CSP son los del script y el estilo servidos |
+| S-51 ✱ | Las mismas apps, detrás de la CDN | Byte por byte iguales a las del repo |
+| S-52 ✱ | Encabezados de las apps | `Cache-Control: no-cache`, `X-Robots-Tag: noindex`, `text/html; charset=utf-8`, `nosniff` |
+| S-53 ✱ | `programa.html` y el listado de la carpeta | 403/404, sin contenido del programa; la página de venta no enlaza ni el programa ni el piloto |
+| S-54 ✱ | Checkout del entrenamiento en fase A | Rechazado sin crear nada (404 con las ventas abiertas) |
+| S-55 ✱ | Página de venta del entrenamiento | Sin formulario ni llamada de compra; los botones a la muestra fuerzan carga completa y se cuentan (`data-sample`); indexable, en el sitemap y sin pendientes entre corchetes |
 | S-36 | Con un token de una compra de prueba: el pase abre las fichas | 200, cookie `HttpOnly` + `SameSite=Strict` + `Path=/api/`, y las descargas restantes no cambian |
 
 ### INT — Integración con el sandbox de Mercado Pago (staging)
@@ -150,6 +158,7 @@ El resto está escrito como pendiente y se implementa en el paso que construye c
 | E2E-01 | Card → página del kit → email → checkout sandbox → `/gracias` → "Tu kit" (guía en el navegador, fichas, descargas) → reembolso | Funciona de punta a punta; el precio es el mismo en la card, la página y el checkout; leer y usar las fichas no gasta descargas; en la ficha de prueba corren el script `blob:` y `new Function`, internet queda bloqueado y lo escrito se guarda; el reembolso cierra el kit |
 | E2E-06 | Métricas: ingreso real en staging con usuario equivocado, y el tablero con datos simulados | El ingreso rechaza la clave equivocada; captura de referencia y accesibilidad del tablero en escritorio, celular y Firefox |
 | E2E-05 | "Tu kit" con datos simulados (sin comprar) | Captura de referencia en escritorio, celular y Firefox, y accesibilidad con axe sin problemas nuevos |
+| E2E-07 | «Conversar con IA», fase A (ADR-030) | La página muestra «Probá gratis» y «Avisame», el precio previsto y ninguna compra; a 360 px no hay desplazamiento horizontal; «Probá gratis» abre la muestra con carga completa, bajo su propia CSP y sin violaciones, y el clic se cuenta con la página de origen; accesibilidad con axe y captura de referencia de la portada |
 | E2E-02 | Descarga de los 3 kits | La huella SHA-256 de cada ZIP descargado coincide con el original |
 | E2E-03 | Mobile (390 px) y desktop | Capturas antes/después aprobadas (regla de AGENTS.md) |
 | E2E-04 | `/recursos-gratuitos?titulo=Texto inventado` (H-03) | La página no muestra el texto de la URL; el título sale del id del producto |

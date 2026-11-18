@@ -63,6 +63,10 @@ import Nav from '../components/Nav.astro';
             <h2 id="mt-h-kit">Tu kit: qué hacen después de comprar</h2>
             <div id="mt-kit"></div>
           </article>
+          <article id="mt-trainings-card" class="mt-card mt-wide" aria-labelledby="mt-h-trainings" hidden>
+            <h2 id="mt-h-trainings">Entrenamientos: página de venta</h2>
+            <div id="mt-trainings"></div>
+          </article>
           <article class="mt-card mt-wide" aria-labelledby="mt-h-recent">
             <h2 id="mt-h-recent">Últimas ventas</h2>
             <div id="mt-recent"></div>
@@ -88,6 +92,8 @@ import Nav from '../components/Nav.astro';
     updated: string;
     visits: { visitors: number; visits: number; views: number; whatsapp: number; sources: Share[]; devices: Share[]; pages: { name: string; n: number }[]; per_day: Day[] };
     funnel: { total: { seen: number; checkout: number; paid: number; rate: number | null }; kits: { id: string; title: string; seen: number; checkout: number; paid: number }[]; since: string | null };
+    /** ADR-030: each training's sales page and its "Probá gratis" clicks. */
+    trainings?: { id: string; title: string; status: string; visitors: number; views: number; sample_clicks: number; sample_people: number; rate: number | null }[];
     sales: {
       count: number; revenue: number; net: number | null; fees: number | null; fee_pct: number | null; net_avg: number | null; fees_pending: number;
       by_pay_type: { name: string; n: number; fee_pct: number | null }[];
@@ -188,6 +194,21 @@ import Nav from '../components/Nav.astro';
     const since = f.since && f.since !== r.from ? ` Se calcula desde el ${f.since}, cuando empezó el contador de visitas.` : '';
     fill('mt-funnel', steps, el('p', 'mt-note', rate + since),
       bars('Por kit: vieron la página', f.kits.map((k) => ({ name: k.title, n: k.seen })), 'Sin kits a la venta.'));
+
+    // Trainings (ADR-030): only shown when there is one in the catalogue.
+    const trainings = r.trainings ?? [];
+    byId('mt-trainings-card').hidden = trainings.length === 0;
+    fill('mt-trainings', ...trainings.flatMap((t) => {
+      const box = el('div', 'mt-block');
+      box.append(el('h3', '', t.title));
+      const tried = t.rate === null ? '' : `${String(t.rate).replace('.', ',')} % de los visitantes`;
+      box.append(stats([
+        ['Visitantes de la página', int(t.visitors), `${int(t.views)} páginas vistas`],
+        ['Clics en «Probá gratis»', int(t.sample_clicks)],
+        ['Personas que la probaron', int(t.sample_people), tried],
+      ]));
+      return [box];
+    }), el('p', 'mt-note', 'La muestra no mide nada adentro: se cuenta el clic en la página de venta. Cada persona cuenta una vez por día.'));
 
     const s = r.sales;
     const sales = [stats([

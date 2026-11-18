@@ -51,6 +51,11 @@ jobs:
             echo "::error::Archive files must never be committed (paid kits live outside the repo): $archives"
             exit 1
           fi
+          paid=$(git ls-files | grep -iE '(^|/)programa\.html$' || true)
+          if [ -n "$paid" ]; then
+            echo "::error::The paid program is served only to buyers, from outside the repo (ADR-030): $paid"
+            exit 1
+          fi
           if git grep -nIE 'APP_USR-[0-9]{6,}|TEST-[0-9]{6,}-'; then
             echo "::error::Something that looks like a Mercado Pago credential is committed. Revoke it in Mercado Pago, then remove it."
             exit 1
@@ -77,6 +82,11 @@ jobs:
         # The PHP backend charges the price in dist/api/catalog.json; this
         # proves it is exactly the price shown on the cards (ADR-028).
         run: node scripts/verify-catalog.mjs
+
+      - name: Self-contained apps match their CSP hashes (ADR-030)
+        # A changed byte in public/app/**.html (editor, line endings) makes
+        # the browser block the app; programa.html must never ship.
+        run: node scripts/verify-app-csp.mjs dist
 
       - name: Upload dist/ artifact
         # Only on pushes that deploy: main → production, dev → staging
@@ -183,6 +193,9 @@ jobs:
             echo "::error::Staging target must be exactly /staging/ (got '$STAGING_SERVER_DIR'). '/' is PRODUCTION."
             exit 1
           fi
+
+      - name: Self-contained apps match their CSP hashes (ADR-030)
+        run: node scripts/verify-app-csp.mjs dist
 
       - name: Make the build staging-only (host lock, noindex, hidden files)
         run: node scripts/prepare-staging.mjs dist

@@ -41,6 +41,32 @@ final class CatalogTest extends TestCase
         }
     }
 
+    /** U-54 (ADR-030): a training in phase A is listed (titles, metrics) but never sold. */
+    public function testATrainingWithAFreeSampleIsNeverSold(): void
+    {
+        $catalog = Catalog::fromJson('{"products": [{"id": "curso-x", "title": "Curso X", "status": "sample", "price": 30000, "currency": "ARS", "page": "/entrenamientos/curso-x/"}]}');
+        self::assertSame('Curso X', $catalog->find('curso-x')['title'] ?? null);
+        self::assertNull($catalog->purchasable('curso-x', self::at('2026-11-18 12:00:00')));
+    }
+
+    /** The page each product is sold on (metrics): kits by default, trainings as the build says. */
+    public function testProductPages(): void
+    {
+        $catalog = Catalog::fromJson('{"products": [
+            {"id": "kit-a", "title": "Kit A", "status": "live", "price": 30000, "currency": "ARS"},
+            {"id": "curso-x", "title": "Curso X", "status": "sample", "price": 30000, "currency": "ARS", "page": "/entrenamientos/curso-x/"}
+        ]}');
+        self::assertSame(['/kits/kit-a/', '/entrenamientos/curso-x/'], array_column($catalog->all(), 'page'));
+        foreach (['"https://evil.example/x/"', '"/../x/"', '"/entrenamientos/X/"', '"/entrenamientos/x"', '"/x/y/z/"', '123'] as $page) {
+            try {
+                Catalog::fromJson('{"products": [{"id": "curso-x", "title": "t", "status": "sample", "price": 1, "currency": "ARS", "page": ' . $page . '}]}');
+                self::fail('Accepted page ' . $page);
+            } catch (\RuntimeException $e) {
+                self::assertSame('Catalog page malformed', $e->getMessage());
+            }
+        }
+    }
+
     public function testMalformedCatalogFailsClosed(): void
     {
         foreach (['', '{', '[]', '{"products": "x"}', '{"products": [{"id": "../x", "title": "t", "status": "live", "currency": "ARS"}]}', '{"products": [{"title": "t"}]}'] as $json) {

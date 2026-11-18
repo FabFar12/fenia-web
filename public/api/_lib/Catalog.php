@@ -14,13 +14,16 @@ defined('FENIA_API') || exit;
  * A kit can carry a time-limited `promo` (D23): between `starts` and `ends`
  * it is charged `promo.price` instead of `price`. The price is decided here,
  * with the server's clock, at the moment the order is created.
+ *
+ * Only `live` products are ever sold. Trainings with a free sample (status
+ * `sample`, ADR-030) are listed for the metrics but never charged.
  */
 final class Catalog
 {
-    /** @var array<string, array{id: string, title: string, status: string, price_cents: ?int, currency: string, promo: ?array{price_cents: int, starts: \DateTimeImmutable, ends: \DateTimeImmutable}}> */
+    /** @var array<string, array{id: string, title: string, status: string, price_cents: ?int, currency: string, page: string, promo: ?array{price_cents: int, starts: \DateTimeImmutable, ends: \DateTimeImmutable}}> */
     private array $products;
 
-    /** @param array<string, array{id: string, title: string, status: string, price_cents: ?int, currency: string, promo: ?array{price_cents: int, starts: \DateTimeImmutable, ends: \DateTimeImmutable}}> $products */
+    /** @param array<string, array{id: string, title: string, status: string, price_cents: ?int, currency: string, page: string, promo: ?array{price_cents: int, starts: \DateTimeImmutable, ends: \DateTimeImmutable}}> $products */
     private function __construct(array $products)
     {
         $this->products = $products;
@@ -59,10 +62,29 @@ final class Catalog
                 'status' => (string) $entry['status'],
                 'price_cents' => $priceCents,
                 'currency' => (string) $entry['currency'],
+                'page' => self::page($entry['page'] ?? null, $entry['id']),
                 'promo' => self::promo($entry['promo'] ?? null, $priceCents),
             ];
         }
         return new self($products);
+    }
+
+    /**
+     * The product's page on the site, where the metrics count its visits
+     * (/kits/<id>/, or /entrenamientos/<id>/ for trainings). Older catalogues
+     * have no `page`: kits were the only products then.
+     *
+     * @param mixed $page
+     */
+    private static function page($page, string $id): string
+    {
+        if ($page === null) {
+            return '/kits/' . $id . '/';
+        }
+        if (!is_string($page) || !preg_match('~^/[a-z0-9-]+/[a-z0-9]+(?:-[a-z0-9]+)*/$~D', $page)) {
+            throw new \RuntimeException('Catalog page malformed');
+        }
+        return $page;
     }
 
     /**
@@ -96,7 +118,7 @@ final class Catalog
     /**
      * Every listed kit, in catalogue order (internal metrics).
      *
-     * @return list<array{id: string, title: string, status: string, price_cents: ?int, currency: string}>
+     * @return list<array{id: string, title: string, status: string, price_cents: ?int, currency: string, page: string}>
      */
     public function all(): array
     {

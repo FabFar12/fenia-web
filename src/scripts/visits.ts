@@ -1,5 +1,7 @@
-// Private visit counter (ADR-029). One small beacon per page view, and one per
-// click on a WhatsApp link, to our own API: nothing goes to third parties.
+// Private visit counter (ADR-029). One small beacon per page view, one per
+// click on a WhatsApp link and one per click on a free sample of a training
+// (links marked `data-sample`, ADR-030), to our own API: nothing goes to third
+// parties. The sample apps themselves count nothing.
 // No cookies are set and nothing personal is sent: the page's path, where the
 // visitor came from (referrer and utm_* of the first page), and the window
 // width (phone or computer). Skipped for automated browsers (our tests) and
@@ -30,6 +32,11 @@ document.addEventListener('astro:page-load', () => {
 });
 
 document.addEventListener('click', (event) => {
-  const link = (event.target as Element | null)?.closest?.('a[href*="wa.me/"], a[href*="whatsapp.com/"]');
-  if (link) send({ k: 'whatsapp', p: window.location.pathname, n: 1, w: window.innerWidth });
+  const target = event.target as Element | null;
+  if (target?.closest?.('a[href*="wa.me/"], a[href*="whatsapp.com/"]')) {
+    send({ k: 'whatsapp', p: window.location.pathname, n: 1, w: window.innerWidth });
+  } else if (target?.closest?.('a[data-sample]')) {
+    // The page the click came from (the training's sales page, for now).
+    send({ k: 'sample', p: window.location.pathname, n: 1, w: window.innerWidth });
+  }
 });

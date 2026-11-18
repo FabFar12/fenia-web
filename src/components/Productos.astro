@@ -5,11 +5,13 @@
 // CTA behavior: see ADR-027, ADR-028 and docs/ventas/propuesta-visual.md.
 import { getCollection } from 'astro:content';
 import { whatsapp } from '../data/site';
-import { formatPrice, isPurchasable, kitUrl, notifyUrl, offerFor } from '../lib/sales';
+import { formatPrice, isPurchasable, isTraining, kitUrl, notifyUrl, offerFor } from '../lib/sales';
 
 const allProducts = await getCollection('products');
+// Trainings (ADR-030) are not kits: they have their own page and are left out
+// of this grid until their featured card is approved.
 const products = allProducts
-  .filter((p) => p.data.status === 'live' || p.data.status === 'coming-soon')
+  .filter((p) => !isTraining(p) && (p.data.status === 'live' || p.data.status === 'coming-soon'))
   .sort((a, b) => a.data.order - b.data.order);
 
 const accentText = (a: 'cyan' | 'coral') => (a === 'cyan' ? '#00B4D8' : '#E8573D');

@@ -48,6 +48,14 @@ test.describe('@staging capturas de referencia', () => {
     await expect(page.locator('.dl-section')).toHaveScreenshot('tu-kit.png', { stylePath });
   });
 
+  test('entrenamiento: portada de la página de venta', async ({ page }) => {
+    await page.goto('/entrenamientos/conversar-con-ia/');
+    const hero = page.locator('.tr-hero');
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForLoadState('networkidle');
+    await expect(hero).toHaveScreenshot('entrenamiento-portada.png', { stylePath });
+  });
+
   test('métricas (datos simulados, sin entrar)', async ({ page }) => {
     await openMetricas(page);
     await page.evaluate(() => document.fonts.ready);
