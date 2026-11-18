@@ -1,0 +1,27 @@
+# "Conversar con IA sin creerle todo" (ADR-030). Self-contained apps copied
+# byte for byte from the product team: each file gets the exact policy it was
+# tested with, carrying the hash of its own script and of its style. If one
+# byte of a script or style changes, the browser blocks it: never edit these
+# files by hand, ask for a regenerated file with new hashes. CI recomputes the
+# hashes and compares them with this file (scripts/verify-app-csp.mjs).
+#
+# No mod_rewrite here: a RewriteEngine in this folder would switch off the
+# HTTPS, www and staging-lock rules of the parent .htaccess for these files.
+AddDefaultCharset UTF-8
+
+<IfModule mod_headers.c>
+  # Every update must reach whoever already started (progress lives in the
+  # browser, under the same key, so replacing the file keeps it). `set`, not
+  # `always set`: the same table as the parent's HTML rule, so it replaces it
+  # instead of sending the header twice.
+  Header set Cache-Control "no-cache"
+  Header always set X-Robots-Tag "noindex, nofollow"
+
+  <Files "muestra.html">
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-7ZtjWwgLj6IfrpM3yRHOTLz+bWu/0B1pwO96Q4nXvPM='; style-src 'sha256-skXxRjkV4i6c0nmkyXwBBC11125VSPYbZ8Nl76UMlfk='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+  </Files>
+
+  <Files "piloto.html">
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-A9S2kjZBgI+ZL+ybvKfnJQHe2MwYpcAd90iqK31O8LM='; style-src 'sha256-skXxRjkV4i6c0nmkyXwBBC11125VSPYbZ8Nl76UMlfk='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+  </Files>
+</IfModule>

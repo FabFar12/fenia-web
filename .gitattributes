@@ -22,5 +22,9 @@
 *.otf   binary
 *.zip   binary
 
+# Self-contained apps (ADR-030): their CSP carries the hash of each script and
+# style, so not one byte may change, line endings included.
+public/app/**/*.html -text
+
 # Generated lockfile — keep as-is, suppress diff noise in PRs.
 package-lock.json -diff
