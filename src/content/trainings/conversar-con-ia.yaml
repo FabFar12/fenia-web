@@ -1,0 +1,161 @@
+# Sales page of "Conversar con IA sin creerle todo" (ADR-030):
+# /entrenamientos/conversar-con-ia/. Copy approved by the product team in
+# handoff-conversar-con-ia/pagina-de-venta/pagina-de-venta.md (v1, 16/11/2026).
+# Price, status and the sample link live in src/content/products/conversar-con-ia.md.
+# Not published until defined: access duration and the cancellation-right text
+# (bracketed items in the source), and testimonials (after the pilot, only real
+# ones with written permission).
+
+seo:
+  title: "Conversar con IA sin creerle todo · Entrenamiento de 5 minutos por día | FENIA"
+  description: "Un entrenamiento de 6 semanas, 5 minutos por día, para dejar de pedirle cosas a la IA y empezar a trabajar con ella. Con tu propia IA gratuita. Probá el día 0 gratis."
+
+ctas:
+  sample: "Probá gratis el día 0"
+  notify: "Avisame cuando esté completo"
+
+hero:
+  pill: "Entrenamiento · 6 semanas"
+  titleLine1: "Conversar con IA"
+  titleLine2: "sin creerle todo"
+  subtitle: "Un entrenamiento de 5 minutos por día, durante 6 semanas, para que la IA trabaje para vos."
+  note: "El día 0 es gratis y te lleva unos 8 minutos."
+  images:
+    - src: "./conversar-con-ia/01-bienvenida.png"
+      alt: "Pantalla de inicio del entrenamiento, con el recorrido de sesiones y el botón «Empezar el día 0»."
+    - src: "./conversar-con-ia/05-probar.png"
+      alt: "Paso «Probar» de una sesión: un pedido listo para copiar y mandarle a tu IA."
+
+problem:
+  title: "Ya usás IA. ¿Le estás sacando lo que puede dar?"
+  text: "La mayoría le pide algo en una línea, acepta la primera respuesta y sigue. A veces sirve. Muchas veces devuelve algo genérico, completa con lo que no le dijiste o se equivoca con un tono tan seguro que no te das cuenta."
+  fact: "Argentina tiene el uso semanal de IA generativa más alto de los nueve países que relevó el Reuters Institute de la Universidad de Oxford en 2026. Usarla ya no es el desafío. Usarla con criterio, sí."
+
+how:
+  title: "Cinco minutos por día. Una cosa por vez."
+  cards:
+    - title: "5 minutos por día."
+      text: "Una sesión corta, siempre con la misma forma."
+    - title: "Una sesión nueva por día."
+      text: "Si un día no podés, te espera. No hay rachas que se pierden."
+    - title: "Con tu propia IA."
+      text: "ChatGPT, Gemini, Copilot, Claude o Meta AI en WhatsApp, en su versión gratuita."
+    - title: "Tus datos quedan en tu celular."
+      text: "El programa no envía nada a ningún lado."
+  session:
+    title: "Así es una sesión"
+    steps:
+      - title: "Recordar"
+        text: "algo de antes"
+      - title: "La idea"
+        text: "del día"
+      - title: "Predecir"
+        text: "qué va a hacer la IA"
+      - title: "Probar"
+        text: "con tu IA"
+      - title: "Comparar"
+        text: "lo que pasó con lo que esperabas"
+    images:
+      - src: "./conversar-con-ia/04-predecir.png"
+        alt: "Paso «Predecir»: antes de probar, elegís cuántas ideas se van a repetir."
+      - src: "./conversar-con-ia/05-probar.png"
+        alt: "Paso «Probar»: un pedido listo para copiar y mandarle a tu IA."
+      - src: "./conversar-con-ia/06-comparar.png"
+        alt: "Paso «Comparar»: tu predicción frente a lo que pasó, y una línea para tu bitácora."
+
+outcomes:
+  title: "En seis semanas, frente a una tarea tuya, vas a poder:"
+  items:
+    - "decidir si conviene usar IA y para qué parte;"
+    - "armar un pedido con lo que la IA no puede adivinar;"
+    - "corregir el rumbo sin empezar de cero;"
+    - "encontrar el dato que sostiene todo y verificarlo;"
+    - "hacer tuyo el resultado, en lugar de copiar y pegar;"
+    - "estimar, con bastante precisión, si lo que obtuviste es bueno."
+  closing: "El día 0 resolvés una tarea real tal como lo harías hoy. En la sesión 30 la repetís y comparás."
+
+journey:
+  title: "El recorrido"
+  rows:
+    - week: "1 · Base"
+      focus: "Entender qué hace la IA (y qué no) antes de pedirle cosas"
+    - week: "2 · Contexto"
+      focus: "Darle lo que no puede adivinar"
+    - week: "3 · Preguntar"
+      focus: "Preguntar mejor y hacer que te pregunte"
+    - week: "4 · Iterar"
+      focus: "Corregir el rumbo sin empezar de cero"
+    - week: "5 · Verificar"
+      focus: "Separar lo que suena bien de lo que es cierto"
+    - week: "6 · Criterio"
+      focus: "Decidir qué delegar y hacer tuyo el resultado"
+    - week: "7 a 12 · Mantenimiento"
+      focus: "Una sesión por semana para que no se pierda"
+
+why:
+  title: "No inventamos el método."
+  text: "Cada sesión usa mecanismos de aprendizaje con años de investigación detrás, y al cierre te dice cuál usaste y qué tan sólida es la evidencia."
+  items:
+    - title: "Práctica distribuida"
+      text: "Repartir la práctica en días rinde más que concentrarla (Cepeda y otros, 2006)."
+    - title: "Recuperación activa"
+      text: "Recordar sin mirar fija más que releer (Roediger y Karpicke, 2006)."
+    - title: "Predecir y comparar"
+      text: "Equivocarse con seguridad y ver la corrección hace que se recuerde mejor (Metcalfe, 2017)."
+  image:
+    src: "./conversar-con-ia/07-por-que-funciona.png"
+    alt: "Cierre de una sesión: lo que hiciste, tu bitácora y la evidencia detrás del mecanismo que usaste."
+  noPromise:
+    title: "Lo que no te prometemos"
+    text: "Que vas a «dominar la IA en 5 minutos», que el programa te cambia el cerebro o que a las seis semanas tenés un hábito garantizado. Te prometemos práctica bien diseñada y una forma de medir si avanzaste."
+
+includes:
+  title: "Qué incluye"
+  items:
+    - "Día 0 con tu punto de partida y tu tarea testigo"
+    - "30 sesiones de 5 minutos, en 6 semanas"
+    - "6 semanas de mantenimiento"
+    - "Bitácora con tus aprendizajes y tu precisión al predecir"
+    - "Comparación de tu tarea testigo, antes y después"
+    - "Guía «¿Qué IA para qué?» de las versiones gratuitas, actualizada"
+    - "Funciona en el celular, sin descargar ninguna app"
+
+audience:
+  title: "Para quién es"
+  yes:
+    title: "Es para vos si"
+    text: "ya usás IA de vez en cuando y sentís que le sacás poco; si la usás seguido y querés más criterio; o si nunca la usaste en serio y querés empezar bien."
+  no:
+    title: "No es para vos si"
+    text: "buscás un curso técnico de programación o automatización, o una lista de «prompts mágicos»."
+  others:
+    before: "Docentes y estudiantes: "
+    linkText: "la trilogía de kits educativos de FENIA"
+    after: " está pensada para ustedes."
+    href: "/#productos"
+
+price:
+  title: "Precio"
+  note: "Pago único."
+
+faq:
+  title: "Preguntas frecuentes"
+  items:
+    - q: "¿Tengo que pagar alguna IA?"
+      a: "No. Todo funciona con las versiones gratuitas."
+    - q: "¿Cuál me conviene?"
+      a: "Cualquiera sirve. Adentro tenés una guía que compara las versiones gratuitas sin ordenarlas de mejor a peor."
+    - q: "¿Y si un día no puedo?"
+      a: "No pasa nada: la sesión te espera. Lo único que no podés es adelantar más de una por día, porque el espaciado es parte del método."
+    - q: "¿Funciona en la computadora?"
+      a: "Sí, aunque está pensado para el celular."
+    - q: "¿Qué pasa con lo que escribo?"
+      a: "Queda guardado en tu dispositivo. FENIA no lo recibe, salvo que vos elijas mandarlo."
+    - q: "¿Puedo pasar mi progreso a otro celular?"
+      a: "Sí, con un código que copiás en uno y cargás en el otro."
+    - q: "Ya uso mucho la IA, ¿me sirve?"
+      a: "Sí. La mayor parte del programa entrena criterio (verificar, decidir qué delegar, calibrar), que es justo lo que el uso frecuente no enseña solo."
+
+closing:
+  title: "Empezá hoy por el día 0."
+  text: "Ocho minutos, gratis, con tu propia IA. Te llevás tu punto de partida y el primer descubrimiento."

@@ -6,7 +6,7 @@
 // which runs on the production build (no sales preview).
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { isPurchasable } from '../../lib/sales';
+import { isPurchasable, productUrl } from '../../lib/sales';
 
 export const GET: APIRoute = async () => {
   const products = (await getCollection('products'))
@@ -20,6 +20,8 @@ export const GET: APIRoute = async () => {
       status: isPurchasable(p) ? 'live' : p.data.status,
       price: p.data.price,
       currency: p.data.currency,
+      // Its page on the site, for the metrics (visits to it; ADR-029/030).
+      page: productUrl(p),
       // The backend charges promo.price while starts <= now < ends (D23).
       promo: p.data.promo
         ? {

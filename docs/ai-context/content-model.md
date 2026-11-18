@@ -34,6 +34,7 @@ What lives in `site.ts`:
 For variable-length lists where each item is curated independently.
 
 **Products** → `src/content/products/<slug>.md`
+**Training pages** → `src/content/trainings/<slug>.yaml` — the copy of a training's sales page, `/entrenamientos/<slug>/` ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). Same slug as its product.
 **Testimonials** → `src/content/testimonials/<slug>.md`
 
 Schema and validation: [`src/content.config.ts`](../../src/content.config.ts).
@@ -60,8 +61,8 @@ Schema and validation: [`src/content.config.ts`](../../src/content.config.ts).
 ```yaml
 ---
 title: "Curso de Neuroliderazgo — Edición 2026"
-type: "Curso"                   # 'Guía' | 'Caja de herramientas' | 'Método' | 'Curso' | 'Workshop' | 'Otro'
-status: "coming-soon"           # 'coming-soon' | 'live' | 'hidden'
+type: "Curso"                   # 'Guía' | 'Caja de herramientas' | 'Método' | 'Curso' | 'Workshop' | 'Entrenamiento' | 'Otro'
+status: "coming-soon"           # 'coming-soon' | 'sample' | 'live' | 'hidden'
 accent: "cyan"                  # 'cyan' | 'coral'
 summary: "Programa intensivo de 8 semanas para directivos."
 price: null                     # number or null for 'consultar'
@@ -73,7 +74,9 @@ promo:                          # opcional — precio por tiempo limitado (docs/
   ends: 2026-11-14T23:59:59-03:00  # plazo real: al vencer, rige `price` solo (sitio + Mercado Pago)
 paymentUrl:                     # opcional — link de Mercado Pago, solo cuando status: live. NUNCA un link de entrega.
 ctaLabel:                       # opcional — override del texto del botón (si falta, se infiere del status)
-deliveryMode: "lead-magnet"     # 'lead-magnet' | 'mercadopago-auto' | 'manual' — ver ADR-027
+sampleUrl:                      # solo entrenamientos con status 'sample': la muestra gratis, ej. "/app/conversar-con-ia/muestra.html"
+plannedPrice:                   # solo con status 'sample': precio de lanzamiento previsto (no se cobra; menor que `price`)
+deliveryMode: "lead-magnet"     # 'lead-magnet' | 'mercadopago-auto' | 'manual' | 'web-app' — ver ADR-027 y ADR-030
 audiences: ["empresas", "profesionales"]
 order: 4                        # orden manual en el grid, ascendente
 publishedAt: 2026-06-01
@@ -90,10 +93,19 @@ Breve descripción adicional en Markdown (opcional). Este cuerpo se puede mostra
 |---|---|---|
 | `hidden` | Nowhere (hidden, even from preview deploys) | n/a |
 | `coming-soon` | Shows in the grid with a "Próximamente" badge | Captura de email → `/recursos-gratuitos` (suscribe + entrega recurso gratuito vía ESP) |
+| `sample` (solo `Entrenamiento`) | Its own page, `/entrenamientos/<slug>/`; not in the kits grid | «Probá gratis el día 0» → `sampleUrl` y «Avisame cuando esté completo» → `/recursos-gratuitos`. Precio previsto, sin compra (ADR-030) |
 | `live` + `paymentUrl` | Shows normally | "Comprar ahora" (o `ctaLabel`) → `paymentUrl` (Mercado Pago) |
 | `live` sin `paymentUrl` | Shows normally, sin botón de compra | n/a — card informativa |
 
 **Nunca** pongas la URL real de entrega (Drive, descarga firmada, etc.) en `paymentUrl`, `ctaLabel` ni en el cuerpo del `.md`. `paymentUrl` es exclusivamente el link de cobro de Mercado Pago; la entrega la maneja Mercado Pago o el ESP de email por fuera del repo.
+
+### "Cambiar un texto de la página de un entrenamiento"
+
+1. Open `src/content/trainings/<slug>.yaml` (e.g. `conversar-con-ia.yaml`). Each block is a section of the page, in order.
+2. Change the text between quotes. Price, status and the sample link are not here: they live in `src/content/products/<slug>.md`.
+3. Never publish the product team's bracketed pending items (`[A DEFINIR …]`, `[A CONFIRMAR …]`) nor testimonials without written permission.
+
+The apps in `public/app/` (`muestra.html`, `piloto.html`) are **never** edited by hand: their security policy carries the hash of their code ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). A change is asked for from the product team, which sends the regenerated file with its new hashes. Then update the file and its `<Files>` line in that folder's `.htaccess`. CI checks that they match.
 
 ### "Agregar un testimonio aprobado"
 

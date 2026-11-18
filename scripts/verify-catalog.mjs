@@ -1,7 +1,9 @@
 // Test U-31 (docs/ventas/test-plan.md): the built sales catalogue must match
 // the product .md files exactly — same visible products, status, price,
 // currency and launch promo (D23) — so the price on the card is the price
-// charged (threat model C12).
+// charged (threat model C12). Also the page each product is sold on, where the
+// metrics count its visits: /kits/<id>/, or /entrenamientos/<id>/ for a
+// training (ADR-030), which is never `live` until buyer access exists.
 // Runs in CI after `npm run build`. No dependencies.
 //
 //   node scripts/verify-catalog.mjs [path/to/catalog.json]
@@ -28,8 +30,12 @@ function frontmatter(file) {
     const m = promoBlock && new RegExp(`^[ \\t]+${name}:\\s*(.*)$`, 'm').exec(promoBlock[1]);
     return m ? m[1].trim().replace(/^["']|["']$/g, '') : undefined;
   };
+  const id = file.replace(/\.md$/, '');
+  const type = field('type');
   return {
-    id: file.replace(/\.md$/, ''),
+    id,
+    type,
+    page: type === 'Entrenamiento' ? `/entrenamientos/${id}/` : `/kits/${id}/`,
     title: field('title'),
     status: field('status'),
     price: price === undefined || price === 'null' || price === '' ? null : Number(price),
@@ -60,7 +66,7 @@ for (const want of expected) {
     errors.push(`${want.id}: missing from catalogue`);
     continue;
   }
-  for (const key of ['title', 'status', 'price', 'currency']) {
+  for (const key of ['title', 'status', 'price', 'currency', 'page']) {
     if (got[key] !== want[key]) errors.push(`${want.id}.${key}: catalogue=${JSON.stringify(got[key])} md=${JSON.stringify(want[key])}`);
   }
   const gotPromo = got.promo ? { price: got.promo.price, starts: got.promo.starts, ends: got.promo.ends } : null;
@@ -72,6 +78,9 @@ for (const want of expected) {
   }
   if (got.status === 'live' && !(Number.isInteger(got.price) && got.price > 0)) {
     errors.push(`${want.id}: live product needs a positive integer price`);
+  }
+  if (want.type === 'Entrenamiento' && got.status === 'live') {
+    errors.push(`${want.id}: a training cannot be sold until buyer access exists (ADR-030, phase B)`);
   }
   actual.delete(want.id);
 }

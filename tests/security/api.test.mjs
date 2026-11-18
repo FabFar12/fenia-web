@@ -336,6 +336,13 @@ describe('Checkout', { skip: skipWithoutTarget }, () => {
     }
   });
 
+  it('S-54 ✱ el entrenamiento con muestra gratis no se puede comprar (ADR-030)', async (t) => {
+    if (!needsApi(t)) return;
+    const res = await json('/api/checkout.php', checkoutBody({ kit: 'conversar-con-ia' }));
+    assertNoCheckout(res);
+    if (salesOn) assert.equal(res.status, 404);
+  });
+
   it('S-21 ✱ email con \\r\\n → rechazado', async (t) => {
     if (!needsApi(t)) return;
     const email = 'ana@example.com\r\nBcc: victima@example.com';

@@ -86,6 +86,16 @@ export function kitUrl(product: CollectionEntry<'products'>): string {
   return `/kits/${product.id}/`;
 }
 
+/** Trainings (ADR-030) have their own sales page; everything else is a kit. */
+export function isTraining(product: CollectionEntry<'products'>): boolean {
+  return product.data.type === 'Entrenamiento';
+}
+
+/** The product's own page on the site. */
+export function productUrl(product: CollectionEntry<'products'>): string {
+  return isTraining(product) ? `/entrenamientos/${product.id}/` : kitUrl(product);
+}
+
 /** "Avisame" link for kits that are not on sale yet. Title comes from the id, never the URL (H-03). */
 export function notifyUrl(product: CollectionEntry<'products'>): string {
   return `/recursos-gratuitos?producto=${encodeURIComponent(product.id)}`;

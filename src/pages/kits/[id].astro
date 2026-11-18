@@ -8,10 +8,11 @@ import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 import { sales, siteMeta } from '../../data/site';
-import { formatPrice, isPurchasable, notifyUrl, offerFor } from '../../lib/sales';
+import { formatPrice, isPurchasable, isTraining, notifyUrl, offerFor } from '../../lib/sales';
 
 export async function getStaticPaths() {
-  const products = await getCollection('products', (p) => p.data.status !== 'hidden');
+  // Trainings have their own page, /entrenamientos/<id>/ (ADR-030).
+  const products = await getCollection('products', (p) => p.data.status !== 'hidden' && !isTraining(p));
   return products.map((product) => ({ params: { id: product.id }, props: { product } }));
 }
 

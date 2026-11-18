@@ -8,8 +8,9 @@ defined('FENIA_API') || exit;
 
 /**
  * Private visit counter (ADR-029). Every page of the site sends one small
- * beacon per page view (and per WhatsApp click) to /api/hit.php, and the data
- * stays in our own database: nothing goes to third parties.
+ * beacon per page view (and per click on WhatsApp or on a training's free
+ * sample, ADR-030) to /api/hit.php, and the data stays in our own database:
+ * nothing goes to third parties.
  *
  * No cookie is set and nothing personal is stored. Instead of the IP, each
  * event carries a hash of IP + browser keyed with the day (Argentina time):
@@ -19,7 +20,8 @@ defined('FENIA_API') || exit;
  */
 final class Visits
 {
-    public const KINDS = ['view', 'whatsapp'];
+    /** `sample`: a click on "Probá gratis" (a training's free sample, ADR-030), recorded with the page it came from. */
+    public const KINDS = ['view', 'whatsapp', 'sample'];
 
     /** Automated clients, link previews and our own test browsers. */
     private const BOTS = '/bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|whatsapp|telegram|discord|skype|curl|wget|python|java\/|go-http|node-fetch|undici|axios|okhttp|scrapy|phantom|selenium|playwright|puppeteer/i';

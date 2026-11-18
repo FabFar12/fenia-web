@@ -8,8 +8,8 @@ defined('FENIA_API') || exit;
 
 /**
  * The internal metrics screen (ADR-029, docs/ventas/propuesta-metricas.md):
- * visits, purchase funnel, sales, how buyers use "Tu kit", latest sales and
- * the site's speed. Everything comes from our own database; buyers' emails
+ * visits, purchase funnel, sales, how buyers use "Tu kit", latest sales, the
+ * trainings' sales pages and their free sample (ADR-030) and the site's speed. Everything comes from our own database; buyers' emails
  * are always masked. Only for logged-in owners (Owners).
  */
 final class Metrics
@@ -57,6 +57,7 @@ final class Metrics
             'updated' => $this->now->setTimezone(new \DateTimeZone(self::TZ))->format('d/m H:i'),
             'visits' => $this->visits($fromDay, $today->modify('-29 days')->format('Y-m-d')),
             'funnel' => $this->funnel($fromDay, $fromUtc),
+            'trainings' => $this->trainings($fromDay),
             'sales' => $this->sales($fromUtc, $today),
             'kit_use' => $this->kitUse($fromUtc),
             'recent' => $this->recent(),
@@ -114,7 +115,7 @@ final class Metrics
             $row = [
                 'id' => $id,
                 'title' => (string) $kit['title'],
-                'seen' => $this->count("SELECT COUNT(*) FROM (SELECT DISTINCT day, visitor FROM site_events WHERE kind = 'view' AND path = ? AND day >= ?) t", ['/kits/' . $id . '/', $fromDay]),
+                'seen' => $this->count("SELECT COUNT(*) FROM (SELECT DISTINCT day, visitor FROM site_events WHERE kind = 'view' AND path = ? AND day >= ?) t", [$kit['page'], $fromDay]),
                 'checkout' => $this->count('SELECT COUNT(*) FROM orders WHERE kit_id = ? AND mp_order_id IS NOT NULL AND created_at >= ?', [$id, $fromUtc]),
                 'paid' => $this->count('SELECT COUNT(*) FROM orders WHERE kit_id = ? AND paid_at IS NOT NULL AND paid_at >= ?', [$id, $fromUtc]),
             ];
@@ -125,6 +126,39 @@ final class Metrics
         }
         $total['rate'] = $total['seen'] > 0 ? round(100 * $total['paid'] / $total['seen'], 1) : null;
         return ['total' => $total, 'kits' => $kits, 'since' => (new \DateTimeImmutable($fromDay))->format('d/m')];
+    }
+
+    /**
+     * Each training's sales page (ADR-030): who saw it and how many clicked
+     * "Probá gratis" there. The sample app itself counts nothing, so this is
+     * the measure of phase A. People are counted once a day, like visitors.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function trainings(string $fromDay): array
+    {
+        $rows = [];
+        foreach ($this->catalog->all() as $product) {
+            $page = (string) $product['page'];
+            if (!str_starts_with($page, '/entrenamientos/')) {
+                continue;
+            }
+            $people = "SELECT COUNT(*) FROM (SELECT DISTINCT day, visitor FROM site_events WHERE kind = ? AND path = ? AND day >= ?) t";
+            $visitors = $this->count($people, ['view', $page, $fromDay]);
+            $triers = $this->count($people, ['sample', $page, $fromDay]);
+            $rows[] = [
+                'id' => (string) $product['id'],
+                'title' => (string) $product['title'],
+                'status' => (string) $product['status'],
+                'visitors' => $visitors,
+                'views' => $this->count("SELECT COUNT(*) FROM site_events WHERE kind = 'view' AND path = ? AND day >= ?", [$page, $fromDay]),
+                'sample_clicks' => $this->count("SELECT COUNT(*) FROM site_events WHERE kind = 'sample' AND path = ? AND day >= ?", [$page, $fromDay]),
+                'sample_people' => $triers,
+                // Can pass 100 % only if someone clicks without the page view being counted (blocked beacon).
+                'rate' => $visitors > 0 ? round(100 * $triers / $visitors, 1) : null,
+            ];
+        }
+        return $rows;
     }
 
     /** @return array<string, mixed> */

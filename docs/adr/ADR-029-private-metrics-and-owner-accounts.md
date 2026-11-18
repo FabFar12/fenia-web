@@ -30,6 +30,8 @@ The research ([propuesta-metricas.md](../ventas/propuesta-metricas.md)) found th
 
 **Amendment 2026-11-14 (D29): Mercado Pago's real commission.** The hourly job asks Mercado Pago, by our order code only (`/v1/payments/search?external_reference=`), what it kept on each new sale (`transaction_details.net_received_amount`) and stores net, commission (price minus net), payment type and installments (schema 4). The screen shows gross, commission in pesos and percent, net, average net per sale and commission by payment type. It never runs on the delivery path.
 
+**Amendment 2026-11-18 ([ADR-030](./ADR-030-trainings-and-self-contained-apps.md)): trainings.** A third event kind, `sample`: a click on «Probá gratis» (links marked `data-sample`), stored with the page it came from. The screen gets a card per training with its sales page's visitors, the clicks and the people who tried the sample. The catalogue now carries each product's page (`page`), which the purchase funnel also uses. The self-contained apps count nothing themselves.
+
 ## Consequences
 
 - One private place where visits and sales meet: the funnel "saw a kit → went to pay → paid" by kit, at no monthly cost.

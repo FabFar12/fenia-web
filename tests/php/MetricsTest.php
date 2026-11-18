@@ -106,6 +106,34 @@ final class MetricsTest extends TestCase
         self::assertSame([['view', 'Google', 1], ['view', 'Interno', 0], ['whatsapp', 'Directo', 0]], array_map(static fn (array $r): array => [$r['kind'], $r['source'], (int) $r['entry']], $rows));
     }
 
+    /** U-55 (ADR-030): visitors of a training's sales page and its "Probá gratis" clicks. */
+    public function testTheTrainingSalesPageCountsVisitorsAndSampleClicks(): void
+    {
+        $page = '/entrenamientos/curso-x/';
+        foreach (['200.0.0.1', '200.0.0.2', '200.0.0.3'] as $ip) {
+            self::assertTrue($this->hit(['p' => $page, 'r' => 'https://l.instagram.com/', 'w' => 390], $ip));
+        }
+        self::assertTrue($this->hit(['p' => $page, 'n' => 1, 'w' => 390], '200.0.0.1'), 'a second view of the same person');
+        foreach (['200.0.0.1', '200.0.0.1', '200.0.0.2'] as $ip) {
+            self::assertTrue($this->hit(['k' => 'sample', 'p' => $page, 'n' => 1, 'w' => 390], $ip));
+        }
+        self::assertTrue($this->hit(['k' => 'sample', 'p' => '/', 'n' => 1, 'w' => 390], '200.0.0.4'), 'a click from another page');
+        $row = $this->pdo->query("SELECT source, entry FROM site_events WHERE kind = 'sample' ORDER BY id")->fetch();
+        self::assertSame(['Interno', 0], [$row['source'], (int) $row['entry']], 'a click is never a new visit');
+
+        $catalog = Catalog::fromJson((string) json_encode(['products' => [
+            ['id' => 'kit-a', 'title' => 'Kit A', 'status' => 'live', 'price' => 30000, 'currency' => 'ARS'],
+            ['id' => 'curso-x', 'title' => 'Curso X', 'status' => 'sample', 'price' => 30000, 'currency' => 'ARS', 'page' => $page],
+        ]]));
+        $report = (new Metrics($this->pdo, $catalog, $this->now))->report('7d');
+        self::assertSame([[
+            'id' => 'curso-x', 'title' => 'Curso X', 'status' => 'sample',
+            'visitors' => 3, 'views' => 4, 'sample_clicks' => 3, 'sample_people' => 2, 'rate' => 66.7,
+        ]], $report['trainings']);
+        self::assertSame(['kit-a'], array_column($report['funnel']['kits'], 'id'), 'the funnel is for products on sale');
+        self::assertSame([], (new Metrics($this->pdo, Catalog::fromJson('{"products":[]}'), $this->now))->report('7d')['trainings']);
+    }
+
     // ── Owners' accounts ─────────────────────────────────────────────────────
 
     public function testOwnersLogInWithUserAndPassword(): void

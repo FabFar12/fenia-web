@@ -37,6 +37,7 @@ const pages: [string, string, string[]][] = [
   ['/descarga', '/descarga/', ['main']],
   ['No me llegó', '/no-me-llego/', ['main']],
   ['métricas: ingreso', '/metricas/', ['main']],
+  ['entrenamiento: página de venta (ADR-030)', '/entrenamientos/conversar-con-ia/', ['main']],
 ];
 
 /** Fails on new serious/critical problems inside `include`; known ones are only reported. */
