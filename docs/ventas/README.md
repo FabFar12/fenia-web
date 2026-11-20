@@ -222,6 +222,16 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (39)** — **PR #31 en producción** (v0.4 de «Conversar con IA», con el OK del dev si staging daba verde). Deploy y purga de la CDN.
+  - Contra producción, la suite de seguridad dio 89 OK y 0 fallas: la CDN entrega las apps byte por byte iguales, con su CSP exacta.
+  - La batería E2E dio 69 OK y 0 fallas.
+  - La semana completa simulada del piloto dio 23 de 23 controles, con 0 violaciones de CSP y 0 errores.
+
+  Antes, en staging, la suite detectó bien que todavía se servía la v0.3: se había esperado el run anterior.
+
+  Para el equipo de producto:
+  - el resumen de la sesión 1 dice «Te dio: no me dio un solo número»;
+  - las apps siguen sin ícono (Firefox).
 - **2026-11-20 (38)** — **«Conversar con IA» v0.4** (pedido y OK del dev, antes de mandar el piloto). El equipo de producto rehízo las sesiones 1, 2 y 4:
   - 1: un número al azar;
   - 2: «¿qué supusiste de mí?»;
