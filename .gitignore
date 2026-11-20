@@ -46,3 +46,6 @@ tmp/
 
 # Handoff of "Conversar con IA" (product prototype): local only, never pushed to main.
 handoff-conversar-con-ia/
+# Update v0.4 of "Conversar con IA" (product team): local only, never pushed.
+# Its programa.html is the paid program: it stays here until phase B (ADR-030).
+actualizacion-conversar-con-ia-v0.4/

@@ -34,7 +34,7 @@ The dev approved the plan on 2026-11-18, with these decisions:
    ```
 
    It replaces the site's policy for those files only (LiteSpeed applies a folder's `<Files>` blocks after the parent's, as with `api/.htaccess`). It also sets `no-cache`, `X-Robots-Tag: noindex` and UTF-8. No `mod_rewrite` in that folder: it would switch off the parent's HTTPS, `www` and staging rules for those files.
-   - **Guarded in CI.** `scripts/verify-app-csp.mjs` recomputes the hashes of every file under `public/app/` and compares them with its `.htaccess`. It also checks that the build copied the files untouched, that no file without a policy lives there, and that no `programa.html` exists in `public/` or `dist/`. The CI guard also rejects any committed `programa.html`. `.gitattributes` marks `public/app/**/*.html` as `-text`, so Git never converts their line endings.
+   - **Guarded in CI.** `scripts/verify-app-csp.mjs` recomputes the hashes of every file under `public/app/` and compares them with its `.htaccess` and with the product team's `csp-hashes.json`, kept as is in `scripts/app-csp-hashes/<name>.json` (since v0.4). It also checks that the build copied the files untouched, that no file without a policy lives there, and that no `programa.html` exists in `public/` or `dist/`. The CI guard also rejects any committed `programa.html`. `.gitattributes` marks `public/app/**/*.html` as `-text`, so Git never converts their line endings.
    - **Checked on the live site.** S-50…S-53 (security suite) compare the served bytes and headers with the repo, behind Hostinger's CDN.
 3. **Product schema** (`src/content.config.ts`):
    - type **`Entrenamiento`**, shown in the same pill where the kits say "Caja de herramientas";
@@ -57,11 +57,21 @@ The dev approved the plan on 2026-11-18, with these decisions:
    `/metricas/` shows a card per training: visitors of the page, clicks, and people who tried the sample (percent of visitors). The catalogue now says which page each product is sold on (`page`), which the purchase funnel also uses.
 7. **Buyers' access (phase B):** option 1 of the handoff, "the server checks the purchase before serving the file". It is designed once for kits and trainings: login with the buyer's email, through a passwordless link. It is the "Mis kits" phase 2 of D25. **Not built yet.** It is decided before phase B, together with the cancellation button (Res. SCI 424/2020).
 
+**Amendment 2026-11-20 (v0.4, approved by the dev).** The product team rebuilt sessions 1, 2 and 4: a random number, «¿qué supusiste de mí?» and a question about something the person knows, with `[brackets]` to fill in. The three HTML files, their hashes (the style's too) and the captures 04 to 07 of the sales page were replaced. The storage key did not change, so progress already made is kept. The package lives in the local, gitignored folder `actualizacion-conversar-con-ia-v0.4/`, and its `programa.html` stays there until phase B: no copy goes to the server before buyer access exists.
+
+**Updating an app (procedure).**
+1. Copy the HTML files byte for byte to `public/app/<name>/`.
+2. Copy the version's `csp-hashes.json` to `scripts/app-csp-hashes/<name>.json`.
+3. Put the same hashes in the `<Files>` lines of that folder's `.htaccess`.
+
+CI refuses the deploy if those three sources and the files do not agree.
+
 ## Consequences
 
 - The sample is public now, on the same origin as the future program, so day 0 progress carries over after buying.
 - Every update of an app is a regenerated file plus its new hashes, in both the file and the `.htaccess`. CI refuses a mismatch before deploying.
 - The training cannot be sold by mistake: the schema, U-31 and the API all refuse it while it is not `live`, and `live` is refused until phase B exists.
+- On iPhone, an app added to the home screen keeps its data apart from Safari's, so day 0 progress made in Safari does not show up under the icon (finding H-12 in docs/ventas). It is iOS behaviour, not the site's. The progress code in Ajustes moves it; the product team is asked for an in-app notice in the next regeneration.
 - The apps measure nothing themselves. The sample's real use (who finishes day 0) is unknown until the product team adds it in a future regeneration.
 - The repo is public: `muestra.html` and `piloto.html` (day 0 and week 1) are readable on GitHub, also after the pilot. `programa.html` never enters it (CI guard).
 - Tests: U-54 and U-55 (PHPUnit), S-50…S-55 (security suite), E2E-07 (sales page, 360 px, the sample under its policy, the counted click), and an axe check and a reference screenshot of the page.

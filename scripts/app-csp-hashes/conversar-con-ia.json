@@ -1,0 +1,14 @@
+{
+  "piloto.html": {
+    "script": "'sha256-Rhb8fkglCKiWiOf55O4t7aKltwSjt4T+dozK2ujTod8='",
+    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+  },
+  "programa.html": {
+    "script": "'sha256-bY4hqpknqCN4g3h0JIrchl9kcnuFoZFuB6DHU7TTysk='",
+    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+  },
+  "muestra.html": {
+    "script": "'sha256-QE33CQCCa/RCn9XHCVUCgTsC+1kQ3jlsbbEeh3C6DjA='",
+    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+  }
+}

@@ -2,9 +2,12 @@
 // must run under the exact policy of its folder's .htaccess, which allows its
 // one script and its one style by their SHA-256 hash. A changed byte (an
 // editor, Git line endings, a hand fix) makes the browser block the app, so
-// CI fails before deploying it. Also checks that the build copies the files
-// untouched and that the paid program (programa.html) is never published.
-// No dependencies.
+// CI fails before deploying it. Three sources must agree for every published
+// file: the hashes recomputed from its bytes, its policy in the .htaccess, and
+// the csp-hashes.json the product team ships with each version (copied as is
+// to scripts/app-csp-hashes/<name>.json). Also checks that the build copies
+// the files untouched and that the paid program (programa.html) is never
+// published. No dependencies.
 //
 //   node scripts/verify-app-csp.mjs [distDir]   (distDir checked only if it exists)
 import { createHash } from 'node:crypto';
@@ -12,6 +15,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const APPS = 'public/app';
+const HASHES = 'scripts/app-csp-hashes';
 const dist = process.argv[2] ?? 'dist';
 const errors = [];
 let checked = 0;
@@ -40,6 +44,16 @@ for (const app of existsSync(APPS) ? readdirSync(APPS) : []) {
     policies.set(m[1], m[2]);
   }
 
+  // The hashes the product team says each file has. It also lists files that
+  // are not published (programa.html): only the published ones are compared.
+  const hashesPath = join(HASHES, `${app}.json`);
+  let declared = null;
+  try {
+    declared = JSON.parse(readFileSync(hashesPath, 'utf8'));
+  } catch (err) {
+    errors.push(`${hashesPath}: missing or unreadable (${err.code ?? err.message}); copy the csp-hashes.json of the product team's version here`);
+  }
+
   for (const file of readdirSync(dir)) {
     if (file === '.htaccess') continue;
     const path = join(dir, file);
@@ -64,6 +78,13 @@ for (const app of existsSync(APPS) ? readdirSync(APPS) : []) {
     const want = expectedPolicy(sha(scripts[0]), sha(styles[0]));
     if (policies.get(file) !== want) {
       errors.push(`${path}: policy in .htaccess does not match the file.\n    .htaccess: ${policies.get(file)}\n    expected:  ${want}`);
+    }
+    if (declared) {
+      const entry = declared[file];
+      if (!entry) errors.push(`${hashesPath}: no entry for ${file}`);
+      else if (entry.script !== sha(scripts[0]) || entry.style !== sha(styles[0])) {
+        errors.push(`${path}: the file is not the version in ${hashesPath} (script ${entry.script === sha(scripts[0]) ? 'ok' : 'differs'}, style ${entry.style === sha(styles[0]) ? 'ok' : 'differs'})`);
+      }
     }
 
     const built = join(dist, 'app', app, file);
@@ -90,4 +111,4 @@ if (errors.length) {
   console.error(`verify-app-csp FAIL (${errors.length}):\n- ${errors.join('\n- ')}`);
   process.exit(1);
 }
-console.log(`verify-app-csp OK: ${checked} app file(s) match their policy${existsSync(dist) ? ' and were copied untouched to the build' : ''}.`);
+console.log(`verify-app-csp OK: ${checked} app file(s) match their policy and the product team's hashes${existsSync(dist) ? ', and were copied untouched to the build' : ''}.`);

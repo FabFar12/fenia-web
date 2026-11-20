@@ -85,7 +85,9 @@ jobs:
 
       - name: Self-contained apps match their CSP hashes (ADR-030)
         # A changed byte in public/app/**.html (editor, line endings) makes
-        # the browser block the app; programa.html must never ship.
+        # the browser block the app; files, .htaccess and the product team's
+        # csp-hashes.json (scripts/app-csp-hashes/) must agree; programa.html
+        # must never ship.
         run: node scripts/verify-app-csp.mjs dist
 
       - name: Upload dist/ artifact

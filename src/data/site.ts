@@ -298,3 +298,18 @@ export const sales = {
   /** D25: reading the guide and using the fichas are free; only file downloads count. */
   downloadPolicy: 'El link dura 30 días y permite 10 descargas.',
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lead capture: "Avisame" (ADR-027, ADR-030)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const leadCapture = {
+  /**
+   * Share URL of the Mailerlite form that /recursos-gratuitos embeds. Empty:
+   * the page offers WhatsApp instead. Public (it is shown in the page), never a
+   * secret. Must be https on a host the site's CSP lets into a frame
+   * (`frame-src` in public/.htaccess); the page refuses to build otherwise.
+   * The env var PUBLIC_MAILERLITE_FORM_URL, if set, wins.
+   */
+  formUrl: '',
+};

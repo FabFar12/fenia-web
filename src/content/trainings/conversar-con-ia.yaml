@@ -24,7 +24,7 @@ hero:
     - src: "./conversar-con-ia/01-bienvenida.png"
       alt: "Pantalla de inicio del entrenamiento, con el recorrido de sesiones y el botón «Empezar el día 0»."
     - src: "./conversar-con-ia/05-probar.png"
-      alt: "Paso «Probar» de una sesión: un pedido listo para copiar y mandarle a tu IA."
+      alt: "Paso «Probar» de una sesión: el pedido «Elegí un número al azar del 1 al 10», listo para copiar y mandarle a tu IA."
 
 problem:
   title: "Ya usás IA. ¿Le estás sacando lo que puede dar?"
@@ -57,11 +57,11 @@ how:
         text: "lo que pasó con lo que esperabas"
     images:
       - src: "./conversar-con-ia/04-predecir.png"
-        alt: "Paso «Predecir»: antes de probar, elegís cuántas ideas se van a repetir."
+        alt: "Paso «Predecir»: antes de probar, apostás qué número del 1 al 10 te va a dar tu IA."
       - src: "./conversar-con-ia/05-probar.png"
-        alt: "Paso «Probar»: un pedido listo para copiar y mandarle a tu IA."
+        alt: "Paso «Probar»: el pedido de un número al azar, listo para copiar y mandarle a tu IA, y después repetirlo en un chat nuevo."
       - src: "./conversar-con-ia/06-comparar.png"
-        alt: "Paso «Comparar»: tu predicción frente a lo que pasó, y una línea para tu bitácora."
+        alt: "Paso «Comparar»: el número que te dio tu IA frente a tu predicción, y una línea para tu bitácora."
 
 outcomes:
   title: "En seis semanas, frente a una tarea tuya, vas a poder:"

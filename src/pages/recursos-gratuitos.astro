@@ -1,7 +1,8 @@
 ---
 // recursos-gratuitos.astro — Captura de email para la lista de lanzamiento
-// Cuando PUBLIC_MAILERLITE_FORM_URL está seteada, embebe el form de Mailerlite
-// (mismo patrón que /dejanos-tu-testimonio con Tally). Si no, fallback a WhatsApp.
+// Cuando hay un formulario de Mailerlite (`leadCapture.formUrl` en
+// src/data/site.ts, o la variable PUBLIC_MAILERLITE_FORM_URL), lo embebe (mismo
+// patrón que /dejanos-tu-testimonio con Tally). Si no, fallback a WhatsApp.
 // Ver ADR-027 y docs/fab-mailerlite-setup.md.
 //
 // NOTA: el sitio es static output (astro build genera el HTML una sola vez), así
@@ -12,7 +13,7 @@ import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { getCollection } from 'astro:content';
-import { whatsapp } from '../data/site';
+import { leadCapture, whatsapp } from '../data/site';
 
 // Titles come from the product id via this build-time map, never from the
 // URL: `?titulo=` let anyone craft an official-looking page (finding H-03).
@@ -20,7 +21,15 @@ const kitTitles = Object.fromEntries(
   (await getCollection('products', (p) => p.data.status !== 'hidden')).map((p) => [p.id, p.data.title]),
 );
 
-const mailerliteUrl = import.meta.env.PUBLIC_MAILERLITE_FORM_URL as string | undefined;
+const mailerliteUrl = ((import.meta.env.PUBLIC_MAILERLITE_FORM_URL as string | undefined) || leadCapture.formUrl || undefined);
+// Only what the CSP lets into a frame (`frame-src` in public/.htaccess): any
+// other host would show an empty box instead of the form.
+if (mailerliteUrl) {
+  const { protocol, hostname } = new URL(mailerliteUrl);
+  if (protocol !== 'https:' || !/(^|\.)mailerlite\.com$/.test(hostname)) {
+    throw new Error(`Mailerlite form URL must be https on *.mailerlite.com (CSP frame-src), got ${hostname}`);
+  }
+}
 const defaultWaUrl = whatsapp.url('Hola FENIA, quiero que me avisen de sus próximos recursos');
 ---
 
