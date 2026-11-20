@@ -50,6 +50,60 @@ test('entrenamiento: «Avisame» lleva a la lista con el título correcto', asyn
   }
 });
 
+// Phone helpers (approved 2026-11-20).
+test('entrenamiento: en el celular, la barra «Probá gratis» aparece al bajar y se va en el cierre', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  const bar = page.locator('[data-tr-bar]');
+  await expect(bar).not.toHaveClass(/is-on/);
+  await page.locator('#tr-h-journey').scrollIntoViewIfNeeded();
+  await expect(bar).toHaveClass(/is-on/);
+  await expect(bar.getByRole('link', { name: /Probá gratis/ })).toHaveAttribute('href', SAMPLE);
+  await page.locator('.tr-closing').scrollIntoViewIfNeeded();
+  await expect(bar).not.toHaveClass(/is-on/);
+  await context.close();
+});
+
+test('entrenamiento: en la compu no hay barra fija', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await page.locator('#tr-h-journey').scrollIntoViewIfNeeded();
+  await expect(page.locator('[data-tr-bar]')).toBeHidden();
+  await context.close();
+});
+
+const IG_ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 7; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.0.0 Mobile Safari/537.36 Instagram 360.0.0.30.109 Android';
+const IG_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 360.0.0.30.109';
+for (const [name, ua, android] of [['Android', IG_ANDROID, true], ['iPhone', IG_IPHONE, false]] as const) {
+  test(`entrenamiento: dentro de Instagram (${name}), «Probá gratis» explica cómo abrirlo en el navegador`, async ({ browser }) => {
+    const context = await browser.newContext({ userAgent: ua, viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.goto(PAGE);
+    await page.getByRole('link', { name: /Probá gratis el día 0/ }).first().click();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet).toBeVisible();
+    await expect(sheet).toContainText('Estás dentro de Instagram');
+    await expect(page).toHaveURL(new RegExp(`${PAGE}$`));
+    const chrome = sheet.getByRole('link', { name: /Abrir en Chrome/ });
+    if (android) {
+      await expect(chrome).toHaveAttribute('href', /^intent:\/\/[^/]+\/app\/conversar-con-ia\/muestra\.html#Intent;scheme=https;package=com\.android\.chrome;/);
+    } else {
+      await expect(chrome).toHaveCount(0);
+      await expect(sheet.getByText('Elegí «Abrir en el navegador».')).toBeVisible();
+    }
+    await sheet.getByRole('button', { name: 'Seguir igual acá' }).click();
+    await expect(page).toHaveURL(new RegExp(`${SAMPLE.replace(/\./g, '\\.')}$`));
+    await context.close();
+  });
+}
+
+test('entrenamiento: en un navegador común no hay aviso de Instagram', async ({ page }) => {
+  await page.goto(PAGE);
+  await expect(page.locator('#tr-inapp')).not.toHaveAttribute('data-ready', '1');
+});
+
 test('entrenamiento: a 360 px no hay desplazamiento horizontal', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 360, height: 780 } });
   const page = await context.newPage();

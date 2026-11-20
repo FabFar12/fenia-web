@@ -105,12 +105,11 @@ Breve descripción adicional en Markdown (opcional). Este cuerpo se puede mostra
 2. Change the text between quotes. Price, status and the sample link are not here: they live in `src/content/products/<slug>.md`.
 3. Never publish the product team's bracketed pending items (`[A DEFINIR …]`, `[A CONFIRMAR …]`) nor testimonials without written permission.
 
-The apps in `public/app/` (`muestra.html`, `piloto.html`) are **never** edited by hand: their security policy carries the hash of their code ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). A change is asked for from the product team, which sends the regenerated file with its new hashes (`csp-hashes.json`). Then:
-1. Copy the file byte for byte.
-2. Copy the `csp-hashes.json` to `scripts/app-csp-hashes/<name>.json`.
-3. Update the `<Files>` lines in that folder's `.htaccess`.
+The apps in `public/app/` (`muestra.html`, `piloto.html`) are edited here since 2026-11-20 (dev's decision, [ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). Their security policy carries the hash of their code, so after **any** change:
+1. Run `node scripts/update-app-csp.mjs conversar-con-ia <local programa.html>`. It writes the hashes in that folder's `.htaccess` and in `scripts/app-csp-hashes/conversar-con-ia.json`.
+2. Run `node scripts/verify-app-csp.mjs`.
 
-CI checks that the files, the `.htaccess` and the JSON match.
+CI refuses a deploy if the files, the `.htaccess` and the JSON do not match. Apply the same change to the local `programa.html`: it never enters the repo.
 
 ### "Agregar un testimonio aprobado"
 

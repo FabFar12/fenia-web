@@ -4,26 +4,21 @@
 // editor, Git line endings, a hand fix) makes the browser block the app, so
 // CI fails before deploying it. Three sources must agree for every published
 // file: the hashes recomputed from its bytes, its policy in the .htaccess, and
-// the csp-hashes.json the product team ships with each version (copied as is
-// to scripts/app-csp-hashes/<name>.json). Also checks that the build copies
+// scripts/app-csp-hashes/<name>.json. After changing an app, write the last two
+// with `node scripts/update-app-csp.mjs <name>`. Also checks that the build copies
 // the files untouched and that the paid program (programa.html) is never
 // published. No dependencies.
 //
 //   node scripts/verify-app-csp.mjs [distDir]   (distDir checked only if it exists)
-import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { policy as expectedPolicy, sha } from './app-csp-policy.mjs';
 
 const APPS = 'public/app';
 const HASHES = 'scripts/app-csp-hashes';
 const dist = process.argv[2] ?? 'dist';
 const errors = [];
 let checked = 0;
-
-const sha = (text) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
-/** The policy the apps were tested with (handoff requirements, point 4). */
-const expectedPolicy = (script, style) =>
-  `default-src 'none'; script-src ${script}; style-src ${style}; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`;
 
 for (const app of existsSync(APPS) ? readdirSync(APPS) : []) {
   const dir = join(APPS, app);
@@ -51,7 +46,7 @@ for (const app of existsSync(APPS) ? readdirSync(APPS) : []) {
   try {
     declared = JSON.parse(readFileSync(hashesPath, 'utf8'));
   } catch (err) {
-    errors.push(`${hashesPath}: missing or unreadable (${err.code ?? err.message}); copy the csp-hashes.json of the product team's version here`);
+    errors.push(`${hashesPath}: missing or unreadable (${err.code ?? err.message}); write it with: node scripts/update-app-csp.mjs ${app}`);
   }
 
   for (const file of readdirSync(dir)) {
@@ -111,4 +106,4 @@ if (errors.length) {
   console.error(`verify-app-csp FAIL (${errors.length}):\n- ${errors.join('\n- ')}`);
   process.exit(1);
 }
-console.log(`verify-app-csp OK: ${checked} app file(s) match their policy and the product team's hashes${existsSync(dist) ? ', and were copied untouched to the build' : ''}.`);
+console.log(`verify-app-csp OK: ${checked} app file(s) match their policy and scripts/app-csp-hashes${existsSync(dist) ? ', and were copied untouched to the build' : ''}.`);

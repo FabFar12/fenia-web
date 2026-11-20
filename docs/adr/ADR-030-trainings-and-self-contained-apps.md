@@ -59,12 +59,25 @@ The dev approved the plan on 2026-11-18, with these decisions:
 
 **Amendment 2026-11-20 (v0.4, approved by the dev).** The product team rebuilt sessions 1, 2 and 4: a random number, «¿qué supusiste de mí?» and a question about something the person knows, with `[brackets]` to fill in. The three HTML files, their hashes (the style's too) and the captures 04 to 07 of the sales page were replaced. The storage key did not change, so progress already made is kept. The package lives in the local, gitignored folder `actualizacion-conversar-con-ia-v0.4/`, and its `programa.html` stays there until phase B: no copy goes to the server before buyer access exists.
 
-**Updating an app (procedure).**
-1. Copy the HTML files byte for byte to `public/app/<name>/`.
-2. Copy the version's `csp-hashes.json` to `scripts/app-csp-hashes/<name>.json`.
-3. Put the same hashes in the `<Files>` lines of that folder's `.htaccess`.
+**Amendment 2026-11-20 (v0.4.1, dev's decision): the apps are edited here.** The FENIA development environment (this repo) changes and decides on the apps. The product environment (the conversation that wrote the brief) provides material and aesthetic decisions, and receives a summary of each change so its next version starts from it. That summary lives in the local folder `conversar-con-ia-v0.4.1/`, gitignored, together with `programa.html`.
 
-CI refuses the deploy if those three sources and the files do not agree.
+v0.4.1 adds (phone UX, approved by the dev):
+- an icon and a name on the home screen: the site's FENIA icons and `/conversar-con-ia.webmanifest`;
+- inside Instagram, Facebook or TikTok browsers, a notice on the start screen to open it in the phone's browser («Abrir en Chrome» on Android, two steps on iPhone, «Copiar el link»);
+- «Agregar a Google Calendar» next to the calendar file, first on Android;
+- the bottom bar hides while the keyboard is open;
+- the session 1 summary «No te dio un solo número.»
+
+The policy now also allows images from the site itself (`img-src 'self'`) and the manifest (`manifest-src 'self'`).
+
+The manifest uses `display: browser`, not full screen, on purpose. On iPhone a full-screen web app keeps its own storage apart from Safari's (finding H-12), and the progress must never look lost.
+
+**Updating an app (procedure).**
+1. Change the HTML in `public/app/<name>/` and the local `programa.html`.
+2. Run `node scripts/update-app-csp.mjs <name> <local programa.html>`. It writes each file's policy in the folder's `.htaccess` and the hashes in `scripts/app-csp-hashes/<name>.json`.
+3. Run `node scripts/verify-app-csp.mjs`.
+
+CI refuses the deploy if the files, the `.htaccess` and the JSON do not agree. The policy is defined once, in `scripts/app-csp-policy.mjs`.
 
 ## Consequences
 

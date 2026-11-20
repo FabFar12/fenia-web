@@ -79,6 +79,14 @@
 </IfModule>
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Web app manifest of "Conversar con IA" (ADR-030): name and icon when the app
+# is added to a phone's home screen. Served with its proper type.
+# ─────────────────────────────────────────────────────────────────────────────
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Custom 404 — Astro emits dist/404.html
 # ─────────────────────────────────────────────────────────────────────────────
 ErrorDocument 404 /404.html

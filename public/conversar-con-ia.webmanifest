@@ -1,0 +1,14 @@
+{
+  "name": "Conversar con IA sin creerle todo",
+  "short_name": "Conversar con IA",
+  "description": "Entrenamiento de FENIA: 5 minutos por día, con tu propia IA.",
+  "lang": "es-AR",
+  "display": "browser",
+  "background_color": "#0B1A2E",
+  "theme_color": "#0B1A2E",
+  "icons": [
+    { "src": "/iconos/fenia-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/iconos/fenia-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/iconos/fenia-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
