@@ -236,8 +236,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 
 /* ---------- bienvenida ---------- */
 .bienvenida .cuerpo { display: flex; flex-direction: column; }
-.marca-fenia { font-weight: 800; font-size: 19px; letter-spacing: .02em; }
-.marca-fenia span { color: var(--coral); }
+.marca-fenia { display: block; align-self: flex-start; width: auto; height: 30px; }
 .mapa-wrap { position: relative; margin-top: 4px; }
 .mapa-wrap::before { content: ""; position: absolute; inset: 10% 5%; background: radial-gradient(closest-side, rgba(0,180,216,.16), rgba(0,180,216,0)); pointer-events: none; }
 .mapa { display: block; width: 100%; height: auto; max-height: 40vh; position: relative; }
@@ -263,7 +262,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 /* ---------- hoy ---------- */
 .hoy-arriba { flex: 1; overflow-y: auto; }
 .cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: calc(16px + var(--inset-top)); padding-bottom: 6px; }
-.cabecera .nombre { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cabecera .nombre { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .cabecera .nombre small { font-size: 13px; color: var(--tenue-osc-2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cabecera .acciones { display: flex; gap: 8px; }
 .leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--tenue-osc-2); font-weight: 600; padding-block: 2px 14px; }
@@ -404,7 +403,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 <div id="app"></div>
 <noscript><p class="gutter">Este programa necesita JavaScript activado.</p></noscript>
 <script>
-var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4.1 · día 0 y semana 1"};
+var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4.2 · día 0 y semana 1"};
 /* Contenido del prototipo: día 0 + semana 1.
    Fuente única de verdad: la app lo lee y el guion en Markdown se genera desde acá. */
 var CONTENIDO = {
@@ -1015,6 +1014,9 @@ var CONTENIDO = {
   }
   function ultimaHecha() { var u = null; SES.forEach(function (s) { if (E.ses[s.id].hecho) u = s; }); return u; }
 
+  /* Logo FENIA para fondo oscuro (v0.4.2). Va dentro de la página: no depende de otro archivo. */
+  var LOGO_FENIA = '<img class="marca-fenia" src="data:image/png;base64,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" alt="FENIA" width="82" height="30">';
+
   /* ---------- navegación por #nombre ---------- */
   var VISTAS = ['inicio', 'dia0', 'listo', 'hoy', 'sesion', 'cierre', 'bitacora', 'ajustes', 'guia'];
   function vistaInicial() { if (!E.dia0.hecho) return E.dia0.paso > 0 ? 'dia0' : 'inicio'; return 'hoy'; }
@@ -1165,7 +1167,7 @@ var CONTENIDO = {
   /* ---------- vistas ---------- */
   function vInicio() {
     return '<div class="pantalla oscuro bienvenida">' +
-      '<div class="cabecera gutter"><div class="nombre"><span class="marca-fenia">FENIA<span>.</span></span></div></div>' +
+      '<div class="cabecera gutter"><div class="nombre">' + LOGO_FENIA + '</div></div>' +
       '<main class="cuerpo gutter"><div class="contenido">' +
       '<div class="mapa-wrap anim">' + mapa({ anim: true, inicio: true, label: 'Recorrido de 30 sesiones en 6 semanas. Empezás por el día 0.' }) + '</div>' +
       '<p class="eyebrow">Entrenamiento · 6 semanas</p>' +
@@ -1262,7 +1264,7 @@ var CONTENIDO = {
   function vHoy() {
     var prox = proxima(), n = hechas();
     var h = '<div class="pantalla oscuro"><div class="hoy-arriba">';
-    h += '<div class="cabecera gutter"><div class="nombre"><span class="marca-fenia">FENIA<span>.</span></span><small>' + esc(C.producto.nombre + ' ' + C.producto.remate) + '</small></div>' +
+    h += '<div class="cabecera gutter"><div class="nombre">' + LOGO_FENIA + '<small>' + esc(C.producto.nombre + ' ' + C.producto.remate) + '</small></div>' +
       '<div class="acciones"><button type="button" class="icono-btn" data-a="irBitacora" aria-label="Tu bitácora">' + I.libro + '</button><button type="button" class="icono-btn" data-a="irAjustes" aria-label="Ajustes y progreso">' + I.menu + '</button></div></div>';
     h += '<div class="gutter contenido-hoy"><h1 class="titulo" tabindex="-1" data-foco>Tu recorrido</h1><p class="lead">Semana ' + (prox ? prox.semana : 1) + ' de 6 · ' + (C.semanas[(prox ? prox.semana : 1) - 1].nombre) + ' · ' + n + ' de 30 sesiones</p></div>';
     h += '<div class="gutter mapa-wrap">' + mapa({ label: n + ' de 30 sesiones hechas.' + (prox ? ' La próxima es la sesión ' + prox.n + '.' : '') }) + '</div>';

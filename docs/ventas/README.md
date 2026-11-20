@@ -108,6 +108,7 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D32 | 2026-11-20 | **Logo de FENIA en la app** (decisión del dev, opción B). Arriba a la izquierda, donde decía el texto «FENIA.», va el logo en su versión para fondo oscuro: letras blancas, puntos celestes y el punto naranja. Se descartó la placa blanca del menú del sitio, porque en la app competía con el título y parecía un botón. App v0.4.2; la captura 01 de la página de venta se rehízo | ✅ Decisión del dev |
 | D31 | 2026-11-20 | **UX en el celular y quién hace las apps** (decisiones del dev).
   - Las apps se editan en este entorno, que es donde se decide. El entorno de producto aporta material y decisiones estéticas y recibe un resumen de cada cambio (ADR-030).
   - **Página de venta:**
@@ -234,6 +235,14 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (42)** — **Logo de FENIA en la app (D32), v0.4.2.**
+  - En la muestra, el piloto y el programa, el logo en blanco reemplaza al texto «FENIA.» en la pantalla de inicio y en «Tu recorrido». Huellas recalculadas.
+  - La captura 01 de la página de venta se rehízo con el logo.
+  - Pruebas en local con la CSP real:
+    - logo: 36 de 36 controles (carga, 82×30 sin estirar, sin CSP rota), en Pixel 7 e iPhone SE;
+    - semana completa con teclado: 43 de 43;
+    - aviso dentro de Instagram: 15 de 15.
+  - El resumen para el entorno de producto está en `conversar-con-ia-v0.4.2/RESUMEN-PARA-PRODUCTO.md` (local).
 - **2026-11-20 (41)** — **PR #32 en producción** con el OK del dev (UX en el celular y v0.4.1, D31). Deploy y purga de la CDN.
   - Contra producción:
     - suite de seguridad: 89 OK, 0 fallas;
