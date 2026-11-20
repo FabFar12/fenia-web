@@ -34,7 +34,7 @@ The dev approved the plan on 2026-11-18, with these decisions:
    ```
 
    It replaces the site's policy for those files only (LiteSpeed applies a folder's `<Files>` blocks after the parent's, as with `api/.htaccess`). It also sets `no-cache`, `X-Robots-Tag: noindex` and UTF-8. No `mod_rewrite` in that folder: it would switch off the parent's HTTPS, `www` and staging rules for those files.
-   - **Guarded in CI.** `scripts/verify-app-csp.mjs` recomputes the hashes of every file under `public/app/` and compares them with its `.htaccess`. It also checks that the build copied the files untouched, that no file without a policy lives there, and that no `programa.html` exists in `public/` or `dist/`. The CI guard also rejects any committed `programa.html`. `.gitattributes` marks `public/app/**/*.html` as `-text`, so Git never converts their line endings.
+   - **Guarded in CI.** `scripts/verify-app-csp.mjs` recomputes the hashes of every file under `public/app/` and compares them with its `.htaccess` and with the product team's `csp-hashes.json`, kept as is in `scripts/app-csp-hashes/<name>.json` (since v0.4). It also checks that the build copied the files untouched, that no file without a policy lives there, and that no `programa.html` exists in `public/` or `dist/`. The CI guard also rejects any committed `programa.html`. `.gitattributes` marks `public/app/**/*.html` as `-text`, so Git never converts their line endings.
    - **Checked on the live site.** S-50…S-53 (security suite) compare the served bytes and headers with the repo, behind Hostinger's CDN.
 3. **Product schema** (`src/content.config.ts`):
    - type **`Entrenamiento`**, shown in the same pill where the kits say "Caja de herramientas";
@@ -56,6 +56,15 @@ The dev approved the plan on 2026-11-18, with these decisions:
 
    `/metricas/` shows a card per training: visitors of the page, clicks, and people who tried the sample (percent of visitors). The catalogue now says which page each product is sold on (`page`), which the purchase funnel also uses.
 7. **Buyers' access (phase B):** option 1 of the handoff, "the server checks the purchase before serving the file". It is designed once for kits and trainings: login with the buyer's email, through a passwordless link. It is the "Mis kits" phase 2 of D25. **Not built yet.** It is decided before phase B, together with the cancellation button (Res. SCI 424/2020).
+
+**Amendment 2026-11-20 (v0.4, approved by the dev).** The product team rebuilt sessions 1, 2 and 4: a random number, «¿qué supusiste de mí?» and a question about something the person knows, with `[brackets]` to fill in. The three HTML files, their hashes (the style's too) and the captures 04 to 07 of the sales page were replaced. The storage key did not change, so progress already made is kept. The package lives in the local, gitignored folder `actualizacion-conversar-con-ia-v0.4/`, and its `programa.html` stays there until phase B: no copy goes to the server before buyer access exists.
+
+**Updating an app (procedure).**
+1. Copy the HTML files byte for byte to `public/app/<name>/`.
+2. Copy the version's `csp-hashes.json` to `scripts/app-csp-hashes/<name>.json`.
+3. Put the same hashes in the `<Files>` lines of that folder's `.htaccess`.
+
+CI refuses the deploy if those three sources and the files do not agree.
 
 ## Consequences
 

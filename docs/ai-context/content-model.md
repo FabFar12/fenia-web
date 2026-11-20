@@ -105,7 +105,12 @@ Breve descripción adicional en Markdown (opcional). Este cuerpo se puede mostra
 2. Change the text between quotes. Price, status and the sample link are not here: they live in `src/content/products/<slug>.md`.
 3. Never publish the product team's bracketed pending items (`[A DEFINIR …]`, `[A CONFIRMAR …]`) nor testimonials without written permission.
 
-The apps in `public/app/` (`muestra.html`, `piloto.html`) are **never** edited by hand: their security policy carries the hash of their code ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). A change is asked for from the product team, which sends the regenerated file with its new hashes. Then update the file and its `<Files>` line in that folder's `.htaccess`. CI checks that they match.
+The apps in `public/app/` (`muestra.html`, `piloto.html`) are **never** edited by hand: their security policy carries the hash of their code ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md)). A change is asked for from the product team, which sends the regenerated file with its new hashes (`csp-hashes.json`). Then:
+1. Copy the file byte for byte.
+2. Copy the `csp-hashes.json` to `scripts/app-csp-hashes/<name>.json`.
+3. Update the `<Files>` lines in that folder's `.htaccess`.
+
+CI checks that the files, the `.htaccess` and the JSON match.
 
 ### "Agregar un testimonio aprobado"
 

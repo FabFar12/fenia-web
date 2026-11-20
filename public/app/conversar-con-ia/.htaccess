@@ -18,10 +18,10 @@ AddDefaultCharset UTF-8
   Header always set X-Robots-Tag "noindex, nofollow"
 
   <Files "muestra.html">
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-7ZtjWwgLj6IfrpM3yRHOTLz+bWu/0B1pwO96Q4nXvPM='; style-src 'sha256-skXxRjkV4i6c0nmkyXwBBC11125VSPYbZ8Nl76UMlfk='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-QE33CQCCa/RCn9XHCVUCgTsC+1kQ3jlsbbEeh3C6DjA='; style-src 'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
   </Files>
 
   <Files "piloto.html">
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-A9S2kjZBgI+ZL+ybvKfnJQHe2MwYpcAd90iqK31O8LM='; style-src 'sha256-skXxRjkV4i6c0nmkyXwBBC11125VSPYbZ8Nl76UMlfk='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-Rhb8fkglCKiWiOf55O4t7aKltwSjt4T+dozK2ujTod8='; style-src 'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='; font-src data:; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
   </Files>
 </IfModule>

@@ -380,13 +380,22 @@ textarea.input { min-height: 96px; resize: vertical; }
 .aviso-piloto { border: 1px solid var(--cian); background: var(--cian-osc); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
 .aviso-piloto .et { color: var(--cian); }
 
+/* v0.4: grilla de números, criterios de la pregunta */
+.escala.grilla .chip { min-height: 52px; font-size: 19px; font-weight: 800; }
+.criterios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.criterios li { display: flex; gap: 10px; align-items: flex-start; font-size: 16px; line-height: 1.4; }
+.criterios svg { width: 16px; height: 16px; flex: none; color: var(--cian-prof); margin-top: 3px; }
+[hidden] { display: none !important; }
+
+.btn-copiar[disabled] { opacity: .45; cursor: not-allowed; }
+
 </style>
 </head>
 <body>
 <div id="app"></div>
 <noscript><p class="gutter">Este programa necesita JavaScript activado.</p></noscript>
 <script>
-var CONFIG = {"edicion":"muestra","destino":"fenia","prototipo":false,"piloto":false,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"v0.3 · día 0 y semana 1"};
+var CONFIG = {"edicion":"muestra","destino":"fenia","prototipo":false,"piloto":false,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"v0.4 · día 0 y semana 1"};
 /* Contenido del prototipo: día 0 + semana 1.
    Fuente única de verdad: la app lo lee y el guion en Markdown se genera desde acá. */
 var CONTENIDO = {
@@ -466,58 +475,65 @@ var CONTENIDO = {
 
   sesiones: [
     {
-      id: 's1', n: 1, semana: 1, titulo: 'Pedí lo mismo dos veces', competencia: 'Entender la herramienta',
+      id: 's1', n: 1, semana: 1, titulo: 'Pedile un número al azar', competencia: 'Entender la herramienta',
       tipo: 'regular',
       duraciones: [60, 30, 20, 120, 60],
       recordar: {
         pregunta: 'En el día 0 le mandaste a tu IA el mismo pedido dos veces. ¿Qué pasó?',
-        respuesta: 'Casi siempre, te respondió distinto. No es una falla: es cómo funciona. Hoy vemos por qué y qué podés hacer con eso.',
+        respuesta: 'Casi siempre, te respondió distinto. No es una falla: es cómo funciona. Hoy vas a ver que varía, pero no al azar.',
         resumen: 'Recordaste lo que pasó en el día 0.'
       },
       idea: {
-        titulo: 'No busca: genera.',
-        texto: 'La IA no tiene guardada una respuesta para cada pregunta. Escribe palabra por palabra, eligiendo cada vez una continuación probable. Por eso el mismo pedido puede darte respuestas distintas.',
+        titulo: 'No busca ni sortea: elige lo probable.',
+        texto: 'La IA escribe palabra por palabra, eligiendo cada vez una continuación probable según lo que leyó. Por eso varía de una vez a otra, pero no al azar: tiende a lo más común. Lo primero que te da suele ser lo más visto, no lo mejor ni lo más tuyo.',
         ejemplo: {
           tipo: 'dos',
           pedido: 'Dame un nombre para el grupo de WhatsApp de la familia.',
           a: 'Los de Siempre',
-          b: 'La Mesa Grande',
-          nota: 'Mismo pedido, dos respuestas. Ninguna es «la» correcta: son dos tiradas.'
+          b: 'La Familia Unida',
+          nota: 'Mismo pedido, dos respuestas distintas. Pero las dos son de los nombres más vistos: varía alrededor de lo común.'
         },
-        destacado: 'La primera respuesta no es la respuesta. Es una de muchas posibles.',
+        destacado: 'Si querés algo original, pedíselo: lo primero que te da es lo más visto.',
         ampliar: {
-          texto: 'Un modelo de lenguaje calcula, para cada lugar del texto, qué palabras son más probables según lo que vio al entrenarse, y elige una con una dosis de azar. Ese azar controlado es lo que hace que el mismo pedido dé respuestas distintas. Por eso tiene sentido pedir otra versión antes de corregir: no le estás pidiendo que «piense mejor», estás tirando de nuevo.'
+          texto: 'Cuando a las personas nos piden un número «al azar» del 0 al 9, el 7 aparece mucho más de lo esperable. Los modelos de lenguaje aprendieron de lo que escribimos, y en estudios recientes también muestran preferencias fijas cuando se les pide azar. No es un defecto puntual: es cómo funcionan. Eligen lo probable.',
+          fuente: 'Kubovy y Psotka (1976), Journal of Experimental Psychology · Coronado-Blázquez (2025), preprint sin revisión por pares.'
         },
-        resumen: 'La IA no busca: genera.'
+        resumen: 'No sortea: elige lo probable.'
       },
       predecir: {
-        pregunta: 'Le vas a pedir 3 ideas, dos veces seguidas. ¿Cuántas se van a repetir?',
+        pregunta: 'Le vas a pedir un número al azar del 1 al 10. ¿Cuál creés que te va a dar?',
+        grilla: true,
         opciones: [
-          { id: 'todas', label: 'Las 3' },
-          { id: 'alguna', label: 'Alguna' },
-          { id: 'ninguna', label: 'Ninguna' }
+          { id: '1', label: '1' }, { id: '2', label: '2' }, { id: '3', label: '3' }, { id: '4', label: '4' }, { id: '5', label: '5' },
+          { id: '6', label: '6' }, { id: '7', label: '7' }, { id: '8', label: '8' }, { id: '9', label: '9' }, { id: '10', label: '10' }
         ]
       },
       probar: {
-        titulo: 'Pedile lo mismo dos veces.',
-        instruccion: 'Mandá este pedido. Cuando conteste, mandalo otra vez igual, o usá el botón de regenerar si tu IA lo tiene.',
-        pedido: 'Dame 3 ideas para festejar un cumpleaños con poca plata.',
-        traslado: 'Cuando una respuesta no te convenza, pedí otra antes de ponerte a corregirla.',
-        resumen: 'Pediste lo mismo dos veces.'
+        titulo: 'Pedile un número al azar.',
+        instruccion: 'Mandá este pedido. Después abrí un chat nuevo y mandalo otra vez.',
+        pedido: 'Elegí un número al azar del 1 al 10. Respondé solo con el número.',
+        traslado: 'Cuando quieras algo original (un nombre, una idea, un regalo), pedile que se aleje de lo más común.',
+        resumen: 'Le pediste un número al azar, dos veces.'
       },
       comparar: {
-        pregunta: '¿Cuántas ideas se repitieron?',
+        pregunta: '¿Qué número te dio la primera vez?',
         multiple: false,
+        grilla: true,
+        resumenPrefijo: 'Te dio: ',
         opciones: [
-          { id: 'todas', label: 'Las 3' },
-          { id: 'alguna', label: 'Alguna' },
-          { id: 'ninguna', label: 'Ninguna' }
+          { id: '1', label: '1' }, { id: '2', label: '2' }, { id: '3', label: '3' }, { id: '4', label: '4' }, { id: '5', label: '5' },
+          { id: '6', label: '6' }, { id: '7', label: '7' }, { id: '8', label: '8' }, { id: '9', label: '9' }, { id: '10', label: '10' },
+          { id: 'otro', label: 'No me dio un solo número' }
         ],
-        regla: 'Acierta si lo que pasó coincide con lo que predijo.',
+        regla: 'Acierta si el número que le dio coincide con el que predijo.',
         evaluar: function (pred, sel) { return sel[0] === pred; },
-        acierto: 'Lo anticipaste.',
-        sorpresa: 'Te sorprendió. Anotalo: es un dato sobre cómo responde tu IA.',
-        explicacion: 'Si alguna se repitió, es porque era muy probable, no porque sea la mejor. Que algo aparezca dos veces no lo vuelve más cierto.'
+        acierto: 'Lo anticipaste: pensaste como ella.',
+        sorpresa: 'No coincidió. Anotalo: es un dato sobre tu IA.',
+        explicacion: 'Muchas IA eligen el 7 mucho más seguido que cualquier otro número, igual que las personas. Fijate si en el chat nuevo te repitió el mismo: si lo repitió, no está sorteando, está eligiendo lo probable.',
+        explicaciones: {
+          '7': 'Te dio el 7, el número que más elegimos las personas cuando nos piden uno «al azar». No sortea: repite lo más probable según cómo escribimos. Si en el chat nuevo te volvió a dar el 7, ahí tenés la prueba.',
+          otro: 'Algunas IA usan una herramienta para sortear de verdad o aclaran que no pueden. Si fue así, anotalo: es un dato sobre la tuya.'
+        }
       },
       porQue: {
         mecanismo: 'Recuperación activa',
@@ -532,24 +548,23 @@ var CONTENIDO = {
       tipo: 'regular',
       duraciones: [60, 30, 20, 120, 60],
       recordar: {
-        pregunta: 'Ayer le pediste lo mismo dos veces. ¿Por qué te respondió distinto?',
-        respuesta: 'Porque no busca una respuesta guardada: genera una nueva cada vez, eligiendo palabras probables. Dos respuestas distintas no prueban que una esté mal, ni que alguna esté bien.',
-        resumen: 'La IA genera; no busca una respuesta guardada.'
+        pregunta: 'Ayer le pediste un número al azar. ¿Por qué tantas IA eligen el 7?',
+        respuesta: 'Porque no sortean: eligen lo más probable según lo que escribimos las personas, y las personas elegimos mucho el 7. Hoy vemos qué pasa cuando esa misma lógica se aplica a vos.',
+        resumen: 'La IA elige lo más probable.'
       },
       idea: {
         titulo: 'Lo que no le decís, lo inventa.',
-        texto: 'La IA completa los huecos con lo más probable, no con lo tuyo.',
+        texto: 'Cuando le falta información, no se frena a preguntar: la completa con lo más probable. Y lo más probable no sos vos: es una persona promedio.',
         ejemplo: {
           tipo: 'contraste',
           flojoLabel: 'PEDIDO FLOJO',
-          flojo: 'Escribime un mail para pedir un día libre.',
+          flojo: 'Armame un plan para este sábado.',
           buenoLabel: 'CON CONTEXTO',
           bueno: [
-            ['Escribime un mail para pedirle ', false], ['a mi jefa', true], [' un día libre ', false], ['el viernes 28', true],
-            ['. ', false], ['Trabajamos juntas hace tres años y el trato es informal.', true], [' ', false],
-            ['Tengo un turno médico.', true], [' ', false], ['Máximo cinco líneas.', true]
+            ['Armame un plan para este sábado ', false], ['en Córdoba', true], [', ', false], ['con mis dos hijos de 6 y 9', true],
+            ['. ', false], ['Va a llover', true], [' y ', false], ['no quiero gastar más de $20.000', true], ['.', false]
           ],
-          nota: 'Lo que agregó: destinataria, fecha, relación, motivo y extensión.'
+          nota: 'Lo que agregó: dónde, con quién, el clima y el presupuesto.'
         },
         ampliar: {
           texto: 'Cuando falta información, la IA no se frena a preguntar, salvo que se lo pidas: completa con lo más frecuente en lo que aprendió. En un estudio con personas que recién empezaban a usarla, uno de los errores más comunes fue esperar que entendiera la situación como la entendería alguien que la conoce. Dar contexto no es escribir más: es darle lo que no puede adivinar.',
@@ -558,39 +573,43 @@ var CONTENIDO = {
         resumen: 'Lo que no le decís, lo inventa.'
       },
       predecir: {
-        pregunta: 'Si le mandás el pedido flojo, ¿qué va a hacer tu IA?',
+        pregunta: 'Si le pedís «Armame un plan para este sábado», ¿qué va a hacer tu IA?',
         opciones: [
-          { id: 'pregunta', label: 'Me va a preguntar lo que falta' },
-          { id: 'inventa', label: 'Lo va a inventar' }
+          { id: 'pregunta', label: 'Me va a preguntar lo que necesita' },
+          { id: 'inventa', label: 'Va a suponer cosas de mí' }
         ]
       },
       probar: {
-        titulo: 'Mandale el pedido flojo a tu IA.',
-        instruccion: 'Fijate qué completó por su cuenta.',
-        pedido: 'Escribime un mail para pedir un día libre.',
-        traslado: '¿Qué pedido de esta semana mandaste sin contexto?',
-        resumen: 'Mandaste un pedido sin contexto.'
+        titulo: 'Pedile un plan y preguntale qué supuso.',
+        instruccion: 'Mandá el primer pedido. Cuando conteste, mandale el segundo.',
+        pedido: 'Armame un plan para este sábado.',
+        pedido2: 'Antes de seguir: ¿qué supusiste de mí para armar ese plan? Hacé una lista.',
+        pedido2Label: 'Segundo pedido',
+        traslado: 'Cuando una respuesta te parezca genérica, preguntale «¿Qué supusiste de mí?». Te muestra justo el contexto que le faltó.',
+        resumen: 'Le pediste que te mostrara lo que supuso de vos.'
       },
       comparar: {
-        pregunta: '¿Qué completó por su cuenta?',
-        ayuda: 'Marcá todo lo que aplique.',
+        pregunta: '¿Qué supuso de vos?',
+        ayuda: 'Marcá todo lo que aparezca en su lista.',
         multiple: true,
+        resumenPrefijo: 'Supuso: ',
         opciones: [
-          { id: 'motivo', label: 'Un motivo' },
-          { id: 'nombre', label: 'Un nombre o un cargo' },
-          { id: 'tono', label: 'Un tono que no es el tuyo' },
-          { id: 'fecha', label: 'Una fecha' },
-          { id: 'pregunto', label: 'Me preguntó antes de escribir' }
+          { id: 'donde', label: 'Dónde vivís' },
+          { id: 'quien', label: 'Con quién vas a estar' },
+          { id: 'plata', label: 'Cuánto querés gastar' },
+          { id: 'gustos', label: 'Qué te gusta hacer' },
+          { id: 'clima', label: 'El clima o la época del año' },
+          { id: 'pregunto', label: 'Me preguntó antes de armarlo' }
         ],
-        regla: 'Si predijo «lo va a inventar», acierta si marcó algo inventado. Si predijo «me va a preguntar», acierta si marcó que preguntó y nada inventado.',
+        regla: 'Si predijo «va a suponer cosas de mí», acierta si marcó algún supuesto. Si predijo «me va a preguntar», acierta si marcó que preguntó y ningún supuesto.',
         evaluar: function (pred, sel) {
-          var inventado = sel.some(function (x) { return x !== 'pregunto'; });
+          var supuso = sel.some(function (x) { return x !== 'pregunto'; });
           var pregunto = sel.indexOf('pregunto') !== -1;
-          return pred === 'inventa' ? inventado : (pregunto && !inventado);
+          return pred === 'inventa' ? supuso : (pregunto && !supuso);
         },
         acierto: 'Lo anticipaste.',
-        sorpresa: 'Te sorprendió. Anotalo: es un dato sobre tu IA.',
-        explicacion: 'Cada hueco que dejás, lo llena con lo más común. Y lo más común casi nunca es lo tuyo.'
+        sorpresa: 'Anotalo: es un dato sobre tu IA.',
+        explicacion: 'Cada supuesto es una decisión que tomó por vos. Por eso el plan sirve para alguien, pero no necesariamente para vos.'
       },
       porQue: {
         mecanismo: 'Predecir y comparar',
@@ -654,7 +673,7 @@ var CONTENIDO = {
         regla: 'Si predijo «sí, casi igual», acierta con «me ayudó igual» o «me pidió datos que no hacían falta». Si predijo «los necesita», acierta con «le faltó algo de verdad».',
         evaluar: function (pred, sel) { return pred === 'si' ? (sel[0] === 'nofalto' || sel[0] === 'pidio') : sel[0] === 'falto'; },
         acierto: 'Lo anticipaste.',
-        sorpresa: 'Te sorprendió. Anotalo: es un dato sobre tu IA.',
+        sorpresa: 'Anotalo: es un dato sobre tu IA.',
         explicacion: 'Para la mayoría de las tareas alcanza con la situación. Si te pide datos, preguntate si de verdad los necesita: casi siempre podés escribir [NOMBRE] y completarlo vos después.'
       },
       porQue: {
@@ -666,9 +685,9 @@ var CONTENIDO = {
     },
 
     {
-      id: 's4', n: 4, semana: 1, titulo: 'Segura no es correcta', competencia: 'Verificar',
+      id: 's4', n: 4, semana: 1, titulo: 'Preguntale algo que vos sabés', competencia: 'Verificar',
       tipo: 'regular',
-      duraciones: [60, 30, 20, 120, 60],
+      duraciones: [60, 30, 20, 130, 60],
       recordar: {
         pregunta: 'En el reclamo de ayer, ¿qué sacaste antes de mandarlo?',
         respuesta: 'Lo que te identifica: nombre, DNI, números de cuenta. Dejaste la situación, que es lo que la IA necesita para ayudarte.',
@@ -684,48 +703,72 @@ var CONTENIDO = {
           b: 'El cuerpo humano adulto tiene 212 huesos.',
           nota: 'La primera es correcta; la segunda, no. Suenan exactamente igual.'
         },
-        destacado: 'Lo que vas a usar se verifica afuera: con una calculadora, una fuente o alguien que sepa.',
+        destacado: 'Donde más inventa es en lo poco conocido: lo de tu barrio, tu ciudad o tu oficio. Justo lo que vos sabés.',
         ampliar: {
-          texto: 'Las personas tendemos a aceptar lo que dice un sistema automático sin revisarlo lo suficiente; se lo llama sesgo de automatización y está documentado hace décadas en aviación y medicina. Con IA aparece algo más: en un estudio reciente, quienes resolvían problemas con IA mejoraron su resultado, pero creyeron que les había ido mejor de lo que en realidad les fue.',
-          fuente: 'Parasuraman y Manzey (2010), Human Factors · Fernandes y otros (2026), Computers in Human Behavior.'
+          texto: 'Los modelos aciertan mucho más en lo que aparece seguido en internet que en lo raro: un dato de tu barrio, un horario, un detalle de tu oficio. En esa «cola larga» de datos poco frecuentes completan con lo que suena probable, y lo dicen con el mismo tono que cuando aciertan. Además, las personas tendemos a aceptar lo que dice un sistema automático sin revisarlo lo suficiente. Por eso tu terreno es el mejor lugar para medirla.',
+          fuente: 'Kandpal y otros (2023), ICML · Parasuraman y Manzey (2010), Human Factors.'
         },
         resumen: 'Que suene segura no la hace correcta.'
       },
       predecir: {
-        pregunta: 'Le vas a pedir una multiplicación difícil, sin calculadora. ¿Va a acertar?',
+        pregunta: 'Le vas a preguntar algo de tu terreno que poca gente sabe. ¿Qué va a hacer?',
         opciones: [
-          { id: 'acierta', label: 'Sí, va a acertar' },
-          { id: 'falla', label: 'No, se va a equivocar' }
+          { id: 'acierta', label: 'Va a acertar' },
+          { id: 'inventa', label: 'Va a inventar algo' },
+          { id: 'nosabe', label: 'Va a decir que no sabe' }
         ]
       },
       probar: {
-        titulo: 'Pedile la cuenta y verificala.',
-        instruccion: 'Mandá este pedido. Después hacé la misma cuenta con la calculadora de tu celular.',
-        pedido: '¿Cuánto es 4837 × 2961? Respondé solo con el número.',
-        nota: 'Si tu IA muestra los pasos o usa una herramienta para calcular, también vale: anotá qué hizo.',
-        traslado: 'Cuando la IA te dé un número, una fecha o un dato que vas a usar, buscá cómo comprobarlo.',
-        resumen: 'Verificaste una cuenta con la calculadora.'
+        titulo: 'Preguntale algo que vos sabés.',
+        instruccion: 'Escribí una pregunta sobre algo que conocés con certeza y que poca gente sabe. El programa le suma «sin buscar en internet».',
+        campo: { id: 'pregunta', label: 'Tu pregunta', placeholder: 'Ej.: ¿Qué línea de colectivo va de Alta Córdoba a Barrio Jardín?' },
+        criterios: [
+          'Vos sabés la respuesta con certeza.',
+          'Es de tu barrio, tu ciudad o tu oficio: poca gente lo sabe.',
+          'La respuesta es un dato concreto: un número, un nombre o un horario.'
+        ],
+        sugerencias: [
+          { label: 'Un colectivo de tu ciudad', texto: '¿Qué línea de colectivo va de [barrio] a [barrio] en [ciudad]?' },
+          { label: 'Un horario de tu zona', texto: '¿A qué hora abre [lugar] de [barrio] los domingos?' },
+          { label: 'Un dato de tu oficio', texto: 'En [tu rubro], ¿[dato puntual que vos sabés]?' },
+          { label: 'La historia de tu barrio', texto: '¿En qué año se fundó [club, escuela o plaza] de [barrio]?' }
+        ],
+        cola: 'Respondé en una línea, sin buscar en internet.',
+        traslado: 'Antes de confiarle algo que no conocés, probala en lo que sí conocés. Ahí ves cuánto inventa.',
+        resumen: 'Le preguntaste algo de tu terreno.'
       },
       comparar: {
-        pregunta: 'Según tu calculadora, ¿qué pasó?',
+        pregunta: '¿Qué hizo?',
         multiple: false,
+        resumenPrefijo: 'Resultado: ',
         opciones: [
-          { id: 'bien-segura', label: 'Acertó y sonó segura' },
-          { id: 'bien-duda', label: 'Acertó, pero avisó que podía fallar' },
-          { id: 'mal-segura', label: 'Se equivocó y sonó segura' },
-          { id: 'mal-duda', label: 'Se equivocó, pero avisó que podía fallar' }
+          { id: 'acerto', label: 'Acertó' },
+          { id: 'mal-segura', label: 'Inventó algo y sonó segura' },
+          { id: 'mal-duda', label: 'Inventó algo, pero avisó que podía fallar' },
+          { id: 'nosabe', label: 'Dijo que no sabía' }
         ],
-        regla: 'Acierta si predijo «va a acertar» y acertó, o «se va a equivocar» y se equivocó.',
-        evaluar: function (pred, sel) { return pred === 'acierta' ? sel[0].indexOf('bien') === 0 : sel[0].indexOf('mal') === 0; },
+        regla: 'Acierta si lo que pasó coincide con lo que predijo: acertar, inventar (con o sin aviso) o decir que no sabe.',
+        evaluar: function (pred, sel) {
+          if (pred === 'acierta') return sel[0] === 'acerto';
+          if (pred === 'inventa') return sel[0].indexOf('mal') === 0;
+          return sel[0] === 'nosabe';
+        },
         acierto: 'Lo anticipaste.',
-        sorpresa: 'Te sorprendió. Anotalo: es un dato sobre tu IA.',
-        explicacion: 'El resultado correcto es 14.322.357. Fijate el tono: suele ser igual de firme cuando acierta y cuando no. Por eso, lo que vas a usar se verifica afuera.'
+        sorpresa: 'Anotalo: es un dato sobre tu IA.',
+        explicacion: 'Fijate el tono: suele ser igual de firme cuando acierta y cuando no.',
+        explicaciones: {
+          acerto: 'Esta vez acertó. Subí la apuesta: preguntale algo todavía más chico y local. Cuanto más puntual, más fácil que complete con lo probable.',
+          'mal-segura': 'Ahí está: un dato inventado, dicho con total seguridad. Si no lo hubieras sabido, ¿te habrías dado cuenta?',
+          'mal-duda': 'Se equivocó, pero avisó. Eso ayuda: cuando una IA marca su duda, tomala en serio.',
+          nosabe: 'Eso es lo que querés que haga: reconocer su límite. No todas lo hacen, ni siempre.'
+        },
+        otraVez: 'acerto'
       },
       porQue: {
-        mecanismo: 'Retroalimentación externa',
-        texto: 'Comprobaste contra una fuente independiente. Esa es la devolución más clara posible: no te dice solo si estaba bien, te muestra qué tan calibrada estaba tu confianza.',
+        mecanismo: 'Autorreferencia y retroalimentación',
+        texto: 'Comparaste su respuesta con algo que sabés de primera mano. Lo que se relaciona con uno mismo se recuerda mejor, y contrastar contra una fuente segura te muestra qué tan calibrada estaba tu confianza.',
         evidencia: 'solida',
-        fuente: 'Hattie y Timperley (2007) · Kluger y DeNisi (1996).'
+        fuente: 'Symons y Johnson (1997), metaanálisis · Hattie y Timperley (2007).'
       }
     },
 
@@ -882,7 +925,7 @@ var CONTENIDO = {
   /* ---------- estado guardado: un único objeto JSON ---------- */
   function nuevaSes() {
     return { paso: 0, revelado: false, pred: null, sel: [], copiado: false, nota: '', sit: [null, null],
-      campos: { que: '', para: '', contexto: '' }, cierre: null, hecho: false, fecha: null, acierto: null, inicio: null, ms: 0 };
+      campos: { que: '', para: '', contexto: '', pregunta: '' }, copiado2: false, cierre: null, hecho: false, fecha: null, acierto: null, inicio: null, ms: 0 };
   }
   function nuevoEstado() {
     var ses = {};
@@ -1040,9 +1083,9 @@ var CONTENIDO = {
       return '<button type="button" id="op-' + accion + '-' + o.id + '" class="' + cls + '" role="radio" aria-checked="' + on + '" data-a="' + accion + '" data-arg="' + o.id + '"><span class="marca"></span><span>' + esc(o.label) + '</span>' + (est ? '<span class="estado">' + est + '</span>' : '') + '</button>';
     }).join('') + '</div>';
   }
-  function bloquePedido(texto, arg, copiado, vacio) {
+  function bloquePedido(texto, arg, copiado, vacio, etiquetaPedido) {
     var share = CFG.destino === 'fenia' && navigator.share ? '<button type="button" class="btn btn-chico btn-compartir" data-a="compartir" data-arg="' + arg + '" aria-label="Enviar a otra app">' + I.compartir + '</button>' : '';
-    return '<div class="pedido"><p class="et">Pedido para tu IA</p>' +
+    return '<div class="pedido"><p class="et">' + esc(etiquetaPedido || 'Pedido para tu IA') + '</p>' +
       '<p class="pedido-texto' + (vacio ? ' vacio' : '') + '" data-vivo="pedido-' + arg + '">' + esc(texto) + '</p>' +
       '<div class="pedido-acciones"><button type="button" id="copiar-' + arg + '" class="btn btn-chico btn-copiar" data-a="copiar" data-arg="' + arg + '"' + (vacio ? ' disabled' : '') + '>' +
       (copiado ? I.check + 'Copiado: pegalo en tu IA' : I.copiar + 'Copiar pedido') + '</button>' + share + '</div>' +
@@ -1055,6 +1098,20 @@ var CONTENIDO = {
     return '<div class="pie gutter"><button type="button" class="btn btn-accion" data-primario data-a="' + p.accion + '"' + (p.disabled ? ' disabled' : '') + '>' + esc(p.label) + (p.flecha ? I.flecha : '') + '</button>' +
       (atras ? '<button type="button" class="btn-texto" data-a="' + atras + '">Atrás</button>' : '') + '</div>';
   }
+  function grilla(grupo, opciones, elegido, accion) {
+    return '<div class="escala grilla" role="radiogroup" aria-label="' + esc(grupo) + '">' + opciones.map(function (o) {
+      return '<button type="button" id="op-' + accion + '-' + o.id + '" class="chip" role="radio" aria-checked="' + (elegido === o.id) + '" data-a="' + accion + '" data-arg="' + o.id + '">' + esc(o.label) + '</button>';
+    }).join('') + '</div>';
+  }
+  function pedidoProbar(s, st) {
+    var pr = s.probar;
+    if (!pr.campo) return pr.pedido;
+    var q = (st.campos[pr.campo.id] || '').trim();
+    if (!q || q.indexOf('[') !== -1) return '';
+    if (!/[?.!]$/.test(q)) q += q.charAt(0) === '¿' ? '?' : '.';
+    return q + ' ' + pr.cola;
+  }
+  function corchetes(st) { return (st.campos.pregunta || '').indexOf('[') !== -1; }
   function marcado(partes) { return partes.map(function (p) { return p[1] ? '<mark>' + esc(p[0]) + '</mark>' : esc(p[0]); }).join(''); }
   function pedidoAplicar(st) {
     var c = st.campos, s = POR_ID.s5.aplicar;
@@ -1080,7 +1137,7 @@ var CONTENIDO = {
     if (s.tipo === 'regular') {
       if (p === 1) return { label: 'Entendido', accion: 'sig' };
       if (p === 2) return { label: 'Seguir', accion: 'sig', disabled: !st.pred };
-      if (p === 3) return { label: 'Ya lo probé', accion: 'sig' };
+      if (p === 3) return { label: 'Ya lo probé', accion: 'sig', disabled: !!s.probar.campo && !pedidoProbar(s, st) };
       return { label: 'Terminar sesión', accion: 'terminar', disabled: !st.sel.length };
     }
     if (p === 1 || p === 2) return { label: 'Seguir', accion: 'sig', disabled: !st.sit[p - 1] };
@@ -1250,7 +1307,7 @@ var CONTENIDO = {
     h += '<p class="eyebrow">Paso ' + (p + 1) + ' de 5 · ' + nombres[p] + '</p>';
     if (p === 0) h += pasoRecordar(s, st);
     else if (regular && p === 1) h += pasoIdea(s);
-    else if (regular && p === 2) h += '<h1 class="titulo" tabindex="-1" data-foco>' + esc(s.predecir.pregunta) + '</h1><p class="lead">Elegí antes de probar. Después comparás.</p>' + radio(s.predecir.pregunta, s.predecir.opciones, st.pred, 'pred');
+    else if (regular && p === 2) h += '<h1 class="titulo" tabindex="-1" data-foco>' + esc(s.predecir.pregunta) + '</h1><p class="lead">Elegí antes de probar. Después comparás.</p>' + (s.predecir.grilla ? grilla(s.predecir.pregunta, s.predecir.opciones, st.pred, 'pred') : radio(s.predecir.pregunta, s.predecir.opciones, st.pred, 'pred'));
     else if (regular && p === 3) h += pasoProbar(s, st);
     else if (regular && p === 4) h += pasoComparar(s, st);
     else if (p === 1 || p === 2) h += pasoSituacion(s, st, p - 1);
@@ -1282,7 +1339,17 @@ var CONTENIDO = {
   function pasoProbar(s, st) {
     var pr = s.probar;
     var h = '<h1 class="titulo" tabindex="-1" data-foco>' + esc(pr.titulo) + '</h1><p class="lead">' + esc(pr.instruccion) + '</p>';
-    h += bloquePedido(pr.pedido, 'probar', st.copiado);
+    if (pr.campo) {
+      h += '<div class="tarjeta"><p class="et cian">Tu pregunta funciona si</p><ul class="criterios">' + pr.criterios.map(function (c) { return '<li>' + I.check + '<span>' + esc(c) + '</span></li>'; }).join('') + '</ul></div>';
+      h += '<div class="chips" role="group" aria-label="Ideas para tu pregunta">' + pr.sugerencias.map(function (g, i) { return '<button type="button" id="sug-' + i + '" class="chip" data-a="sugerir" data-arg="' + i + '">' + esc(g.label) + '</button>'; }).join('') + '</div>';
+      h += '<div class="campo"><label for="pr-' + pr.campo.id + '">' + esc(pr.campo.label) + '</label><textarea class="input" id="pr-' + pr.campo.id + '" data-campo="ses.' + s.id + '.campos.' + pr.campo.id + '" placeholder="' + esc(pr.campo.placeholder) + '"></textarea>' +
+        '<p class="error" data-vivo="corchetes"' + (corchetes(st) ? '' : ' hidden') + '>Reemplazá lo que está entre corchetes por tu dato.</p></div>';
+      var ped = pedidoProbar(s, st);
+      h += bloquePedido(ped || 'Escribí tu pregunta y el pedido aparece acá.', 'probar', st.copiado, !ped);
+    } else {
+      h += bloquePedido(pr.pedido, 'probar', st.copiado);
+      if (pr.pedido2) h += bloquePedido(pr.pedido2, 'probar2', st.copiado2, false, pr.pedido2Label);
+    }
     h += '<p class="chico">Sirve cualquier IA: ChatGPT, Gemini, Copilot, Claude o Meta AI en WhatsApp.' + (pr.nota ? ' ' + esc(pr.nota) : '') + '</p>';
     if (CFG.edicion !== 'muestra') h += '<button type="button" class="btn-texto sub izq" data-a="irGuia">¿Qué IA me conviene?</button>';
     h += '<div class="traslado"><p class="et cian">Llevalo a lo tuyo</p><p class="texto">' + esc(pr.traslado) + '</p></div>';
@@ -1298,12 +1365,18 @@ var CONTENIDO = {
         var on = st.sel.indexOf(o.id) !== -1;
         return '<button type="button" id="sel-' + o.id + '" class="opcion" aria-pressed="' + on + '" data-a="sel" data-arg="' + o.id + '"><span class="marca cuadro">' + I.check + '</span><span>' + esc(o.label) + '</span></button>';
       }).join('') + '</div>';
+    } else if (c.grilla) {
+      var num = c.opciones.filter(function (o) { return /^\d+$/.test(o.id); }), otras = c.opciones.filter(function (o) { return !/^\d+$/.test(o.id); });
+      h += grilla(c.pregunta, num, st.sel[0] || null, 'sel');
+      if (otras.length) h += radio(c.pregunta, otras, st.sel[0] || null, 'sel');
     } else {
       h += radio(c.pregunta, c.opciones, st.sel[0] || null, 'sel');
     }
     if (st.sel.length) {
       var ok = c.evaluar(st.pred, st.sel);
-      h += feedback(ok, ok ? 'Acertaste' : 'Te sorprendió', ok ? c.acierto : c.sorpresa, c.explicacion);
+      var expl = (c.explicaciones && !c.multiple && c.explicaciones[st.sel[0]]) || c.explicacion;
+      h += feedback(ok, ok ? 'Acertaste' : 'Te sorprendió', ok ? c.acierto : c.sorpresa, expl);
+      if (c.otraVez && st.sel[0] === c.otraVez) h += '<button type="button" class="btn btn-chico btn-borde" data-a="otraVez">Probar con otra pregunta</button>';
     }
     h += '<div class="campo"><label for="nota-' + s.id + '">Una línea para tu bitácora</label><input class="input" id="nota-' + s.id + '" type="text" autocomplete="off" data-campo="ses.' + s.id + '.nota" placeholder="Qué te llevás de hoy"></div>';
     return h;
@@ -1358,7 +1431,7 @@ var CONTENIDO = {
         ['Recordar', s.recordar.resumen], ['La idea', s.idea.resumen],
         ['Predecir', 'Tu predicción: ' + etiqueta(s.predecir.opciones, st.pred).toLowerCase() + '.'],
         ['Probar', s.probar.resumen],
-        ['Comparar', 'Pasó: ' + st.sel.map(function (id) { return etiqueta(s.comparar.opciones, id).toLowerCase(); }).join(', ') + '.']
+        ['Comparar', (s.comparar.resumenPrefijo || 'Pasó: ') + st.sel.map(function (id) { return etiqueta(s.comparar.opciones, id).toLowerCase(); }).join(', ') + '.']
       ];
     }
     return [
@@ -1555,7 +1628,8 @@ var CONTENIDO = {
   function textoDe(arg) {
     if (arg === 'dia0') return E.dia0.pedido.trim();
     if (arg === 'aplicar') return pedidoAplicar(E.ses[ui.sesionId]);
-    return POR_ID[ui.sesionId].probar.pedido;
+    if (arg === 'probar2') return POR_ID[ui.sesionId].probar.pedido2;
+    return pedidoProbar(POR_ID[ui.sesionId], E.ses[ui.sesionId]);
   }
   function copiarTexto(t, ok, mal) {
     function viejo() {
@@ -1630,12 +1704,19 @@ var CONTENIDO = {
     sit: function (id) { var st = E.ses[ui.sesionId]; st.sit[st.paso - 1] = id; guardar(); render(); },
     cierreOp: function (id) { E.ses[ui.sesionId].cierre = id; guardar(); render(); },
     ejEsc: function (id) { ui.ejEsc = id; render(); },
+    sugerir: function (i) {
+      var s = POR_ID[ui.sesionId], st = E.ses[ui.sesionId], t = s.probar.sugerencias[Number(i)].texto;
+      st.campos.pregunta = t; st.copiado = false; guardar(); render();
+      var el = document.getElementById('pr-' + s.probar.campo.id), a = t.indexOf('['), b = t.indexOf(']');
+      if (el) { try { el.focus(); if (a !== -1) el.setSelectionRange(a, b + 1); } catch (e) { } }
+    },
+    otraVez: function () { var st = E.ses[ui.sesionId]; st.paso = 3; st.sel = []; st.copiado = false; guardar(); render(); },
     usarEjemplo: function () { var sel = escenariosSel(), e0 = sel.filter(function (e) { return e.id === ui.ejEsc; })[0] || sel[0]; var ej = POR_ID.s5.aplicar.ejemplos[e0.id]; E.ses[ui.sesionId].campos = { que: ej.que, para: ej.para, contexto: ej.contexto }; guardar(); render(); },
     copiar: function (arg, b) {
       var t = textoDe(arg);
       if (!t) return;
       copiarTexto(t, function () {
-        if (arg === 'dia0') E.dia0.copiado = true; else E.ses[ui.sesionId].copiado = true;
+        if (arg === 'dia0') E.dia0.copiado = true; else if (arg === 'probar2') E.ses[ui.sesionId].copiado2 = true; else E.ses[ui.sesionId].copiado = true;
         ui.copiaFallo = false; guardar();
         b.innerHTML = I.check + 'Copiado: pegalo en tu IA';
       }, function () { ui.copiaFallo = true; render(); seleccionarPedido(arg); });
@@ -1705,7 +1786,13 @@ var CONTENIDO = {
       if (vivo) vivo.innerHTML = fraseMomento();
       app.querySelectorAll('.chip[aria-pressed]').forEach(function (c) { c.setAttribute('aria-pressed', String(c.getAttribute('data-arg') === el.value)); });
     }
-    if (ruta.indexOf('.campos.') !== -1) {
+    if (ruta.indexOf('.campos.pregunta') !== -1) {
+      var sp = POR_ID[ui.sesionId], stp = E.ses[ui.sesionId], pq = pedidoProbar(sp, stp);
+      var vp = app.querySelector('[data-vivo="pedido-probar"]'), bp = document.getElementById('copiar-probar'), aviso = app.querySelector('[data-vivo="corchetes"]');
+      if (vp) { vp.textContent = pq || 'Escribí tu pregunta y el pedido aparece acá.'; vp.classList.toggle('vacio', !pq); }
+      if (aviso) aviso.hidden = !corchetes(stp);
+      if (bp) { bp.disabled = !pq; if (stp.copiado) { stp.copiado = false; guardar(); bp.innerHTML = I.copiar + 'Copiar pedido'; } }
+    } else if (ruta.indexOf('.campos.') !== -1) {
       var ped = pedidoAplicar(E.ses[ui.sesionId]);
       var p = app.querySelector('[data-vivo="pedido-aplicar"]'), bc = document.getElementById('copiar-aplicar');
       if (p) { p.textContent = ped || 'Completá «¿Qué necesitás?» y tu pedido aparece acá.'; p.classList.toggle('vacio', !ped); }

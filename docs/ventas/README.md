@@ -222,6 +222,18 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (38)** — **«Conversar con IA» v0.4** (pedido y OK del dev, antes de mandar el piloto). El equipo de producto rehízo las sesiones 1, 2 y 4:
+  - 1: un número al azar;
+  - 2: «¿qué supusiste de mí?»;
+  - 4: una pregunta de tu terreno, con corchetes para completar.
+
+  Lo que se hizo:
+  - `muestra.html` y `piloto.html` reemplazados byte por byte, con los hashes nuevos (también el del estilo).
+  - La CI ahora exige que coincidan los archivos, el `.htaccess` y el `csp-hashes.json` del equipo de producto, guardado en `scripts/app-csp-hashes/`. La prueba de mutación detecta el JSON viejo, la falta del JSON y un byte cambiado.
+  - En la página de venta, capturas 04 a 07 nuevas con sus textos alternativos.
+  - `programa.html` v0.4 queda solo en la carpeta local `actualizacion-conversar-con-ia-v0.4/`, fuera de git, hasta la fase B.
+
+  Semana completa del piloto en local, con la CSP real: 23 de 23 controles OK.
 - **2026-11-18 (37)** — Mientras el dev hace sus tareas:
   - guía del día con los mensajes del piloto para copiar;
   - los armadores de la configuración leen la clave de PageSpeed de `~/fenia-secrets/psi-api-key.txt` (controlan la forma y no la muestran);
