@@ -212,6 +212,28 @@ const trainings = defineCollection({
           kitsLabel: z.string(),
         })
         .optional(),
+      /**
+       * Phone only (approved 2026-11-20). `inApp`: shown when «Probá gratis» is
+       * tapped inside Instagram, Facebook or TikTok, whose browsers can lose the
+       * progress; `{app}` is replaced by the app's name. `stickyBar`: a bottom
+       * bar with «Probá gratis» once the hero's buttons scroll away.
+       */
+      mobile: z
+        .object({
+          inApp: z.object({
+            tag: z.string(),
+            title: z.string(),
+            titleIphone: z.string(),
+            text: z.string().includes('{app}'),
+            openChrome: z.string(),
+            steps: z.array(z.string()).length(2),
+            copy: z.string(),
+            copied: z.string(),
+            continue: z.string(),
+          }),
+          stickyBar: z.object({ title: z.string(), text: z.string(), cta: z.string() }),
+        })
+        .optional(),
     }),
 });
 

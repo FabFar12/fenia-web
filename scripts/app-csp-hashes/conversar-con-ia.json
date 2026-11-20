@@ -1,14 +1,14 @@
 {
   "piloto.html": {
-    "script": "'sha256-Rhb8fkglCKiWiOf55O4t7aKltwSjt4T+dozK2ujTod8='",
-    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+    "script": "'sha256-Uo/XCfDX6QNlx+pKsdQNP74eI463Du8/kFap8HnvQWI='",
+    "style": "'sha256-KIZW4qMdBnMBYgFqQh3q5jsJ6oji98D5TeiOGONfFEU='"
   },
   "programa.html": {
-    "script": "'sha256-bY4hqpknqCN4g3h0JIrchl9kcnuFoZFuB6DHU7TTysk='",
-    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+    "script": "'sha256-Ym7ogMC8Op+gauWbxSQKCAy5aQ5dDaBWomngpQFUdPQ='",
+    "style": "'sha256-KIZW4qMdBnMBYgFqQh3q5jsJ6oji98D5TeiOGONfFEU='"
   },
   "muestra.html": {
-    "script": "'sha256-QE33CQCCa/RCn9XHCVUCgTsC+1kQ3jlsbbEeh3C6DjA='",
-    "style": "'sha256-dP81i7td35xNT4Dt5JuBfghOD9IqL2GCEBTrklcUTWQ='"
+    "script": "'sha256-SRCKEH/EP7N0EuRLQJN23F9J4dA9S+MoEc2hWYv+vsA='",
+    "style": "'sha256-KIZW4qMdBnMBYgFqQh3q5jsJ6oji98D5TeiOGONfFEU='"
   }
 }

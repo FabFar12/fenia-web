@@ -244,10 +244,113 @@ const ogImage = `/entrenamientos/${product.id}/og.jpg`;
         </p>
       </div>
     </section>
+
+    {sampleUrl && c.mobile && (
+      <>
+        <!-- Phone only: «Probá gratis» stays at hand once the hero's buttons scroll away. -->
+        <div class="tr-bar" data-tr-bar inert>
+          <p class="tr-bar-text"><b>{c.mobile.stickyBar.title}</b><span>{c.mobile.stickyBar.text}</span></p>
+          <a class="tr-bar-cta" href={sampleUrl} data-sample data-astro-reload data-astro-prefetch="false">{c.mobile.stickyBar.cta} <span aria-hidden="true">→</span></a>
+        </div>
+
+        <!-- Inside Instagram, Facebook or TikTok: their browsers can lose the progress. -->
+        <dialog id="tr-inapp" class="tr-sheet" aria-labelledby="tr-inapp-title" data-sample-url={sampleUrl} data-text={c.mobile.inApp.text} data-copied={c.mobile.inApp.copied}>
+          <span class="tr-sheet-tag">{c.mobile.inApp.tag}</span>
+          <h2 id="tr-inapp-title" class="tr-sheet-title" data-title-iphone={c.mobile.inApp.titleIphone}>{c.mobile.inApp.title}</h2>
+          <p class="tr-sheet-text" data-inapp-text></p>
+          <a class="tr-btn tr-btn--primary tr-sheet-btn" data-inapp-android hidden>{c.mobile.inApp.openChrome} <span aria-hidden="true">→</span></a>
+          <ol class="tr-sheet-steps" data-inapp-iphone hidden>
+            {c.mobile.inApp.steps.map((step, i) => <li><b>{i + 1}</b><span>{step}</span></li>)}
+          </ol>
+          <button type="button" class="tr-btn tr-btn--outline tr-sheet-btn" data-inapp-copy>{c.mobile.inApp.copy}</button>
+          <button type="button" class="tr-sheet-continue" data-inapp-continue>{c.mobile.inApp.continue}</button>
+        </dialog>
+      </>
+    )}
   </main>
 
   <Footer />
 </Layout>
+
+<script>
+  // Phone helpers of the sales page (approved 2026-11-20).
+  // 1. Sticky bar: shown once the hero's buttons scroll away, hidden again at
+  //    the closing section (which has its own buttons). Phones only (CSS).
+  // 2. Inside Instagram, Facebook or TikTok, «Probá gratis» first explains how
+  //    to open the sample in the phone's browser: those in-app browsers keep
+  //    their own storage and can lose the progress (H-12 in docs/ventas).
+  //    The click is still counted (src/scripts/visits.ts).
+  function inAppName(ua: string): string | null {
+    if (/Instagram/i.test(ua)) return 'Instagram';
+    if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'Facebook';
+    if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return 'TikTok';
+    return null;
+  }
+
+  function setUpBar() {
+    const bar = document.querySelector<HTMLElement>('[data-tr-bar]');
+    const hero = document.querySelector('.tr-hero .tr-ctas');
+    const closing = document.querySelector('.tr-closing');
+    if (!bar || !hero || !closing || !('IntersectionObserver' in window)) return;
+    let heroInView = true;
+    let closingReached = false;
+    const update = () => {
+      const on = !heroInView && !closingReached;
+      bar.classList.toggle('is-on', on);
+      bar.inert = !on;
+    };
+    new IntersectionObserver(([e]) => {
+      heroInView = e.isIntersecting || e.boundingClientRect.top > 0;
+      update();
+    }).observe(hero);
+    new IntersectionObserver(([e]) => {
+      closingReached = e.isIntersecting || e.boundingClientRect.top < 0;
+      update();
+    }).observe(closing);
+  }
+
+  function setUpInApp() {
+    const dialog = document.getElementById('tr-inapp') as HTMLDialogElement | null;
+    const where = inAppName(navigator.userAgent);
+    if (!dialog || !where || typeof dialog.showModal !== 'function') return;
+    const sample = new URL(dialog.dataset.sampleUrl ?? '/', location.href).href;
+    const android = /Android/i.test(navigator.userAgent);
+    dialog.querySelector<HTMLElement>('[data-inapp-text]')!.textContent = (dialog.dataset.text ?? '').replace('{app}', where);
+    const title = dialog.querySelector<HTMLElement>('.tr-sheet-title')!;
+    if (!android) title.textContent = title.dataset.titleIphone ?? title.textContent;
+    const chrome = dialog.querySelector<HTMLAnchorElement>('[data-inapp-android]')!;
+    const steps = dialog.querySelector<HTMLElement>('[data-inapp-iphone]')!;
+    if (android) {
+      const u = new URL(sample);
+      chrome.href = `intent://${u.host}${u.pathname}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(sample)};end`;
+      chrome.hidden = false;
+    } else {
+      steps.hidden = false;
+    }
+    const copy = dialog.querySelector<HTMLButtonElement>('[data-inapp-copy]')!;
+    copy.onclick = () => {
+      navigator.clipboard?.writeText(sample).then(() => { copy.textContent = dialog.dataset.copied ?? copy.textContent; }, () => {});
+    };
+    dialog.querySelector<HTMLButtonElement>('[data-inapp-continue]')!.onclick = () => { location.href = sample; };
+    // Tapping the dimmed area closes it.
+    dialog.onclick = (ev) => { if (ev.target === dialog) dialog.close(); };
+    dialog.dataset.ready = '1';
+  }
+
+  // Once per document: any «Probá gratis» (hero, price, closing, sticky bar).
+  document.addEventListener('click', (ev) => {
+    const link = (ev.target as Element | null)?.closest?.('a[data-sample]');
+    const dialog = document.getElementById('tr-inapp') as HTMLDialogElement | null;
+    if (!link || !dialog || dialog.dataset.ready !== '1' || dialog.open) return;
+    ev.preventDefault();
+    dialog.showModal();
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    setUpBar();
+    setUpInApp();
+  });
+</script>
 
 <style>
   /* Product palette (handoff brief): night blue #0B1A2E, cyan #00B4D8 on dark,
@@ -402,8 +505,41 @@ const ogImage = `/entrenamientos/${product.id}/og.jpg`;
   @media (max-width: 560px) {
     .tr-cards { grid-template-columns: minmax(0, 1fr); }
   }
+  /* Phone helpers (approved 2026-11-20): sticky bar and in-app browser notice. */
+  .tr-bar { display: none; }
+  @media (max-width: 899px) {
+    .tr-bar {
+      display: flex; align-items: center; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+      padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      background: rgba(11, 26, 46, 0.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.1);
+      transform: translateY(110%); transition: transform 220ms ease;
+    }
+    .tr-bar.is-on { transform: none; }
+  }
+  .tr-bar-text { flex: 1; min-width: 0; margin: 0; color: #fff; font-size: 13.5px; line-height: 1.3; }
+  .tr-bar-text b { display: block; font-size: 15px; }
+  .tr-bar-text span { color: rgba(255, 255, 255, 0.75); }
+  .tr-bar-cta { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 46px; padding: 0 18px; border-radius: 12px; background: #cf4630; color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; box-shadow: 0 6px 18px rgba(207, 70, 48, 0.35); }
+  .tr-bar-cta:focus-visible { outline: 3px solid #00b4d8; outline-offset: 3px; }
+
+  .tr-sheet { width: 100%; max-width: 520px; margin: auto auto 0; padding: 26px 20px calc(24px + env(safe-area-inset-bottom, 0px)); border: 0; border-radius: 22px 22px 0 0; background: #fff; color: #0b1a2e; font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25); }
+  .tr-sheet[open] { display: flex; flex-direction: column; }
+  .tr-sheet::backdrop { background: rgba(11, 26, 46, 0.62); }
+  .tr-sheet-tag { align-self: flex-start; font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #006b87; background: #e3f2f6; border-radius: 100px; padding: 4px 10px; margin-bottom: 12px; }
+  .tr-sheet-title { margin: 0 0 8px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .tr-sheet-text { margin: 0 0 16px; font-size: 15.5px; line-height: 1.55; color: #3d4a5c; }
+  .tr-sheet-btn { width: 100%; margin: 0 0 10px; }
+  .tr-sheet-btn[hidden] { display: none; }
+  .tr-sheet-steps { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
+  .tr-sheet-steps[hidden] { display: none; }
+  .tr-sheet-steps li { display: flex; gap: 12px; align-items: center; font-size: 15.5px; color: #24303f; }
+  .tr-sheet-steps b { flex: 0 0 30px; height: 30px; border-radius: 50%; background: #0b1a2e; color: #fff; display: grid; place-items: center; font-size: 14px; }
+  .tr-sheet-continue { align-self: center; margin-top: 4px; padding: 10px; border: 0; background: none; font: inherit; font-size: 14.5px; font-weight: 600; color: #3d4a5c; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .tr-sheet-continue:focus-visible, .tr-sheet .tr-btn:focus-visible { outline: 3px solid #006b87; outline-offset: 3px; }
+
   @media (prefers-reduced-motion: reduce) {
     .tr-btn { transition: none; }
     .tr-btn--primary:hover { transform: none; }
+    .tr-bar { transition: none; }
   }
 </style>

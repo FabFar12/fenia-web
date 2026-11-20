@@ -108,6 +108,18 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D31 | 2026-11-20 | **UX en el celular y quién hace las apps** (decisiones del dev).
+  - Las apps se editan en este entorno, que es donde se decide. El entorno de producto aporta material y decisiones estéticas y recibe un resumen de cada cambio (ADR-030).
+  - **Página de venta:**
+    - aviso al tocar «Probá gratis» dentro de Instagram, Facebook o TikTok;
+    - barra fija «Probá gratis» en el celular.
+  - **App (v0.4.1):**
+    - el mismo aviso en la pantalla de inicio;
+    - «Agregar a Google Calendar»;
+    - la barra de abajo se oculta con el teclado;
+    - ícono y nombre en la pantalla de inicio.
+  - **Ícono:** opción A, FENIA completo sobre blanco, para todo el sitio; reemplaza el logo de Astro que había quedado desde la creación del proyecto.
+  - **«Abrir en tu IA» con el pedido escrito:** después del piloto y con prueba en el celular, por la web, sin Copilot | ✅ Decisión del dev |
 | D30 | 2026-11-18 | **«Conversar con IA sin creerle todo», fase A** ([ADR-030](../adr/ADR-030-trainings-and-self-contained-apps.md), decisiones del dev sobre el plan):
   - `muestra.html` y `piloto.html` se publican byte por byte en `/app/conversar-con-ia/`, cada una con su CSP exacta en un `.htaccess` de la carpeta, y la CI controla los hashes;
   - `programa.html` queda afuera de lo público hasta la fase B, cuando se sirve desde la carpeta privada, detrás del ingreso, en la misma dirección;
@@ -207,7 +219,7 @@ eformateo`;
 | H-05 | 2026-11-06 | Al crear el subdominio, Hostinger dejó `default.php` en `public_html/staging`, y `https://fenia.com.ar/staging/` responde 200 con la página genérica de Hostinger: C20 activo. S-25 lo detecta | Bajo (página genérica) | ✅ Cerrado 2026-11-06 en el paso 2.1: `fenia.com.ar/staging/` → 403 y `default.php` → 403 (S-25 verde) |
 | H-06 | 2026-11-06 | ✅ Parte IP cerrada el 2026-11-07: `health` de producción muestra la IP real del visitante detrás de la CDN, así que los límites por IP funcionan. Sigue vigente la purga después de cada deploy (D18). Detalle original: | **La CDN de Hostinger está activa** en `fenia.com.ar` y en staging (`Server: hcdn`). Sirve la home con `Age` ≈ 10 días aunque el sitio pide `max-age=3600`. Por eso el DNS ya no apunta a la IP del cutover. Después de un deploy, la CDN puede mostrar la versión vieja durante días | **Alto para el lanzamiento**: un kit que pasa a `live` podría seguir viéndose "Próximamente". Además hay que asegurar que `/api` nunca se cachee (C21) | Q6. Purga de CDN después de cada deploy y verificación de frescura (OPS-07) antes del lanzamiento |
 | H-07 | 2026-11-06 | Ya estaba de antes: [docs/audit/2026-05-26-cutover-status.md](../audit/2026-05-26-cutover-status.md) publica en el repo público el usuario FTP del deploy, el host, el puerto y la carpeta. Solo falta la contraseña para entrar | Medio: facilita intentos de fuerza bruta. El historial de git ya es público, así que borrarlo del doc no alcanza | Contraseña FTP fuerte y rotada. Antes del lanzamiento: deploy por **SFTP con llave** (el plan Business tiene SSH, ver [deployment.md](../ai-context/deployment.md)) y desactivar el usuario FTP expuesto |
-| H-12 | 2026-11-18 | **En iPhone, el ícono de «Conversar con IA» en la pantalla de inicio arranca sin el progreso hecho en Safari.** iOS guarda los datos de una app agregada a la pantalla de inicio aparte de los de Safari y no copia el `localStorage` al agregarla (comprobado en iOS 17 y 18). En Android el progreso sigue. No es un problema del sitio: la prueba de aceptación 5 falla en iPhone si se agrega el ícono después de empezar | Medio para el piloto y la venta: parece que se perdió el progreso | Mientras tanto: la invitación del piloto aconseja agregar el ícono antes del día 0, y el progreso se pasa con el código de Ajustes. Para la próxima regeneración, pedirle al equipo de producto un aviso dentro de la app en iPhone |
+| H-12 | 2026-11-18 | **En iPhone, el ícono de «Conversar con IA» en la pantalla de inicio arranca sin el progreso hecho en Safari.** iOS guarda los datos de una app agregada a la pantalla de inicio aparte de los de Safari y no copia el `localStorage` al agregarla (comprobado en iOS 17 y 18). En Android el progreso sigue. No es un problema del sitio: la prueba de aceptación 5 falla en iPhone si se agrega el ícono después de empezar | Medio para el piloto y la venta: parece que se perdió el progreso | Mientras tanto: la invitación del piloto aconseja agregar el ícono antes del día 0, y el progreso se pasa con el código de Ajustes. Desde la v0.4.1 el manifiesto usa `display: browser`, así el ícono abre en el navegador, con el mismo progreso, y no en una app aparte; falta comprobarlo en un iPhone real. Lo mismo pasa con los navegadores internos de Instagram, Facebook y TikTok: ahí la página de venta y la app avisan cómo abrirlo en el navegador (D31) |
 | H-11 | 2026-11-14 | **Las fichas de Enseñar que se venden no muestran lo guardado** al reabrir una ficha o recargar la página: el paquete de Claude Design pasa el valor en el atributo `defaultvalue`, que el navegador no muestra. Lo escrito no se pierde: queda en el navegador y "Copiar para la IA" lo incluye. Las fichas nuevas de Evaluar y Aprender no tienen el problema | Medio: parece que la ficha no guardó | Corrección de pocas líneas, sin tocar ningún texto, en la copia que sirve "Tu kit" (`tu-kit\kit-ensenar-con-ia\fichas.html`). Probada en compu y celular, con la CSP del sitio. Falta el OK del dev para usarla también en el ZIP |
 | H-10 | 2026-11-07 | La descarga por POST de formulario fallaba: Chrome y Firefox recibían el ZIP y lo volvían a pedir con GET (rechazado a propósito, C6). Además **gastaba una de las 5 descargas** | Alto: el comprador no podía bajar el kit | Corregido: la página baja el ZIP con `fetch` y lo entrega completo. Probado en Edge y Firefox |
 | H-09 | 2026-11-07 | **MariaDB de Hostinger: "Illegal mix of collations"** al marcar una orden pagada (la conexión usa `utf8mb4_general_ci` y las tablas `utf8mb4_unicode_ci`). SQLite no lo mostraba. Nada se entregó por error: la orden quedó pendiente | **Crítico**: ninguna venta se habría entregado | Corregido: la decisión pasa a PHP y la conexión fija la collation. CI ahora corre los tests también contra MariaDB 10.11 |
@@ -222,6 +234,20 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (40)** — **UX en el celular (D31) y v0.4.1 de «Conversar con IA», hecha en este entorno.**
+  - Lo nuevo:
+    - aviso de Instagram en la página de venta y en la app;
+    - barra fija;
+    - Google Calendar;
+    - barra de la app oculta con el teclado;
+    - ícono FENIA en todo el sitio, en reemplazo del de Astro;
+    - manifiesto de la app;
+    - arreglo del resumen de la sesión 1.
+  - `scripts/update-app-csp.mjs` escribe las huellas en el `.htaccess` y en el JSON, y `scripts/app-csp-policy.mjs` define la política una sola vez.
+  - Pruebas en local con la CSP real:
+    - semana completa simulada: 43 de 43 controles, incluida la barra oculta con el teclado en las 9 pantallas con campos;
+    - aviso dentro de Instagram (Android, iPhone y navegador común): 15 de 15.
+  - El resumen para el entorno de producto está en `conversar-con-ia-v0.4.1/RESUMEN-PARA-PRODUCTO.md` (local).
 - **2026-11-20 (39)** — **PR #31 en producción** (v0.4 de «Conversar con IA», con el OK del dev si staging daba verde). Deploy y purga de la CDN.
   - Contra producción, la suite de seguridad dio 89 OK y 0 fallas: la CDN entrega las apps byte por byte iguales, con su CSP exacta.
   - La batería E2E dio 69 OK y 0 fallas.

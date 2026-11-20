@@ -169,3 +169,23 @@ card:
     - "Con tu propia IA gratuita"
   cta: "Conocé el entrenamiento"
   kitsLabel: "Kits para educación"
+
+# Phone only (approved 2026-11-20): notice inside Instagram/Facebook/TikTok
+# browsers when tapping «Probá gratis», and the sticky bottom bar.
+mobile:
+  inApp:
+    tag: "Antes de empezar"
+    title: "Abrilo en tu navegador"
+    titleIphone: "Abrilo en Safari"
+    text: "Estás dentro de {app}. Si hacés el día 0 acá, tu progreso puede borrarse cuando cierres la app."
+    openChrome: "Abrir en Chrome"
+    steps:
+      - "Tocá ⋯ arriba a la derecha."
+      - "Elegí «Abrir en el navegador»."
+    copy: "Copiar el link"
+    copied: "Link copiado: pegalo en tu navegador"
+    continue: "Seguir igual acá"
+  stickyBar:
+    title: "Día 0 gratis"
+    text: "8 minutos, con tu IA"
+    cta: "Probá gratis"

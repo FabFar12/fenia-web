@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B1A2E">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/conversar-con-ia.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Conversar con IA">
 <meta name="color-scheme" content="dark light">
 <meta name="robots" content="noindex">
 <title>Conversar con IA sin creerle todo · FENIA</title>
@@ -389,13 +393,18 @@ textarea.input { min-height: 96px; resize: vertical; }
 
 .btn-copiar[disabled] { opacity: .45; cursor: not-allowed; }
 
+
+/* v0.4.1: teclado abierto, aviso de navegador interno, calendario */
+.tecleando .pie { display: none; }
+.aviso-navegador .btn { margin-top: 8px; align-self: flex-start; }
+.aviso-navegador .btn-texto { align-self: flex-start; padding-inline: 0; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <noscript><p class="gutter">Este programa necesita JavaScript activado.</p></noscript>
 <script>
-var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4 · día 0 y semana 1"};
+var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4.1 · día 0 y semana 1"};
 /* Contenido del prototipo: día 0 + semana 1.
    Fuente única de verdad: la app lo lee y el guion en Markdown se genera desde acá. */
 var CONTENIDO = {
@@ -523,7 +532,7 @@ var CONTENIDO = {
         opciones: [
           { id: '1', label: '1' }, { id: '2', label: '2' }, { id: '3', label: '3' }, { id: '4', label: '4' }, { id: '5', label: '5' },
           { id: '6', label: '6' }, { id: '7', label: '7' }, { id: '8', label: '8' }, { id: '9', label: '9' }, { id: '10', label: '10' },
-          { id: 'otro', label: 'No me dio un solo número' }
+          { id: 'otro', label: 'No me dio un solo número', resumen: 'No te dio un solo número.' }
         ],
         regla: 'Acierta si el número que le dio coincide con el que predijo.',
         evaluar: function (pred, sel) { return sel[0] === pred; },
@@ -1163,7 +1172,7 @@ var CONTENIDO = {
       '<h1 class="titulo titulo-xl" tabindex="-1" data-foco>' + esc(C.producto.nombre) + ' <span class="cian">' + esc(C.producto.remate) + '</span></h1>' +
       '<p class="lead">' + esc(C.producto.subtitulo) + '</p>' +
       (CFG.piloto && !CFG.prototipo ? '<div class="aviso-piloto"><p class="et">Estás en el piloto</p><p class="texto">Gracias por probarlo. Hacé una sesión por día, a tu ritmo. Al terminar la semana, mandanos tu resumen desde Ajustes: son dos toques.</p></div>' : '') +
-      '<div class="datos"><span class="dato">' + I.reloj + '5 min por día</span><span class="dato">' + I.sesiones + '30 sesiones</span><span class="dato">' + I.chat + 'Con tu propia IA</span></div>' +
+      avisoNavegador() + '<div class="datos"><span class="dato">' + I.reloj + '5 min por día</span><span class="dato">' + I.sesiones + '30 sesiones</span><span class="dato">' + I.chat + 'Con tu propia IA</span></div>' +
       '</div></main>' +
       '<div class="pie gutter"><button type="button" class="btn btn-accion" data-a="empezarDia0">Empezar el día 0' + I.flecha + '</button>' +
       '<p class="chico">' + (CFG.edicion === 'muestra' ? 'El día 0 es gratis. ' : '') + 'Te lleva unos 8 minutos: hoy armás tu punto de partida.</p>' +
@@ -1237,7 +1246,7 @@ var CONTENIDO = {
     var h = '<div class="tarjeta"><p class="et cian">Tu recordatorio</p><p class="texto"><b>' + esc(frase) + '</b></p>';
     if (CFG.destino === 'fenia') {
       h += '<div class="campo"><label for="hora">¿A qué hora suele ser ese momento?</label><input class="input" id="hora" type="time" data-campo="hora"></div>' +
-        '<button type="button" class="btn btn-chico btn-borde" data-a="ics">' + I.calendario + 'Agregar recordatorio al calendario</button>' +
+        botonesCalendario() +
         '<p class="chico">De lunes a viernes, durante 6 semanas. Lo podés borrar cuando quieras.</p>' + (ui.icsMsg ? '<p class="ok" role="status">' + esc(ui.icsMsg) + '</p>' : '');
     } else {
       h += '<p class="chico">Poné una alarma diaria en tu celular con el nombre «FENIA · 5 minutos», a la hora de tu momento.</p>';
@@ -1431,7 +1440,7 @@ var CONTENIDO = {
         ['Recordar', s.recordar.resumen], ['La idea', s.idea.resumen],
         ['Predecir', 'Tu predicción: ' + etiqueta(s.predecir.opciones, st.pred).toLowerCase() + '.'],
         ['Probar', s.probar.resumen],
-        ['Comparar', (s.comparar.resumenPrefijo || 'Pasó: ') + st.sel.map(function (id) { return etiqueta(s.comparar.opciones, id).toLowerCase(); }).join(', ') + '.']
+        ['Comparar', resumenComparar(s, st)]
       ];
     }
     return [
@@ -1800,6 +1809,85 @@ var CONTENIDO = {
     }
     refrescarPrimario();
   });
+
+  /* ---------- v0.4.1 ---------- */
+  function resumenComparar(s, st) {
+    var solo = st.sel.length === 1 && s.comparar.opciones.filter(function (o) { return o.id === st.sel[0] && o.resumen; })[0];
+    if (solo) return solo.resumen;
+    return (s.comparar.resumenPrefijo || 'Pasó: ') + st.sel.map(function (id) { return etiqueta(s.comparar.opciones, id).toLowerCase(); }).join(', ') + '.';
+  }
+
+  function esAndroid() { return /Android/i.test(navigator.userAgent || ''); }
+  function botonesCalendario() {
+    var gcal = '<button type="button" class="btn btn-chico btn-borde" data-a="gcal">' + I.calendario + 'Agregar a Google Calendar</button>';
+    var ics = '<button type="button" class="btn btn-chico btn-borde" data-a="ics">' + I.calendario + 'Agregar recordatorio al calendario</button>';
+    return esAndroid()
+      ? gcal + '<button type="button" class="btn-texto" data-a="ics">¿Usás otro calendario? Descargá el archivo</button>'
+      : ics + '<button type="button" class="btn-texto" data-a="gcal">O agregalo a Google Calendar</button>';
+  }
+  A.gcal = function () {
+    var hm = (E.hora || '09:00').split(':');
+    var d = new Date(); d.setDate(d.getDate() + 1);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+    var ini = new Date(d.getFullYear(), d.getMonth(), d.getDate(), +hm[0], +hm[1]);
+    var fin = new Date(ini.getTime() + 5 * 60000);
+    function f(x) { return x.getFullYear() + pad(x.getMonth() + 1) + pad(x.getDate()) + 'T' + pad(x.getHours()) + pad(x.getMinutes()) + '00'; }
+    var zona = 'America/Argentina/Buenos_Aires';
+    try { zona = Intl.DateTimeFormat().resolvedOptions().timeZone || zona; } catch (e) { }
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent('FENIA · 5 minutos') +
+      '&details=' + encodeURIComponent('Después ' + conDe(momentoTxt()) + ', abrí Conversar con IA y hacé tu sesión del día: ' + location.href.split('#')[0]) +
+      '&dates=' + f(ini) + '/' + f(fin) + '&ctz=' + encodeURIComponent(zona) +
+      '&recur=' + encodeURIComponent('RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=30');
+    window.open(url, '_blank', 'noopener');
+    ui.icsMsg = 'Se abrió Google Calendar: revisá la hora y tocá Guardar.';
+    render();
+  };
+
+  function navegadorInterno() {
+    var ua = navigator.userAgent || '';
+    if (/Instagram/i.test(ua)) return 'Instagram';
+    if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'Facebook';
+    if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return 'TikTok';
+    return null;
+  }
+  function avisoNavegador() {
+    var donde = navegadorInterno();
+    if (!donde) return '';
+    var url = location.href.split('#')[0];
+    var h = '<div class="aviso-piloto aviso-navegador" role="note"><p class="et">Antes de empezar</p>' +
+      '<p class="texto">Estás dentro de ' + esc(donde) + '. Si hacés el día 0 acá, tu progreso puede borrarse cuando cierres la app. Abrilo en tu navegador.</p>';
+    if (esAndroid()) {
+      h += '<a class="btn btn-chico btn-borde" href="' + esc('intent://' + location.host + location.pathname + location.search +
+        '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end') + '">Abrir en Chrome</a>';
+    } else {
+      h += '<p class="texto">Tocá <b>⋯</b> arriba a la derecha y elegí <b>Abrir en el navegador</b>.</p>';
+    }
+    return h + '<button type="button" class="btn-texto" data-a="copiarLink">' + (ui.linkCopiado ? 'Link copiado: pegalo en tu navegador' : 'Copiar el link') + '</button></div>';
+  }
+  A.copiarLink = function () {
+    copiarTexto(location.href.split('#')[0], function () { ui.linkCopiado = true; render(); }, function () { });
+  };
+
+  // The bottom bar hides while the keyboard is open: the field stays in view.
+  // The keyboard shrinks the visible area; desktops never get here.
+  (function teclado() {
+    var vv = window.visualViewport;
+    if (!vv) return;
+    var alto = vv.height;
+    function escribiendo() {
+      var el = document.activeElement;
+      return !!el && app.contains(el) && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|search|email|url|tel)?$/i.test(el.getAttribute('type') || '')));
+    }
+    function revisar() {
+      if (!escribiendo()) alto = Math.max(alto, vv.height);
+      document.documentElement.classList.toggle('tecleando', escribiendo() && vv.height < alto - 120);
+    }
+    vv.addEventListener('resize', revisar);
+    document.addEventListener('focusin', revisar);
+    document.addEventListener('focusout', function () { setTimeout(revisar, 60); });
+    window.addEventListener('orientationchange', function () { setTimeout(function () { alto = vv.height; revisar(); }, 400); });
+  })();
 
   ui.vista = resolver(location.hash);
   render();
