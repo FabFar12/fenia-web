@@ -72,6 +72,8 @@ The policy now also allows images from the site itself (`img-src 'self'`) and th
 
 The manifest uses `display: browser`, not full screen, on purpose. On iPhone a full-screen web app keeps its own storage apart from Safari's (finding H-12), and the progress must never look lost.
 
+**Amendment 2026-11-20 (v0.4.2, dev's decision): the FENIA logo in the app's headers.** The text wordmark «FENIA.» is replaced by the real logo, in a version for dark backgrounds: the letters in white, the cyan dots of the circuit «F» and the coral dot over the «i» keep their colour. It is made from `public/images/main-logo.png` (glow dropped), 30 px high, and it goes inside the page as a 2 KB `data:` image, so the app depends on no other file. The site's nav keeps the logo on a white plate; in the app a plate competed with the title and looked like a button. The local folder for each version is `conversar-con-ia-v<version>/`.
+
 **Updating an app (procedure).**
 1. Change the HTML in `public/app/<name>/` and the local `programa.html`.
 2. Run `node scripts/update-app-csp.mjs <name> <local programa.html>`. It writes each file's policy in the folder's `.htaccess` and the hashes in `scripts/app-csp-hashes/<name>.json`.

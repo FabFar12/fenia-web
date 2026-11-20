@@ -50,5 +50,6 @@ handoff-conversar-con-ia/
 # Its programa.html is the paid program: it stays here until phase B (ADR-030).
 actualizacion-conversar-con-ia-v0.4/
 # Our own versions of the apps' paid program and the summary for the product
-# environment (ADR-030): local only, programa.html never in the repo.
-conversar-con-ia-v0.4.1/
+# environment (ADR-030), one folder per version: local only, programa.html
+# never in the repo.
+conversar-con-ia-v*/
