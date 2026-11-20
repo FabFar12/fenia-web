@@ -234,6 +234,14 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (41)** — **PR #32 en producción** con el OK del dev (UX en el celular y v0.4.1, D31). Deploy y purga de la CDN.
+  - Contra producción:
+    - suite de seguridad: 89 OK, 0 fallas;
+    - batería E2E: 84 OK, 0 fallas, con la barra fija y el aviso de Instagram;
+    - aviso dentro de la app: 15 de 15;
+    - semana completa simulada: 43 de 43, con 0 violaciones de CSP y 0 errores.
+  - El ícono de FENIA reemplazó al de Astro y  ya no existe.
+  - Pendiente: ver el ícono, la barra con el teclado y el aviso en un iPhone real.
 - **2026-11-20 (40)** — **UX en el celular (D31) y v0.4.1 de «Conversar con IA», hecha en este entorno.**
   - Lo nuevo:
     - aviso de Instagram en la página de venta y en la app;
