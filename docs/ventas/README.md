@@ -235,6 +235,14 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-20 (43)** — **PR #33 en producción** con el OK del dev (logo de FENIA en la app, v0.4.2, D32). Deploy y purga de la CDN.
+  - Contra producción:
+    - logo: 36 de 36 controles;
+    - semana completa simulada: 25 de 25, con 0 violaciones de CSP;
+    - aviso dentro de Instagram: 15 de 15;
+    - suite de seguridad: 89 OK, 0 fallas;
+    - batería E2E: 84 OK, 0 fallas.
+  - El link del piloto no cambió y el progreso guardado se conserva.
 - **2026-11-20 (42)** — **Logo de FENIA en la app (D32), v0.4.2.**
   - En la muestra, el piloto y el programa, el logo en blanco reemplaza al texto «FENIA.» en la pantalla de inicio y en «Tu recorrido». Huellas recalculadas.
   - La captura 01 de la página de venta se rehízo con el logo.
