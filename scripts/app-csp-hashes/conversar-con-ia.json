@@ -1,14 +1,14 @@
 {
   "piloto.html": {
-    "script": "'sha256-v/VUSdH44hNp2pIdZjKJMaYaE8EU3Gwfb5Q8MHrcOEw='",
-    "style": "'sha256-HVHklsiL115mJNEFvK9zKEUjAxqSHVAhdxQaXNNa+0E='"
+    "script": "'sha256-udyDs9xMwKGPEP+mVt1q6J7ZRq+JDaHj66i9t0I/1nI='",
+    "style": "'sha256-6H6fTcgWOlIHciDfA6L3wWFwQsI/Fm8UXrQUhe7x6H4='"
   },
   "programa.html": {
-    "script": "'sha256-cMHUwfy04wNp+sd0yrJ/nw78T+FASiyJ3zh0H6nUHoU='",
-    "style": "'sha256-HVHklsiL115mJNEFvK9zKEUjAxqSHVAhdxQaXNNa+0E='"
+    "script": "'sha256-fyZPsjE0oKmvPFth0E+JzA9h3oKJitcUmtzJjuy0cDw='",
+    "style": "'sha256-6H6fTcgWOlIHciDfA6L3wWFwQsI/Fm8UXrQUhe7x6H4='"
   },
   "muestra.html": {
-    "script": "'sha256-l7uXYx57HqFFj8boRItcXIm7HC0WvS3G4KyovU8CCpY='",
-    "style": "'sha256-HVHklsiL115mJNEFvK9zKEUjAxqSHVAhdxQaXNNa+0E='"
+    "script": "'sha256-RyLgTVemaxhzQ+N/skwU9HNH+wIWYhWjiXpm9ULjF48='",
+    "style": "'sha256-6H6fTcgWOlIHciDfA6L3wWFwQsI/Fm8UXrQUhe7x6H4='"
   }
 }
