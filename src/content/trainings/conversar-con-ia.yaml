@@ -15,7 +15,7 @@ ctas:
   notify: "Avisame cuando esté completo"
 
 hero:
-  pill: "Entrenamiento · 6 semanas"
+  pill: "Entrenamiento de 6 semanas"
   titleLine1: "Conversar con IA"
   titleLine2: "sin creerle todo"
   subtitle: "Un entrenamiento de 5 minutos por día, durante 6 semanas, para que la IA trabaje para vos."

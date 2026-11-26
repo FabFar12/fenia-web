@@ -13,7 +13,7 @@ const SAMPLE = '/app/conversar-con-ia/muestra.html';
 test('entrenamiento: fase A, muestra gratis y lista de espera, sin compra', async ({ page }) => {
   await page.goto(PAGE);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Conversar con IA\s*sin creerle todo/);
-  await expect(page.getByText('Entrenamiento · 6 semanas', { exact: true })).toBeVisible();
+  await expect(page.getByText('Entrenamiento de 6 semanas', { exact: true })).toBeVisible();
 
   const tryIt = page.getByRole('link', { name: /Probá gratis el día 0/ });
   await expect(tryIt).toHaveCount(3);

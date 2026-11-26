@@ -108,6 +108,7 @@ De la IA:
 | D6 | 2026-11-06 | Los Links de Pago que ya existen en Mercado Pago no se usan en el circuito. Se desactivan, salvo que se estén usando para ventas manuales. Verificado: hay 3 activos ("Evaluar / Aprender / Educar con IA - Ebook"). Sus URLs **no** se escriben en el repo | ✅ (acción de Fab en la guía, 2.7) |
 | D7 | 2026-11-06 | El webhook se configura en el panel de MP por entorno (URL de prueba → staging, URL productiva → producción), así los avisos llegan firmados. `notification_url` por preferencia solo si INT-08 prueba que también llega firmado | ✅ Técnica |
 | D8 | 2026-11-06 | Versión mínima de PHP: 8.1 (CI prueba 8.1 y 8.3). Se revisa al confirmar Q1 | ✅ Técnica |
+| D33 | 2026-11-26 | **Tipografía «Editorial» en la app** (decisión del dev, opción B). Para que la app no parezca hecha por una IA: sin « · » en los textos de pantalla; la etiqueta sobre el título, en minúscula, sin espaciado entre letras y pegada al título; rótulos sin espaciado entre letras; ritmo vertical por grupos; avisos con una línea celeste al costado. App v0.4.3. En la página de venta, la etiqueta pasa a «Entrenamiento de 6 semanas» y se rehicieron las capturas 01 y 04 a 07. El resto del sitio no cambia | ✅ Decisión del dev |
 | D32 | 2026-11-20 | **Logo de FENIA en la app** (decisión del dev, opción B). Arriba a la izquierda, donde decía el texto «FENIA.», va el logo en su versión para fondo oscuro: letras blancas, puntos celestes y el punto naranja. Se descartó la placa blanca del menú del sitio, porque en la app competía con el título y parecía un botón. App v0.4.2; la captura 01 de la página de venta se rehízo | ✅ Decisión del dev |
 | D31 | 2026-11-20 | **UX en el celular y quién hace las apps** (decisiones del dev).
   - Las apps se editan en este entorno, que es donde se decide. El entorno de producto aporta material y decisiones estéticas y recibe un resumen de cada cambio (ADR-030).
@@ -235,6 +236,15 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-26 (44)** — **Tipografía «Editorial» en la app (D33), v0.4.3.**
+  - Diagnóstico del dev: la app «se nota hecha por una IA». Se compararon tres versiones sobre la app real (la de hoy, A «como el sitio» y B «editorial»). El dev eligió la B después de verla en staging.
+  - En la muestra, el piloto y el programa cambiaron los estilos de la etiqueta, los rótulos, los avisos, los datos del inicio y el ritmo vertical. Las etiquetas y los textos de pantalla ya no usan « · ». La clave de guardado no cambió. Huellas recalculadas.
+  - Página de venta: la etiqueta dice «Entrenamiento de 6 semanas» y las capturas 01 y 04 a 07 se rehicieron con la v0.4.3. Se actualizaron las fotos de referencia afectadas.
+  - Pruebas en local con la CSP real y en staging:
+    - semana completa simulada: 25 de 25, con 0 violaciones de CSP;
+    - aviso dentro de Instagram: 15 de 15;
+    - logo: 36 de 36.
+  - El resumen para el entorno de producto está en `conversar-con-ia-v0.4.3/RESUMEN-PARA-PRODUCTO.md` (local).
 - **2026-11-20 (43)** — **PR #33 en producción** con el OK del dev (logo de FENIA en la app, v0.4.2, D32). Deploy y purga de la CDN.
   - Contra producción:
     - logo: 36 de 36 controles;
