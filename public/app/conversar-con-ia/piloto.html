@@ -106,7 +106,7 @@ button { -webkit-appearance: none; appearance: none; }
 
 /* ---------- cuerpo y pie ---------- */
 .cuerpo { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-.contenido { display: flex; flex-direction: column; gap: 14px; padding-block: 18px 24px; }
+.contenido { display: flex; flex-direction: column; padding-block: 18px 24px; }
 .entra { animation: entra .38s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes entra { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .pie { padding-top: 10px; padding-bottom: calc(18px + var(--inset-bottom)); display: flex; flex-direction: column; gap: 4px; }
@@ -114,7 +114,7 @@ button { -webkit-appearance: none; appearance: none; }
 .claro .pie { background: linear-gradient(to top, var(--papel) 70%, rgba(244,246,249,0)); }
 
 /* ---------- tipografía ---------- */
-.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .14em; line-height: 1.3; color: var(--eyebrow); margin: 0; text-transform: uppercase; }
+.eyebrow { font-size: 15px; font-weight: 700; line-height: 1.35; color: var(--eyebrow); margin: 0; }
 .titulo { margin: 0; font-size: 30px; line-height: 1.14; font-weight: 800; letter-spacing: -.015em; text-wrap: balance; }
 .titulo:focus { outline: none; }
 .titulo-xl { font-size: 34px; line-height: 1.08; }
@@ -162,7 +162,7 @@ button { -webkit-appearance: none; appearance: none; }
 .opcion.correcta { border-color: var(--cian); }
 .claro .opcion.correcta { border-color: var(--cian-prof); }
 .opcion.errada { border-color: var(--ambar); }
-.opcion .estado { margin-left: auto; font-size: 12px; font-weight: 800; letter-spacing: .1em; flex: none; }
+.opcion .estado { margin-left: auto; font-size: 14px; font-weight: 800; flex: none; }
 .opcion.correcta .estado { color: var(--cian); }
 .opcion.errada .estado { color: var(--ambar); }
 .escenario-op { align-items: flex-start; }
@@ -183,7 +183,7 @@ button { -webkit-appearance: none; appearance: none; }
 .tarjeta { background: var(--card); border: 1px solid var(--card-borde); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
 .tarjeta.destacada { border: 2px solid var(--cian-prof); }
 .oscuro .tarjeta.destacada { border-color: var(--cian); }
-.et { font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--tx-tenue); margin: 0; }
+.et { font-size: 14px; font-weight: 700; line-height: 1.4; color: var(--tx-tenue); margin: 0; }
 .et.cian { color: var(--eyebrow); }
 .respuesta { background: var(--cian-osc); border: 1px solid var(--cian); border-radius: 18px; padding: 16px 18px; font-size: 17px; line-height: 1.55; }
 .claro .respuesta { background: var(--cian-suave); border-color: var(--cian-borde); }
@@ -205,7 +205,7 @@ mark { background: var(--marca); color: inherit; border-radius: 4px; padding: 0 
 .btn-compartir { background: transparent; color: var(--blanco); border: 2px solid var(--borde-osc); width: auto; flex: none; padding: 0 16px; }
 .aviso-copia { margin: 0; font-size: 14px; color: var(--tenue-osc); }
 
-.traslado { border: 1.5px dashed var(--linea-2); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.traslado { border: 1px solid var(--linea-2); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
 .oscuro .traslado { border-color: var(--borde-osc); }
 
 .feedback { border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--cian-borde); background: var(--cian-suave); }
@@ -255,8 +255,8 @@ textarea.input { min-height: 96px; resize: vertical; }
 .anim .nodo-anim { opacity: 0; transform-box: fill-box; transform-origin: center; animation: aparecer .4s ease-out forwards; }
 @keyframes dibujar { to { stroke-dashoffset: 0; } }
 @keyframes aparecer { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
-.datos { display: flex; flex-wrap: wrap; gap: 8px; }
-.dato { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid var(--noche-3); background: var(--noche-2); font-size: 14px; font-weight: 700; color: var(--tenue-osc); }
+.datos { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.dato { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--tenue-osc); }
 .dato svg { width: 16px; height: 16px; color: var(--cian); }
 
 /* ---------- hoy ---------- */
@@ -305,7 +305,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 
 /* ---------- bitácora y ajustes ---------- */
 .seccion { display: flex; flex-direction: column; gap: 10px; }
-.seccion h2 { margin: 8px 0 0; font-size: 13px; font-weight: 800; letter-spacing: .12em; color: var(--tenue); }
+.seccion h2 { margin: 8px 0 0; font-size: 17px; font-weight: 800; line-height: 1.3; }
 .entrada .fila { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
 .entrada h3 { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.3; }
 .entrada .fecha { font-size: 13px; color: var(--tenue); white-space: nowrap; }
@@ -380,8 +380,8 @@ textarea.input { min-height: 96px; resize: vertical; }
 .herramienta[open] summary::after { content: "−"; }
 .herramienta .et { margin-top: 10px; }
 .herramienta .fuente { margin-top: 10px; }
-.aviso-piloto { border: 1px solid var(--cian); background: var(--cian-osc); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
-.aviso-piloto .et { color: var(--cian); }
+.aviso-piloto { border-left: 3px solid var(--cian); padding: 2px 0 2px 14px; display: flex; flex-direction: column; gap: 4px; }
+.aviso-piloto b { color: var(--blanco); }
 
 /* v0.4: grilla de números, criterios de la pregunta */
 .escala.grilla .chip { min-height: 52px; font-size: 19px; font-weight: 800; }
@@ -397,13 +397,26 @@ textarea.input { min-height: 96px; resize: vertical; }
 .tecleando .pie { display: none; }
 .aviso-navegador .btn { margin-top: 8px; align-self: flex-start; }
 .aviso-navegador .btn-texto { align-self: flex-start; padding-inline: 0; }
+
+/* v0.4.3: ritmo vertical por grupos. Lo que va junto, pegado (el rótulo a su
+   título, el título a su bajada, la nota a su bloque); entre bloques, más aire. */
+.contenido > * + * { margin-top: 22px; }
+.contenido > .mapa-wrap + * { margin-top: 4px; }
+.contenido > .sello + * { margin-top: 14px; }
+.contenido > .eyebrow + * { margin-top: 6px; }
+.contenido > .et + * { margin-top: 8px; }
+.contenido > * + .chico { margin-top: 10px; }
+.contenido > .chico + .eyebrow { margin-top: 4px; }
+.contenido > .titulo + p, .contenido > .titulo + .pill { margin-top: 10px; }
+.contenido > .datos { margin-top: 18px; }
+.hoja .eyebrow + .titulo { margin-top: -4px; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <noscript><p class="gutter">Este programa necesita JavaScript activado.</p></noscript>
 <script>
-var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4.2 · día 0 y semana 1"};
+var CONFIG = {"edicion":"completo","destino":"fenia","prototipo":false,"piloto":true,"whatsapp":"5493513559947","clave":"fenia_programa_conversar-con-ia_v1","urlCompra":"/entrenamientos/conversar-con-ia/","versionTexto":"Piloto v0.4.3, día 0 y semana 1"};
 /* Contenido del prototipo: día 0 + semana 1.
    Fuente única de verdad: la app lo lee y el guion en Markdown se genera desde acá. */
 var CONTENIDO = {
@@ -434,7 +447,7 @@ var CONTENIDO = {
   dia0: {
     titulo: 'Tu punto de partida',
     duraciones: [40, 20, 40, 300, 60],
-    etiquetas: ['CÓMO FUNCIONA', 'TU ESCENARIO', 'TU MOMENTO', 'TU PUNTO DE PARTIDA', 'UNA COSA MÁS'],
+    etiquetas: ['Cómo funciona', 'Tu escenario', 'Tu momento', 'Tu punto de partida', 'Una cosa más'],
     comoFunciona: {
       titulo: 'Cinco minutos por día. Una cosa por vez.',
       puntos: [
@@ -504,7 +517,7 @@ var CONTENIDO = {
         destacado: 'Si querés algo original, pedíselo: lo primero que te da es lo más visto.',
         ampliar: {
           texto: 'Cuando a las personas nos piden un número «al azar» del 0 al 9, el 7 aparece mucho más de lo esperable. Los modelos de lenguaje aprendieron de lo que escribimos, y en estudios recientes también muestran preferencias fijas cuando se les pide azar. No es un defecto puntual: es cómo funcionan. Eligen lo probable.',
-          fuente: 'Kubovy y Psotka (1976), Journal of Experimental Psychology · Coronado-Blázquez (2025), preprint sin revisión por pares.'
+          fuente: 'Kubovy y Psotka (1976), Journal of Experimental Psychology; Coronado-Blázquez (2025), preprint sin revisión por pares.'
         },
         resumen: 'No sortea: elige lo probable.'
       },
@@ -547,7 +560,7 @@ var CONTENIDO = {
         mecanismo: 'Recuperación activa',
         texto: 'Empezaste recordando lo del día 0 antes de ver la respuesta. Recordar sin mirar fija mejor que volver a leer.',
         evidencia: 'solida',
-        fuente: 'Roediger y Karpicke (2006) · Rowland (2014), metaanálisis.'
+        fuente: 'Roediger y Karpicke (2006); Rowland (2014), metaanálisis.'
       }
     },
 
@@ -565,9 +578,9 @@ var CONTENIDO = {
         texto: 'Cuando le falta información, no se frena a preguntar: la completa con lo más probable. Y lo más probable no sos vos: es una persona promedio.',
         ejemplo: {
           tipo: 'contraste',
-          flojoLabel: 'PEDIDO FLOJO',
+          flojoLabel: 'Pedido flojo',
           flojo: 'Armame un plan para este sábado.',
-          buenoLabel: 'CON CONTEXTO',
+          buenoLabel: 'Con contexto',
           bueno: [
             ['Armame un plan para este sábado ', false], ['en Córdoba', true], [', ', false], ['con mis dos hijos de 6 y 9', true],
             ['. ', false], ['Va a llover', true], [' y ', false], ['no quiero gastar más de $20.000', true], ['.', false]
@@ -623,7 +636,7 @@ var CONTENIDO = {
         mecanismo: 'Predecir y comparar',
         texto: 'Antes de probar, apostaste qué iba a pasar. Contrastar una predicción con lo que ocurre, sobre todo cuando te equivocás con seguridad, hace que la corrección se recuerde mejor.',
         evidencia: 'solida',
-        fuente: 'Butterfield y Metcalfe (2001) · Metcalfe (2017).'
+        fuente: 'Butterfield y Metcalfe (2001); Metcalfe (2017).'
       }
     },
 
@@ -641,9 +654,9 @@ var CONTENIDO = {
         texto: 'Lo que escribís en una IA puede quedar guardado y, según el servicio y cómo lo tengas configurado, revisarse o usarse para entrenar modelos. Y casi nunca necesita saber quién sos para ayudarte.',
         ejemplo: {
           tipo: 'contraste',
-          flojoLabel: 'CON DATOS DE MÁS',
+          flojoLabel: 'Con datos de más',
           flojo: 'Ayudame con un reclamo. Soy Laura Gómez, DNI 30.123.456, cliente 88412 de mi empresa de internet. Me cobraron dos veces en octubre con la tarjeta terminada en 4421.',
-          buenoLabel: 'SOLO LA SITUACIÓN',
+          buenoLabel: 'Solo la situación',
           bueno: [
             ['Ayudame con un reclamo a mi empresa de internet. ', false], ['Me cobraron dos veces el mismo mes', true],
             [' y ', false], ['ya llamé dos veces sin solución.', true], [' ', false], ['Quiero un tono firme y educado.', true]
@@ -688,7 +701,7 @@ var CONTENIDO = {
         mecanismo: 'Práctica distribuida',
         texto: 'Hiciste esta sesión otro día, no a continuación de la anterior. Repartir la práctica en días rinde más que concentrarla, y el sueño entre sesiones ayuda a consolidar.',
         evidencia: 'solida',
-        fuente: 'Cepeda y otros (2006), metaanálisis · Diekelmann y Born (2010).'
+        fuente: 'Cepeda y otros (2006), metaanálisis; Diekelmann y Born (2010).'
       }
     },
 
@@ -714,7 +727,7 @@ var CONTENIDO = {
         destacado: 'Donde más inventa es en lo poco conocido: lo de tu barrio, tu ciudad o tu oficio. Justo lo que vos sabés.',
         ampliar: {
           texto: 'Los modelos aciertan mucho más en lo que aparece seguido en internet que en lo raro: un dato de tu barrio, un horario, un detalle de tu oficio. En esa «cola larga» de datos poco frecuentes completan con lo que suena probable, y lo dicen con el mismo tono que cuando aciertan. Además, las personas tendemos a aceptar lo que dice un sistema automático sin revisarlo lo suficiente. Por eso tu terreno es el mejor lugar para medirla.',
-          fuente: 'Kandpal y otros (2023), ICML · Parasuraman y Manzey (2010), Human Factors.'
+          fuente: 'Kandpal y otros (2023), ICML; Parasuraman y Manzey (2010), Human Factors.'
         },
         resumen: 'Que suene segura no la hace correcta.'
       },
@@ -776,7 +789,7 @@ var CONTENIDO = {
         mecanismo: 'Autorreferencia y retroalimentación',
         texto: 'Comparaste su respuesta con algo que sabés de primera mano. Lo que se relaciona con uno mismo se recuerda mejor, y contrastar contra una fuente segura te muestra qué tan calibrada estaba tu confianza.',
         evidencia: 'solida',
-        fuente: 'Symons y Johnson (1997), metaanálisis · Hattie y Timperley (2007).'
+        fuente: 'Symons y Johnson (1997), metaanálisis; Hattie y Timperley (2007).'
       }
     },
 
@@ -890,7 +903,7 @@ var CONTENIDO = {
         donde: 'Dentro de WhatsApp (como chat propio o mencionándola con @Meta AI en un grupo), en Instagram, Messenger y su propia app.',
         gratis: 'Uso gratuito dentro de las apps de Meta. En la app Meta AI, Argentina estuvo entre los primeros países con funciones nuevas, como tareas de varios pasos e investigación en la web.',
         ojo: 'Según WhatsApp, no lee tus chats personales: solo lo que le escribís o le reenvían. Lo que le escribís puede usarse para mejorar su IA. Si alguien la menciona en un grupo, lo que le pase le llega a Meta.',
-        fuente: 'WWWhatsnew, con la ayuda oficial de WhatsApp, noviembre de 2026 · A24, julio de 2026.'
+        fuente: 'WWWhatsnew, con la ayuda oficial de WhatsApp, noviembre de 2026; A24, julio de 2026.'
       }
     ],
     reglaFinal: 'Lo que no cambia de una a otra: ninguna sabe lo que no le contás, todas pueden equivocarse con tono seguro y en ninguna conviene poner datos personales.'
@@ -1170,10 +1183,10 @@ var CONTENIDO = {
       '<div class="cabecera gutter"><div class="nombre">' + LOGO_FENIA + '</div></div>' +
       '<main class="cuerpo gutter"><div class="contenido">' +
       '<div class="mapa-wrap anim">' + mapa({ anim: true, inicio: true, label: 'Recorrido de 30 sesiones en 6 semanas. Empezás por el día 0.' }) + '</div>' +
-      '<p class="eyebrow">Entrenamiento · 6 semanas</p>' +
+      '<p class="eyebrow">Entrenamiento de 6 semanas</p>' +
       '<h1 class="titulo titulo-xl" tabindex="-1" data-foco>' + esc(C.producto.nombre) + ' <span class="cian">' + esc(C.producto.remate) + '</span></h1>' +
       '<p class="lead">' + esc(C.producto.subtitulo) + '</p>' +
-      (CFG.piloto && !CFG.prototipo ? '<div class="aviso-piloto"><p class="et">Estás en el piloto</p><p class="texto">Gracias por probarlo. Hacé una sesión por día, a tu ritmo. Al terminar la semana, mandanos tu resumen desde Ajustes: son dos toques.</p></div>' : '') +
+      (CFG.piloto && !CFG.prototipo ? '<div class="aviso-piloto"><p class="texto"><b>Estás en el piloto.</b> Gracias por probarlo. Hacé una sesión por día, a tu ritmo. Al terminar la semana, mandanos tu resumen desde Ajustes: son dos toques.</p></div>' : '') +
       avisoNavegador() + '<div class="datos"><span class="dato">' + I.reloj + '5 min por día</span><span class="dato">' + I.sesiones + '30 sesiones</span><span class="dato">' + I.chat + 'Con tu propia IA</span></div>' +
       '</div></main>' +
       '<div class="pie gutter"><button type="button" class="btn btn-accion" data-a="empezarDia0">Empezar el día 0' + I.flecha + '</button>' +
@@ -1186,7 +1199,7 @@ var CONTENIDO = {
     var modos = ['claro', 'oscuro', 'claro', 'claro', 'oscuro'];
     var h = '<div class="pantalla ' + modos[p] + '">' + barra('salirDia0', 'Salir: tu avance queda guardado', p, 5, mins(D.duraciones, p));
     h += '<main class="cuerpo gutter"><div class="contenido">';
-    h += '<p class="eyebrow">Día 0 · ' + D.etiquetas[p] + '</p>';
+    h += '<p class="eyebrow">' + D.etiquetas[p] + '</p>';
     if (p === 0) {
       h += '<h1 class="titulo" tabindex="-1" data-foco>' + esc(D.comoFunciona.titulo) + '</h1><ul class="puntos">' +
         D.comoFunciona.puntos.map(function (x) { return '<li><span class="ico">' + I[x.icono] + '</span><span>' + esc(x.texto) + '</span></li>'; }).join('') + '</ul>' +
@@ -1233,9 +1246,9 @@ var CONTENIDO = {
     h += '<span class="sello anim-sello" aria-hidden="true">' + I.check + '</span>';
     h += '<p class="eyebrow">Día 0 completo</p><h1 class="titulo" tabindex="-1" data-foco>Tu punto de partida quedó guardado.</h1>';
     h += '<ol class="hilo">' +
-      itemHilo(E.escenarios.length > 1 ? 'Tus escenarios' : 'Tu escenario', escenariosSel().map(function (e) { return e.label; }).join(' · ')) +
+      itemHilo(E.escenarios.length > 1 ? 'Tus escenarios' : 'Tu escenario', enumerar(escenariosSel().map(function (e) { return e.label; }))) +
       itemHilo('Tu momento', 'Después ' + conDe(momentoTxt()) + ', abrís tu sesión.') +
-      itemHilo('Tu tarea testigo', d.tarea + ' · Utilidad: ' + d.utilidad + ' de 5') +
+      itemHilo('Tu tarea testigo', d.tarea + ' (utilidad: ' + d.utilidad + ' de 5)') +
       itemHilo('Tu primer descubrimiento', d.repetido === 'igual' ? 'Esta vez respondió igual. Mañana vemos por qué casi nunca pasa.' : 'Mismo pedido, otra respuesta: no busca, genera.') + '</ol>';
     h += '<div class="tarjeta"><p class="et cian">Dentro de seis semanas</p><p class="texto">' + esc(C.dia0.testigo.cierre) + '</p></div>';
     if (CFG.edicion === 'muestra') h += upsell();
@@ -1243,6 +1256,7 @@ var CONTENIDO = {
     h += '</div></main><div class="pie gutter"><button type="button" class="btn btn-accion" data-a="irHoy">Ir a mi recorrido' + I.flecha + '</button></div></div>';
     return h;
   }
+  function enumerar(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1]; }
   function itemHilo(et, tx) { return '<li><span class="nodo" aria-hidden="true">' + I.check + '</span><p class="et cian">' + esc(et) + '</p><p class="tx">' + esc(tx) + '</p></li>'; }
   function recordatorio(frase) {
     var h = '<div class="tarjeta"><p class="et cian">Tu recordatorio</p><p class="texto"><b>' + esc(frase) + '</b></p>';
@@ -1251,7 +1265,7 @@ var CONTENIDO = {
         botonesCalendario() +
         '<p class="chico">De lunes a viernes, durante 6 semanas. Lo podés borrar cuando quieras.</p>' + (ui.icsMsg ? '<p class="ok" role="status">' + esc(ui.icsMsg) + '</p>' : '');
     } else {
-      h += '<p class="chico">Poné una alarma diaria en tu celular con el nombre «FENIA · 5 minutos», a la hora de tu momento.</p>';
+      h += '<p class="chico">Poné una alarma diaria en tu celular con el nombre «5 minutos de FENIA», a la hora de tu momento.</p>';
     }
     return h + '</div>';
   }
@@ -1266,11 +1280,11 @@ var CONTENIDO = {
     var h = '<div class="pantalla oscuro"><div class="hoy-arriba">';
     h += '<div class="cabecera gutter"><div class="nombre">' + LOGO_FENIA + '<small>' + esc(C.producto.nombre + ' ' + C.producto.remate) + '</small></div>' +
       '<div class="acciones"><button type="button" class="icono-btn" data-a="irBitacora" aria-label="Tu bitácora">' + I.libro + '</button><button type="button" class="icono-btn" data-a="irAjustes" aria-label="Ajustes y progreso">' + I.menu + '</button></div></div>';
-    h += '<div class="gutter contenido-hoy"><h1 class="titulo" tabindex="-1" data-foco>Tu recorrido</h1><p class="lead">Semana ' + (prox ? prox.semana : 1) + ' de 6 · ' + (C.semanas[(prox ? prox.semana : 1) - 1].nombre) + ' · ' + n + ' de 30 sesiones</p></div>';
+    h += '<div class="gutter contenido-hoy"><h1 class="titulo" tabindex="-1" data-foco>Tu recorrido</h1><p class="lead">Semana ' + (prox ? prox.semana : 1) + ' de 6, ' + (C.semanas[(prox ? prox.semana : 1) - 1].nombre) + '. Llevás ' + n + ' de 30 sesiones.</p></div>';
     h += '<div class="gutter mapa-wrap">' + mapa({ label: n + ' de 30 sesiones hechas.' + (prox ? ' La próxima es la sesión ' + prox.n + '.' : '') }) + '</div>';
     var sem = C.semanas[(prox ? prox.semana : 1) - 1];
     h += '<p class="foco-semana gutter">' + esc(sem.foco) + '</p>';
-    if (CFG.edicion !== 'muestra') h += '<div class="gutter"><button type="button" class="acceso-guia" data-a="irGuia">' + I.chat + '<span><b>¿Qué IA para qué?</b><small>Guía de las versiones gratuitas · ' + esc(C.guiaIA.actualizada) + '</small></span>' + I.flecha + '</button></div>';
+    if (CFG.edicion !== 'muestra') h += '<div class="gutter"><button type="button" class="acceso-guia" data-a="irGuia">' + I.chat + '<span><b>¿Qué IA para qué?</b><small>Guía de las versiones gratuitas, ' + esc(C.guiaIA.actualizada) + '</small></span>' + I.flecha + '</button></div>';
     h += '<div class="leyenda gutter" aria-hidden="true"><span><i class="l-hecho"></i>Hecha</span><span><i class="l-hoy"></i>La que sigue</span><span><i class="l-mezcla"></i>Mezcla de la semana</span></div>';
     h += '</div><section class="hoja gutter" aria-labelledby="hoy-t">' + hojaHoy(prox) + '</section></div>';
     return h;
@@ -1292,16 +1306,16 @@ var CONTENIDO = {
     var st = E.ses[prox.id];
     var meta = '<p class="meta">' + I.reloj + 'Tu momento: después ' + esc(conDe(momentoTxt())) + '</p>';
     if (st.paso > 0) {
-      return '<p class="eyebrow">Sesión ' + prox.n + ' · Ibas por el paso ' + (st.paso + 1) + ' de 5</p><h2 class="titulo" id="hoy-t">' + esc(prox.titulo) + '</h2>' + meta +
+      return '<p class="eyebrow">Te quedaste en el paso ' + (st.paso + 1) + ' de la sesión ' + prox.n + '</p><h2 class="titulo" id="hoy-t">' + esc(prox.titulo) + '</h2>' + meta +
         '<button type="button" class="btn btn-accion" data-a="empezar" data-arg="' + prox.id + '">Seguir donde estabas' + I.flecha + '</button>';
     }
     if (disponible(prox.id)) {
-      return '<p class="eyebrow">Hoy · Sesión ' + prox.n + ' · 5 min</p><h2 class="titulo" id="hoy-t">' + esc(prox.titulo) + '</h2>' + meta +
+      return '<p class="eyebrow">Hoy te toca la sesión ' + prox.n + '</p><h2 class="titulo" id="hoy-t">' + esc(prox.titulo) + '</h2>' + meta +
         '<button type="button" class="btn btn-accion" data-a="empezar" data-arg="' + prox.id + '">Empezar' + I.flecha + '</button>';
     }
     var u = ultimaHecha();
     var h = '<span class="pill">' + I.check.replace('<svg', '<svg width="14" height="14"') + 'Listo por hoy</span>' +
-      '<h2 class="titulo" id="hoy-t">La sesión ' + prox.n + ' se habilita mañana.</h2><p class="meta">«' + esc(prox.titulo) + '» · después ' + esc(conDe(momentoTxt())) + '</p>';
+      '<h2 class="titulo" id="hoy-t">La sesión ' + prox.n + ' se habilita mañana.</h2><p class="meta">«' + esc(prox.titulo) + '», después ' + esc(conDe(momentoTxt())) + '</p>';
     if (u) h += '<button type="button" class="btn btn-chico btn-borde" data-a="verResumen" data-arg="' + u.id + '">Ver lo que hiciste hoy</button>';
     if (CFG.prototipo) h += '<button type="button" class="btn-texto sub" data-a="irAjustes">¿Revisando el prototipo? Activá el modo revisión</button>';
     return h;
@@ -1314,8 +1328,8 @@ var CONTENIDO = {
     var modos = regular ? ['oscuro', 'claro', 'oscuro', 'claro', 'claro'] : ['oscuro', 'oscuro', 'oscuro', 'claro', 'claro'];
     var h = '<div class="pantalla ' + modos[p] + '">' + barra('salirSesion', 'Salir: queda guardado dónde estás', p, 5, mins(s.duraciones, p));
     h += '<main class="cuerpo gutter"><div class="contenido">';
-    if (p === 0) h += '<p class="chico">Sesión ' + s.n + ' · ' + esc(s.titulo) + '</p>';
-    h += '<p class="eyebrow">Paso ' + (p + 1) + ' de 5 · ' + nombres[p] + '</p>';
+    if (p === 0) h += '<p class="chico">Sesión ' + s.n + ', «' + esc(s.titulo) + '»</p>';
+    h += '<p class="eyebrow">' + nombres[p] + '</p>';
     if (p === 0) h += pasoRecordar(s, st);
     else if (regular && p === 1) h += pasoIdea(s);
     else if (regular && p === 2) h += '<h1 class="titulo" tabindex="-1" data-foco>' + esc(s.predecir.pregunta) + '</h1><p class="lead">Elegí antes de probar. Después comparás.</p>' + (s.predecir.grilla ? grilla(s.predecir.pregunta, s.predecir.opciones, st.pred, 'pred') : radio(s.predecir.pregunta, s.predecir.opciones, st.pred, 'pred'));
@@ -1397,7 +1411,7 @@ var CONTENIDO = {
     var h = '<div class="tarjeta"><p class="texto">' + esc(x.escena) + '</p></div><h1 class="titulo" tabindex="-1" data-foco>' + esc(x.pregunta) + '</h1>';
     h += radio(x.pregunta, x.opciones, elegido, 'sit', {
       clase: function (o) { if (!elegido) return ''; if (o.correcta) return 'correcta'; return o.id === elegido ? 'errada' : ''; },
-      estado: function (o) { if (!elegido) return ''; if (o.correcta) return 'MEJOR'; return o.id === elegido ? 'OJO' : ''; }
+      estado: function (o) { if (!elegido) return ''; if (o.correcta) return 'Mejor'; return o.id === elegido ? 'Ojo' : ''; }
     });
     if (elegido) {
       var op = x.opciones.filter(function (o) { return o.id === elegido; })[0];
@@ -1457,7 +1471,7 @@ var CONTENIDO = {
     var h = '<div class="pantalla claro"><div class="barra gutter"><button type="button" class="icono-btn" data-a="irHoy" aria-label="Volver a tu recorrido">' + I.cerrar + '</button></div>';
     h += '<main class="cuerpo gutter"><div class="contenido">';
     h += '<span class="sello anim-sello" aria-hidden="true">' + I.check + '</span>';
-    h += '<p class="eyebrow">Sesión ' + s.n + ' completa' + (s.tipo === 'mezcla' ? ' · Semana 1 completa' : '') + '</p>';
+    h += '<p class="eyebrow">Sesión ' + s.n + ' completa' + (s.tipo === 'mezcla' ? ', y con ella la semana 1' : '') + '</p>';
     h += '<h1 class="titulo" tabindex="-1" data-foco>' + esc(s.titulo) + '</h1>';
     if (s.tipo === 'regular') h += '<span class="pill' + (st.acierto ? '' : ' coral') + '">Predicción: ' + (st.acierto ? 'acertaste' : 'te sorprendió') + '</span>';
     h += '<p class="et">Lo que hiciste</p><ol class="hilo">' + resumenPasos(s, st).map(function (r) { return itemHilo(r[0], r[1]); }).join('') + '</ol>';
@@ -1483,9 +1497,9 @@ var CONTENIDO = {
   function vGuia() {
     var G = C.guiaIA;
     var h = '<div class="pantalla claro"><div class="barra gutter"><button type="button" class="icono-btn" data-a="volverGuia" aria-label="Volver">' + I.atras + '</button></div>';
-    h += '<main class="cuerpo gutter"><div class="contenido"><p class="eyebrow">Guía · actualizada a ' + esc(G.actualizada) + '</p><h1 class="titulo" tabindex="-1" data-foco>¿Qué IA para qué?</h1><p class="lead">' + esc(G.intro) + '</p>';
-    h += '<section class="seccion"><h2>SEGÚN LO QUE VAS A HACER</h2>' + G.porActividad.map(function (a) { return '<div class="tarjeta"><p class="frase-chica">' + esc(a.actividad) + '</p><p class="texto">' + esc(a.criterio) + '</p></div>'; }).join('') + '</section>';
-    h += '<section class="seccion"><h2>LAS CINCO, EN ORDEN ALFABÉTICO</h2>' + G.herramientas.map(function (t) {
+    h += '<main class="cuerpo gutter"><div class="contenido"><p class="eyebrow">Guía actualizada a ' + esc(G.actualizada) + '</p><h1 class="titulo" tabindex="-1" data-foco>¿Qué IA para qué?</h1><p class="lead">' + esc(G.intro) + '</p>';
+    h += '<section class="seccion"><h2>Según lo que vas a hacer</h2>' + G.porActividad.map(function (a) { return '<div class="tarjeta"><p class="frase-chica">' + esc(a.actividad) + '</p><p class="texto">' + esc(a.criterio) + '</p></div>'; }).join('') + '</section>';
+    h += '<section class="seccion"><h2>Las cinco, en orden alfabético</h2>' + G.herramientas.map(function (t) {
       return '<details class="herramienta"><summary><span><b>' + esc(t.nombre) + '</b><small>' + esc(t.empresa) + '</small></span></summary>' +
         '<p class="et cian">Dónde está</p><p class="texto">' + esc(t.donde) + '</p><p class="et cian">Qué trae gratis</p><p class="texto">' + esc(t.gratis) + '</p>' +
         '<p class="et cian">Ojo</p><p class="texto">' + esc(t.ojo) + '</p><p class="fuente">Fuente: ' + esc(t.fuente) + '</p></details>';
@@ -1504,13 +1518,13 @@ var CONTENIDO = {
     if (!lista.length) h += '<p class="vacio-msg">Cuando termines tu primera sesión, tu línea del día aparece acá.</p>';
     lista.forEach(function (s) {
       var st = E.ses[s.id];
-      h += '<article class="tarjeta entrada"><div class="fila"><h3>Sesión ' + s.n + ' · ' + esc(s.titulo) + '</h3><span class="fecha">' + esc(fechaCorta(st.fecha)) + '</span></div>' +
+      h += '<article class="tarjeta entrada"><div class="fila"><h3>Sesión ' + s.n + ', «' + esc(s.titulo) + '»</h3><span class="fecha">' + esc(fechaCorta(st.fecha)) + '</span></div>' +
         (st.nota.trim() ? '<p class="cita">«' + esc(st.nota.trim()) + '»</p>' : '<p class="vacio-msg">Sin línea de bitácora.</p>') +
         (s.tipo === 'regular' ? '<span class="pill' + (st.acierto ? '' : ' coral') + '">Predicción: ' + (st.acierto ? 'acertaste' : 'te sorprendió') + '</span>' : '') +
         '<button type="button" class="btn btn-chico btn-borde" data-a="verResumen" data-arg="' + s.id + '">Ver resumen</button></article>';
     });
-    h += '<article class="tarjeta entrada"><div class="fila"><h3>Día 0 · Tu punto de partida</h3><span class="fecha">' + esc(fechaCorta(E.dia0.fecha)) + '</span></div>' +
-      '<p class="texto">' + esc(E.dia0.tarea) + '</p><p class="chico">Utilidad: ' + E.dia0.utilidad + ' de 5' + (E.dia0.pedido.trim() ? ' · Tu pedido: «' + esc(E.dia0.pedido.trim()) + '»' : '') + '</p></article>';
+    h += '<article class="tarjeta entrada"><div class="fila"><h3>Día 0, tu punto de partida</h3><span class="fecha">' + esc(fechaCorta(E.dia0.fecha)) + '</span></div>' +
+      '<p class="texto">' + esc(E.dia0.tarea) + '</p><p class="chico">Utilidad: ' + E.dia0.utilidad + ' de 5.' + (E.dia0.pedido.trim() ? ' Tu pedido: «' + esc(E.dia0.pedido.trim()) + '».' : '') + '</p></article>';
     h += '</section></div></main></div>';
     return h;
   }
@@ -1521,13 +1535,13 @@ var CONTENIDO = {
     h += '<main class="cuerpo gutter"><div class="contenido"><h1 class="titulo" tabindex="-1" data-foco>Ajustes</h1>';
     if (!almacenOK) h += '<p class="error" role="alert">Este navegador no está guardando tu progreso (puede ser una ventana privada). Usá una ventana normal para no perderlo.</p>';
     if (E.dia0.hecho) {
-      h += '<section class="seccion"><h2>TUS ESCENARIOS</h2><div class="chips" role="group" aria-label="Tus escenarios">' + C.escenarios.map(function (e) {
+      h += '<section class="seccion"><h2>Tus escenarios</h2><div class="chips" role="group" aria-label="Tus escenarios">' + C.escenarios.map(function (e) {
         return '<button type="button" id="aj-esc-' + e.id + '" class="chip" aria-pressed="' + (E.escenarios.indexOf(e.id) !== -1) + '" data-a="escenarioAj" data-arg="' + e.id + '">' + esc(e.label) + '</button>';
       }).join('') + '</div></section>';
-      h += '<section class="seccion"><h2>TU MOMENTO</h2>' + chipsMomento() + '</section>';
-      if (CFG.edicion !== 'muestra') h += '<section class="seccion"><h2>RECORDATORIO</h2>' + recordatorio('Después ' + conDe(momentoTxt()) + ', abrís tu sesión.') + '</section>';
+      h += '<section class="seccion"><h2>Tu momento</h2>' + chipsMomento() + '</section>';
+      if (CFG.edicion !== 'muestra') h += '<section class="seccion"><h2>Recordatorio</h2>' + recordatorio('Después ' + conDe(momentoTxt()) + ', abrís tu sesión.') + '</section>';
     }
-    h += '<section class="seccion"><h2>TU PROGRESO</h2><div class="tarjeta"><p class="texto">Tu progreso vive solo en este dispositivo. Para pasarlo a otro, copiá tu código y cargalo allá.</p>' +
+    h += '<section class="seccion"><h2>Tu progreso</h2><div class="tarjeta"><p class="texto">Tu progreso vive solo en este dispositivo. Para pasarlo a otro, copiá tu código y cargalo allá.</p>' +
       '<button type="button" class="btn btn-chico btn-borde" data-a="exportar">' + I.copiar + 'Copiar mi código de progreso</button>' +
       (ui.codigo ? '<label class="sr" for="codigo">Tu código de progreso</label><textarea class="input codigo" id="codigo" readonly>' + esc(ui.codigo) + '</textarea>' : '') +
       (ui.codigoMsg ? '<p class="ok" role="status">' + esc(ui.codigoMsg) + '</p>' : '') +
@@ -1540,21 +1554,21 @@ var CONTENIDO = {
     }
     h += '</div></section>';
     if (CFG.piloto && E.dia0.hecho) {
-      h += '<section class="seccion"><h2>TU DEVOLUCIÓN PARA FENIA</h2><div class="tarjeta"><p class="texto">Mandanos un resumen de cómo te fue: tiempos, predicciones y tus líneas de bitácora. No incluye nada más.</p>' +
+      h += '<section class="seccion"><h2>Tu devolución para FENIA</h2><div class="tarjeta"><p class="texto">Mandanos un resumen de cómo te fue: tiempos, predicciones y tus líneas de bitácora. No incluye nada más.</p>' +
         '<a class="btn btn-chico btn-accion" href="' + esc(enlaceWhatsApp()) + '" target="_blank" rel="noopener">' + I.chat + 'Enviar por WhatsApp</a>' +
         '<button type="button" class="btn btn-chico btn-borde" data-a="copiarDevol">' + I.copiar + 'Copiar el resumen</button>' +
         (ui.devolMsg ? '<p class="ok" role="status">' + esc(ui.devolMsg) + '</p>' : '') +
         '<details class="ampliar"><summary>Ver qué se envía</summary><pre class="codigo resumen">' + esc(resumenPiloto()) + '</pre></details></div></section>';
     }
     if (CFG.prototipo && CFG.edicion !== 'muestra') {
-      h += '<section class="seccion"><h2>MODO REVISIÓN</h2><div class="tarjeta"><button type="button" class="switch" role="switch" aria-checked="' + E.revision + '" data-a="revision"><span>Habilitar todas las sesiones sin esperar al día siguiente</span><span class="riel"></span></button>' +
+      h += '<section class="seccion"><h2>Modo revisión</h2><div class="tarjeta"><button type="button" class="switch" role="switch" aria-checked="' + E.revision + '" data-a="revision"><span>Habilitar todas las sesiones sin esperar al día siguiente</span><span class="riel"></span></button>' +
         '<p class="chico">Solo para revisar el prototipo. En el uso real, el espaciado entre días es parte del método.</p></div></section>';
     }
-    h += '<section class="seccion"><h2>EMPEZAR DE CERO</h2><div class="tarjeta">';
+    h += '<section class="seccion"><h2>Empezar de cero</h2><div class="tarjeta">';
     h += ui.borrar ? '<div class="confirmar" role="alert"><p class="texto"><b>Se borra todo tu progreso de este dispositivo.</b> No se puede deshacer.</p><div class="fila-btn"><button type="button" class="btn btn-chico btn-peligro" data-a="borrarConfirmar">Borrar todo</button><button type="button" class="btn btn-chico btn-borde" data-a="borrarCancelar">Cancelar</button></div></div>'
       : '<button type="button" class="btn btn-chico btn-borde" data-a="borrarPedir">Borrar mi progreso</button>';
     h += '</div></section>';
-    h += '<p class="chico">' + esc(C.producto.nombre + ' ' + C.producto.remate) + ' · FENIA · ' + esc(CFG.versionTexto) + '</p>';
+    h += '<p class="chico">' + esc(C.producto.nombre + ' ' + C.producto.remate) + ', de FENIA. ' + esc(CFG.versionTexto) + '.</p>';
     h += '</div></main></div>';
     return h;
   }
@@ -1671,8 +1685,8 @@ var CONTENIDO = {
     return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//FENIA//Conversar con IA//ES', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT',
       'UID:fenia-conversar-' + n.getTime() + '@fenia.com.ar', 'DTSTAMP:' + stamp,
       'DTSTART:' + f + 'T' + pad(+hm[0]) + pad(+hm[1]) + '00', 'DURATION:PT5M', 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=30',
-      'SUMMARY:FENIA · 5 minutos', 'DESCRIPTION:Después ' + conDe(momentoTxt()) + '\\, abrí Conversar con IA y hacé tu sesión del día.',
-      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:FENIA · 5 minutos', 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      'SUMMARY:5 minutos de FENIA', 'DESCRIPTION:Después ' + conDe(momentoTxt()) + '\\, abrí Conversar con IA y hacé tu sesión del día.',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:5 minutos de FENIA', 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   }
   function b64(s) { return btoa(unescape(encodeURIComponent(s))); }
   function deB64(s) { return decodeURIComponent(escape(atob(s))); }
@@ -1837,7 +1851,7 @@ var CONTENIDO = {
     var zona = 'America/Argentina/Buenos_Aires';
     try { zona = Intl.DateTimeFormat().resolvedOptions().timeZone || zona; } catch (e) { }
     var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
-      '&text=' + encodeURIComponent('FENIA · 5 minutos') +
+      '&text=' + encodeURIComponent('5 minutos de FENIA') +
       '&details=' + encodeURIComponent('Después ' + conDe(momentoTxt()) + ', abrí Conversar con IA y hacé tu sesión del día: ' + location.href.split('#')[0]) +
       '&dates=' + f(ini) + '/' + f(fin) + '&ctz=' + encodeURIComponent(zona) +
       '&recur=' + encodeURIComponent('RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=30');
@@ -1857,8 +1871,8 @@ var CONTENIDO = {
     var donde = navegadorInterno();
     if (!donde) return '';
     var url = location.href.split('#')[0];
-    var h = '<div class="aviso-piloto aviso-navegador" role="note"><p class="et">Antes de empezar</p>' +
-      '<p class="texto">Estás dentro de ' + esc(donde) + '. Si hacés el día 0 acá, tu progreso puede borrarse cuando cierres la app. Abrilo en tu navegador.</p>';
+    var h = '<div class="aviso-piloto aviso-navegador" role="note">' +
+      '<p class="texto"><b>Antes de empezar.</b> Estás dentro de ' + esc(donde) + '. Si hacés el día 0 acá, tu progreso puede borrarse cuando cierres la app. Abrilo en tu navegador.</p>';
     if (esAndroid()) {
       h += '<a class="btn btn-chico btn-borde" href="' + esc('intent://' + location.host + location.pathname + location.search +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end') + '">Abrir en Chrome</a>';

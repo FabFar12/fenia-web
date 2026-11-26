@@ -18,10 +18,10 @@ AddDefaultCharset UTF-8
   Header always set X-Robots-Tag "noindex, nofollow"
 
   <Files "muestra.html">
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-l7uXYx57HqFFj8boRItcXIm7HC0WvS3G4KyovU8CCpY='; style-src 'sha256-HVHklsiL115mJNEFvK9zKEUjAxqSHVAhdxQaXNNa+0E='; font-src data:; img-src data: blob: 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-RyLgTVemaxhzQ+N/skwU9HNH+wIWYhWjiXpm9ULjF48='; style-src 'sha256-6H6fTcgWOlIHciDfA6L3wWFwQsI/Fm8UXrQUhe7x6H4='; font-src data:; img-src data: blob: 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
   </Files>
 
   <Files "piloto.html">
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-v/VUSdH44hNp2pIdZjKJMaYaE8EU3Gwfb5Q8MHrcOEw='; style-src 'sha256-HVHklsiL115mJNEFvK9zKEUjAxqSHVAhdxQaXNNa+0E='; font-src data:; img-src data: blob: 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'sha256-udyDs9xMwKGPEP+mVt1q6J7ZRq+JDaHj66i9t0I/1nI='; style-src 'sha256-6H6fTcgWOlIHciDfA6L3wWFwQsI/Fm8UXrQUhe7x6H4='; font-src data:; img-src data: blob: 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
   </Files>
 </IfModule>
