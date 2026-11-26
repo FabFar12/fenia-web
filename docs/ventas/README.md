@@ -236,6 +236,14 @@ eformateo`;
 
 ## Bitácora
 
+- **2026-11-26 (45)** — **PR #34 en producción** con el OK del dev (tipografía «Editorial», v0.4.3, D33). Merge commit, deploy y purga de la CDN.
+  - Contra producción:
+    - semana completa simulada: 25 de 25, con 0 violaciones de CSP;
+    - aviso dentro de Instagram: 15 de 15;
+    - logo: 36 de 36;
+    - suite de seguridad: 89 OK, 0 fallas;
+    - batería E2E: 84 OK, 0 fallas.
+  - El link del piloto no cambió y el progreso guardado se conserva.
 - **2026-11-26 (44)** — **Tipografía «Editorial» en la app (D33), v0.4.3.**
   - Diagnóstico del dev: la app «se nota hecha por una IA». Se compararon tres versiones sobre la app real (la de hoy, A «como el sitio» y B «editorial»). El dev eligió la B después de verla en staging.
   - En la muestra, el piloto y el programa cambiaron los estilos de la etiqueta, los rótulos, los avisos, los datos del inicio y el ritmo vertical. Las etiquetas y los textos de pantalla ya no usan « · ». La clave de guardado no cambió. Huellas recalculadas.
