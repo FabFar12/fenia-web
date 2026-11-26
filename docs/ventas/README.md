@@ -243,7 +243,9 @@ eformateo`;
   - Pruebas en local con la CSP real y en staging:
     - semana completa simulada: 25 de 25, con 0 violaciones de CSP;
     - aviso dentro de Instagram: 15 de 15;
-    - logo: 36 de 36.
+    - logo: 36 de 36;
+    - suite de seguridad: 89 OK, 0 fallas;
+    - batería E2E: 96 OK, 0 fallas, con las fotos nuevas de la portada del entrenamiento y de productos.
   - El resumen para el entorno de producto está en `conversar-con-ia-v0.4.3/RESUMEN-PARA-PRODUCTO.md` (local).
 - **2026-11-20 (43)** — **PR #33 en producción** con el OK del dev (logo de FENIA en la app, v0.4.2, D32). Deploy y purga de la CDN.
   - Contra producción:
